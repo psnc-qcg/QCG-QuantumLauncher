@@ -50,9 +50,15 @@ class QAOA2(Algorithm):
 
         qaoa = QAOA(sampler, optimizer, reps=self.p, callback=qaoa_callback)
         qaoa_result = qaoa.compute_minimum_eigenvalue(hamiltonian, self.aux)
+        depth = qaoa.ansatz.decompose(reps=10).depth()
+        if 'cx' in qaoa.ansatz.decompose(reps=10).count_ops():
+            cx_count = qaoa.ansatz.decompose(reps=10).count_ops()['cx']
+        else:
+            cx_count = 0
         result = {'qaoa_res': qaoa_result,
                   'energy': qaoa_result.eigenvalue,
-                  'depth': qaoa.ansatz.depth(),
+                  'depth': depth,
+                  'cx_count': cx_count,
                   'energies': energies}
         return result
 
@@ -83,16 +89,18 @@ class FALQON(Algorithm):
         betas = [self.beta_0]
         energies = []
         circuit_depths = []
+        cxs = []
 
         estimator = backend.get_estimator()
         sampler = backend.get_sampler()
 
         best_sample, last_sample = self.falqon_subroutine(estimator,
-                                                    sampler, energies, betas, circuit_depths)
+                                                    sampler, energies, betas, circuit_depths, cxs)
 
         result = {'betas': betas,
                   'energies': energies,
-                  'circuit_depths': circuit_depths,
+                  'depths': circuit_depths,
+                  'cxs': cxs,
                   'best_sample': best_sample,
                   'last_sample': last_sample,
                   'n': self.n,
@@ -112,13 +120,14 @@ class FALQON(Algorithm):
         return circ
 
     def falqon_subroutine(self, estimator,
-                          sampler, energies, betas, circuit_depths):
+                          sampler, energies, betas, circuit_depths, cxs):
         ''' subroutine for falqon '''
         for i in range(self.n):
-            betas, energy, depth = self.run_falqon(betas, estimator)
+            betas, energy, depth, cx_count = self.run_falqon(betas, estimator)
             print(i, energy)
             energies.append(energy)
             circuit_depths.append(depth)
+            cxs.append(cx_count)
         argmin = np.argmin(np.asarray(energies))
         best_sample = self.sample_at(betas[:argmin], sampler)
         last_sample = self.sample_at(betas, sampler)
@@ -134,7 +143,13 @@ class FALQON(Algorithm):
         ansatz = self.build_ansatz(betas)
         energy = estimator.run(ansatz, self.cost_h, betas).result().values[0]
 
-        return betas, energy, ansatz.depth()
+        depth = ansatz.decompose(reps=10).depth()
+        if 'cx' in ansatz.decompose(reps=10).count_ops():
+            cx_count = ansatz.decompose(reps=10).count_ops()['cx']
+        else:
+            cx_count = 0
+
+        return betas, energy, depth, cx_count
 
     def sample_at(self, betas, sampler):
         ''' Not sure yet '''
