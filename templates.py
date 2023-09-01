@@ -1,20 +1,24 @@
 ''' File with templates ? '''
 import pickle
 from os import makedirs, path
+from pickle import load
+from abc import ABC, abstractmethod
 from qiskit import QuantumCircuit
 from qiskit.quantum_info import SparsePauliOp
 from qiskit_ibm_runtime import QiskitRuntimeService, Session#, Sampler, Estimator
-from pickle import load
 
-class Problem():
+class Problem(ABC):
     ''' Abstract class for Problems'''
+    @abstractmethod
     def __init__(self) -> None:
         self.variant = 'Optimization'
         self.path_name = ''
 
+    @abstractmethod
     def get_hamiltonian(self) -> SparsePauliOp:
         ''' Creates Hamiltonian for a problem '''
 
+    @abstractmethod
     def read_result(self, exp, log_path):
         ''' pickling files '''
         exp += exp
@@ -22,19 +26,22 @@ class Problem():
             res = pickle.load(file)
         return res
 
-class Algorithm():
+class Algorithm(ABC):
     ''' Abstract class for Algorithms'''
+    @abstractmethod
     def __init__(self) -> None:
         self.name:str = ''
         self.path_name:str = ''
 
-    def run(self, hamiltonian:SparsePauliOp,  backend_name:str,session=None):
-        ...
+    @abstractmethod
+    def run(self, hamiltonian:SparsePauliOp, backend_name:str, session=None):
+        ''' Runs the hamiltonian on current algorithm '''
 
+    @abstractmethod
     def create_circuit(self)->QuantumCircuit:
         ''' Generates circuit for certain problem '''
-        return ...
 
+    @abstractmethod
     def solve_parameters(self)->list[complex]:
         ''' get good parameters '''
         parameters = []
@@ -55,7 +62,7 @@ class QuantumLauncher():
         ''' runs problem on machine'''
         return self.algorithm.run(self.problem.get_hamiltonian(), backend_name, session)
 
-    def solve_problem(self, backend, shots:int= 1):
+    def solve_problem(self, backend, shots:int=1):
         ''' Solving problem with algorithm TODO'''
         if backend == 'local_simulator':
             ...
@@ -90,7 +97,8 @@ class QuantumLauncher():
         results['alg_options'] = alg_options
         results['backend_name'] = backend_name
         if save_to_file:
-            self.res_path = self.dir + '/' + self.problem.path_name + self.algorithm.path_name + '-' + str(energy) + '.pkl'
+            self.res_path = self.dir + '/' + self.problem.path_name \
+                + self.algorithm.path_name + '-' + str(energy) + '.pkl'
             self.result_paths.append(self.res_path)
             self.dir = path.dirname(self.res_path)
             if not path.exists(self.dir):
@@ -101,7 +109,7 @@ class QuantumLauncher():
         self.res = results
         return results
 
-def from_pickle(path:str) -> dict:
+def from_pickle(path_:str) -> dict:
     ''' reades pickle and returns as a dict '''
-    with open(path, 'rb') as file_:
+    with open(path_, 'rb') as file_:
         return load(file_)

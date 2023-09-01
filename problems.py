@@ -97,9 +97,9 @@ class JSSP(Problem):
     def read_instance(self, path:str):
         ''' Sth '''
         job_dict = defaultdict(list)
-        with open(path) as f:
-            f.readline()
-            for i, line in enumerate(f):
+        with open(path, 'r', encoding='utf-8') as file_:
+            file_.readline()
+            for i, line in enumerate(file_):
                 lint = list(map(int, line.split()))
                 job_dict[i + 1] = [x for x in
                                    zip(lint[::2],  # machines
