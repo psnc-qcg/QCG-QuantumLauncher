@@ -1,6 +1,7 @@
 ''' File with problem sub-classes '''
 import os
 from collections import defaultdict
+import ast
 
 import hampy
 import numpy as np
@@ -9,9 +10,9 @@ from qiskit.quantum_info import SparsePauliOp
 
 from job_shop_scheduler import get_jss_hamiltonian
 from templates import Problem
-import ast
 
 class QATM(Problem):
+    ''' class for QATM problem '''
     def __init__(self, onehot: str, instance_name: str, instance_path: str = None) -> None:
         super().__init__()
         self.name = 'qatm'
@@ -22,6 +23,7 @@ class QATM(Problem):
         self.path_name = f'{self.name}/{self.instance_name}'
 
     def read_instance(self, instance_name: str, instance_path: str):
+        ''' reads instance of the problem '''
         cm_path = os.path.join(instance_path, 'CM_' + instance_name)
         aircrafts_path = os.path.join(instance_path, 'aircrafts_' + instance_name)
 
@@ -36,7 +38,7 @@ class QATM(Problem):
                 h = hampy.Ham_not(hampy.H_one_in_n(manouvers.index.values.tolist(), len(cm)))
             elif self.onehot == 'quadratic':
                 h = hampy.quadratic_onehot(manouvers.index.values.tolist(), len(cm))
-            if onehot_hamiltonian != None:
+            if onehot_hamiltonian is not None:
                 onehot_hamiltonian += h
             else:
                 onehot_hamiltonian = h
@@ -44,7 +46,7 @@ class QATM(Problem):
         triu = np.triu(cm, k=1)
         conflict_hamiltonian = None
         for p1, p2 in zip(*np.where(triu == 1)):
-            if conflict_hamiltonian != None:
+            if conflict_hamiltonian is not None:
                 conflict_hamiltonian += hampy.H_and([p1, p2], len(cm))
             else:
                 conflict_hamiltonian = hampy.H_and([p1, p2], len(cm))
@@ -74,13 +76,14 @@ class EC(Problem):
                                  {2, 7}]
                 self.instance_name = instance_name
             case _:
-                self.instance = self.read_instance(instance_name, instance_path)
+                self.instance = self.read_instance(instance_name,
+                                                instance_path)
                 self.instance_name = instance_name.split('.')[0]
         self.path_name = f'{self.name}/{self.instance_name}-{onehot}'
 
     def read_instance(self, instance_name: str, instance_path: str):
         path = os.path.join(instance_path, instance_name)
-        with open(path, 'r') as file:
+        with open(path, 'r', encoding='utf-8') as file:
             read_file = file.read()
         instance = ast.literal_eval(read_file)
         return instance

@@ -5,7 +5,7 @@ from pickle import load
 from abc import ABC, abstractmethod
 #from qiskit import QuantumCircuit
 from qiskit.quantum_info import SparsePauliOp
-from qiskit_ibm_runtime import QiskitRuntimeService, Session #, Sampler, Estimator
+#from qiskit_ibm_runtime import QiskitRuntimeService, Session #, Sampler, Estimator
 from qiskit_ibm_runtime import Sampler, Estimator
 from qiskit_algorithms.optimizers import SPSA
 
@@ -74,14 +74,9 @@ class QuantumLauncher():
         ''' runs problem on machine'''
         return self.algorithm.run(self.problem.get_hamiltonian(), self.backend)
 
-    def solve_problem(self, backend, shots:int=1):
-        ''' Solving problem with algorithm TODO'''
-        if backend == 'local_simulator':
-            ...
-        else:
-            service = QiskitRuntimeService(channel="ibm_quantum")
-            self.run()
-        return ...
+    def get_path(self) -> str:
+        ''' Outputs path of current output '''
+        return self.path
 
     def set_dir(self, dir_path: str) -> None:
         ''' Setting output file directory path '''
@@ -97,7 +92,8 @@ class QuantumLauncher():
         results['alg_options'] = alg_options
         results['backend_name'] = self.backend.name
         if save_to_file:
-            self.res_path = self.dir + '/' + self.problem.path_name \
+            self.res_path = self.dir + '/' + self.backend.name + '-' + \
+                self.problem.path_name \
                 + self.algorithm.path_name + '-' + str(energy) + '.pkl'
             self.result_paths.append(self.res_path)
             self.dir = path.dirname(self.res_path)

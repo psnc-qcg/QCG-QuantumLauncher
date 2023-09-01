@@ -113,6 +113,7 @@ class FALQON(Algorithm):
 
     def falqon_subroutine(self, estimator,
                           sampler, energies, betas, circuit_depths):
+        ''' subroutine for falqon '''
         for i in range(self.n):
             betas, energy, depth = self.run_falqon(betas, estimator)
             print(i, energy)

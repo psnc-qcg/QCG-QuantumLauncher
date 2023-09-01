@@ -18,7 +18,7 @@ class LocalBackend(Backend):
         return LocalSampler()
 
     def get_optimizer(self):
-        return COBYLA
+        return COBYLA()
 
 class RemoteBackend(Backend):
     ''' remote backend '''
