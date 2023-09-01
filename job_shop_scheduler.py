@@ -1,11 +1,11 @@
 from __future__ import print_function
 
 from bisect import bisect_right
+
 import hampy
 
 
 def get_jss_hamiltonian(job_dict, max_time, onehot):
-
     scheduler = JobShopScheduler(job_dict, max_time, onehot)
     return scheduler.get_hamiltonian()
 
@@ -62,7 +62,7 @@ class JobShopScheduler:
 
     def _process_data(self, jobs):
         tasks = []
-        last_task_indices = [-1]    # -1 for zero-indexing
+        last_task_indices = [-1]  # -1 for zero-indexing
         total_time = 0  # total time of all jobs
 
         for job_name, job_tasks in jobs.items():
@@ -203,7 +203,7 @@ class JobShopScheduler:
         self._add_precedence_constraint()
         self._add_share_machine_constraint()
         # Get BQM
-        #bqm = dwavebinarycsp.stitch(self.csp, **stitch_kwargs)
+        # bqm = dwavebinarycsp.stitch(self.csp, **stitch_kwargs)
 
         # Edit BQM to encourage the shortest schedule
         # Overview of this added penalty:
@@ -245,9 +245,9 @@ class JobShopScheduler:
         # Get BQM
         decision_hamiltonian = self.H.simplify().copy()
 
-        base = len(self.last_task_indices) + 1     # Base for exponent
+        base = len(self.last_task_indices) + 1  # Base for exponent
         # Get our pruned (remove_absurd_times) variable list so we don't undo pruning
-        #pruned_variables = list(bqm.variables)
+        # pruned_variables = list(bqm.variables)
 
         h = 0
 
@@ -262,16 +262,16 @@ class JobShopScheduler:
                     continue
 
                 # Add bias to variable
-                bias = 2 * base**(end_time - self.max_time)
-                #bias = base**(end_time - 5)
-                #bias = base ** (end_time)
+                bias = 2 * base ** (end_time - self.max_time)
+                # bias = base**(end_time - 5)
+                # bias = base ** (end_time)
                 label = get_label(task, t)
                 if label in self.absurd_times:
                     continue
 
                 var = self.H_pos_by_label[label]
                 self.H += hampy.H_x(var, self.n)
-        #self.H += h / (base * len(self.last_task_indices))
+        # self.H += h / (base * len(self.last_task_indices))
 
         # Get BQM
         optimization_hamiltonian = self.H.simplify().copy()

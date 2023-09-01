@@ -1,26 +1,27 @@
 ''' file with algorithms subclasses '''
 
-from qiskit.primitives import Sampler as LocalSampler
-from qiskit.primitives import Estimator as LocalEstimator
-from qiskit.providers.fake_provider import FakeSherbrooke
-from qiskit.quantum_info import SparsePauliOp
-from qiskit.opflow import H
+import numpy as np
 from qiskit.circuit import ParameterVector
 from qiskit.circuit.library import PauliEvolutionGate
-from qiskit_ibm_runtime import Sampler, Estimator, Options
-from qiskit_algorithms import QAOA
-from qiskit_algorithms.optimizers import COBYLA
+from qiskit.opflow import H
+from qiskit.primitives import Estimator as LocalEstimator
+from qiskit.primitives import Sampler as LocalSampler
+from qiskit.providers.fake_provider import FakeSherbrooke
+from qiskit.quantum_info import SparsePauliOp
 from qiskit_aer.noise import NoiseModel
-
-import numpy as np
+from qiskit_algorithms import QAOA
+from qiskit_algorithms.optimizers import COBYLA, SPSA
+from qiskit_ibm_runtime import Sampler, Estimator, Options
 
 from templates import Algorithm
 
-def commutator(op_a:SparsePauliOp, op_b:SparsePauliOp) -> SparsePauliOp:
+
+def commutator(op_a: SparsePauliOp, op_b: SparsePauliOp) -> SparsePauliOp:
     ''' Commutator '''
     return op_a @ op_b - op_b @ op_a
 
-fake_backend = FakeSherbrooke()
+
+'''fake_backend = FakeSherbrooke()
 noise_model = NoiseModel.from_backend(fake_backend)
 options = Options()
 options.simulator = {
@@ -29,35 +30,44 @@ options.simulator = {
     "seed_simulator": 42
 }
 options.resilience_level = 1
-options.optimization_level = 1
+options.optimization_level = 1'''
+
 
 class QAOA2(Algorithm):
     ''' Algorithm class with QAOA '''
-    def __init__(self, p:int = 1, aux = None):
+
+    def __init__(self, p: int = 1, aux=None):
         self.name = 'qaoa'
         self.path_name = f'{self.name}-{p}'
         self.aux = aux
-        self.p:int = p
+        self.p: int = p
 
-    def run(self, hamiltonian:SparsePauliOp, backend_name:str, session=None)\
-        ->tuple[int, complex, int, float]:
+    def run(self, hamiltonian: SparsePauliOp, backend_name: str, session=None) -> dict:
         ''' Runs the QAOA algorithm '''
         energies = []
+
         def qaoa_callback(evaluation_count, params, mean, std):
             energies.append(mean)
 
-        optimizer = COBYLA()
         if backend_name == 'local_simulator':
             sampler = LocalSampler()
+            optimizer = COBYLA()
         else:
-            sampler = Sampler(session=session, options=options)
+            sampler = Sampler(session=session)
+            optimizer = SPSA()
 
-        qaoa = QAOA(sampler, optimizer, reps= self.p, callback=qaoa_callback)
-        result = qaoa.compute_minimum_eigenvalue(hamiltonian, self.aux)
-        return result, result.eigenvalue, qaoa.ansatz.depth(), energies
+        qaoa = QAOA(sampler, optimizer, reps=self.p, callback=qaoa_callback)
+        qaoa_result = qaoa.compute_minimum_eigenvalue(hamiltonian, self.aux)
+        result = {'qaoa_res': qaoa_result,
+                  'energy': qaoa_result.eigenvalue,
+                  'depth': qaoa.ansatz.depth(),
+                  'energies': energies}
+        return result
+
 
 class FALQON(Algorithm):
     ''' Algorithm class with FALQON '''
+
     def __init__(self, driver_h=None, delta_t=0, beta_0=0, n=1):
 
         self.name = 'falqon'
@@ -67,11 +77,11 @@ class FALQON(Algorithm):
         self.beta_0 = beta_0
         self.n = n
         self.cost_h = None
-        self.n_qubits:int = 0
+        self.n_qubits: int = 0
 
-    def run(self, hamiltonian:SparsePauliOp, backend_name:str, session=None):
+    def run(self, hamiltonian: SparsePauliOp, backend_name: str, session=None):
         ''' run falqon '''
-        #TODO implement aux operator
+        # TODO implement aux operator
         self.cost_h = hamiltonian
         self.n_qubits = hamiltonian.num_qubits
         if self.driver_h is None:
@@ -97,9 +107,10 @@ class FALQON(Algorithm):
                   'last_sample': last_sample,
                   'n': self.n,
                   'delta_t': self.delta_t,
-                  'beta_0': self.beta_0}
+                  'beta_0': self.beta_0,
+                  'energy': min(energies)}
 
-        return result, min(energies)
+        return result
 
     def build_ansatz(self, betas):
         ''' building ansatz circuit '''
@@ -121,7 +132,6 @@ class FALQON(Algorithm):
         best_sample = self.sample_at(betas[:argmin], sampler)
         last_sample = self.sample_at(betas, sampler)
         return best_sample, last_sample
-
 
     def run_falqon(self, betas, estimator):
         ''' Method to run FALQON algorithm '''
