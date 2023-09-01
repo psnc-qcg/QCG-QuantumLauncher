@@ -60,18 +60,19 @@ class Algorithm(ABC):
 class QuantumLauncher():
     ''' Global Launcher problem'''
 
-    def __init__(self, problem: Problem, algorithm: Algorithm) -> None:
+    def __init__(self, problem: Problem, algorithm: Algorithm, backend:Backend) -> None:
         self.problem: Problem = problem
         self.algorithm: Algorithm = algorithm
+        self.backend: Backend = backend
         self.path = None
         self.res = {}
         self.dir = 'data/'
         self.res_path = None
         self.result_paths = []
 
-    def run(self, backend_name: str, session=None) -> dict:
+    def run(self) -> dict:
         ''' runs problem on machine'''
-        return self.algorithm.run(self.problem.get_hamiltonian(), backend_name, session)
+        return self.algorithm.run(self.problem.get_hamiltonian(), self.backend)
 
     def solve_problem(self, backend, shots:int=1):
         ''' Solving problem with algorithm TODO'''
@@ -79,8 +80,7 @@ class QuantumLauncher():
             ...
         else:
             service = QiskitRuntimeService(channel="ibm_quantum")
-            with Session(service=service, backend=backend) as session:
-                self.run(backend, session)
+            self.run()
         return ...
 
     def set_dir(self, dir_path: str) -> None:
@@ -88,14 +88,14 @@ class QuantumLauncher():
         self.dir = dir_path
 
     def process(self, alg_options,
-                backend_name, session=None, save_to_file: bool = False) -> dict:
+                save_to_file: bool = False) -> dict:
         ''' Runs and proccesses problem on algorithm '''
-        results = self.run(backend_name, session)
+        results = self.run()
         energy = results['energy']
         variant = self.problem.variant
         results['variant'] = variant
         results['alg_options'] = alg_options
-        results['backend_name'] = backend_name
+        results['backend_name'] = self.backend.name
         if save_to_file:
             self.res_path = self.dir + '/' + self.problem.path_name \
                 + self.algorithm.path_name + '-' + str(energy) + '.pkl'
