@@ -4,16 +4,12 @@ import numpy as np
 from qiskit.circuit import ParameterVector
 from qiskit.circuit.library import PauliEvolutionGate
 from qiskit.opflow import H
-from qiskit.primitives import Estimator as LocalEstimator
-from qiskit.primitives import Sampler as LocalSampler
 from qiskit.providers.fake_provider import FakeSherbrooke
 from qiskit.quantum_info import SparsePauliOp
 from qiskit_aer.noise import NoiseModel
 from qiskit_algorithms import QAOA
-from qiskit_algorithms.optimizers import COBYLA, SPSA
-from qiskit_ibm_runtime import Sampler, Estimator, Options
 
-from templates import Algorithm
+from templates import Algorithm, Backend
 
 
 def commutator(op_a: SparsePauliOp, op_b: SparsePauliOp) -> SparsePauliOp:
@@ -42,19 +38,15 @@ class QAOA2(Algorithm):
         self.aux = aux
         self.p: int = p
 
-    def run(self, hamiltonian: SparsePauliOp, backend_name: str, session=None) -> dict:
+    def run(self, hamiltonian: SparsePauliOp, backend:Backend) -> dict:
         ''' Runs the QAOA algorithm '''
         energies = []
 
         def qaoa_callback(evaluation_count, params, mean, std):
             energies.append(mean)
 
-        if backend_name == 'local_simulator':
-            sampler = LocalSampler()
-            optimizer = COBYLA()
-        else:
-            sampler = Sampler(session=session)
-            optimizer = SPSA()
+        sampler = backend.get_sampler()
+        optimizer = backend.get_optimizer()
 
         qaoa = QAOA(sampler, optimizer, reps=self.p, callback=qaoa_callback)
         qaoa_result = qaoa.compute_minimum_eigenvalue(hamiltonian, self.aux)
@@ -79,7 +71,7 @@ class FALQON(Algorithm):
         self.cost_h = None
         self.n_qubits: int = 0
 
-    def run(self, hamiltonian: SparsePauliOp, backend_name: str, session=None):
+    def run(self, hamiltonian: SparsePauliOp, backend:Backend):
         ''' run falqon '''
         # TODO implement aux operator
         self.cost_h = hamiltonian
@@ -91,14 +83,12 @@ class FALQON(Algorithm):
         betas = [self.beta_0]
         energies = []
         circuit_depths = []
-        if backend_name == 'local_simulator':
-            estimator = LocalEstimator()
-            sampler = LocalSampler()
-        else:
-            estimator = Estimator(session=session, options=options)
-            sampler = Sampler(session=session, options=options)
 
-        best_sample, last_sample = self.falqon_subroutine(estimator, sampler, energies, betas, circuit_depths)
+        estimator = backend.get_estimator()
+        sampler = backend.get_sampler()
+
+        best_sample, last_sample = self.falqon_subroutine(estimator,
+                                                    sampler, energies, betas, circuit_depths)
 
         result = {'betas': betas,
                   'energies': energies,

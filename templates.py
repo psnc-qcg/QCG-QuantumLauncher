@@ -3,9 +3,30 @@ import pickle
 from os import makedirs, path
 from pickle import load
 from abc import ABC, abstractmethod
-from qiskit import QuantumCircuit
+#from qiskit import QuantumCircuit
 from qiskit.quantum_info import SparsePauliOp
 from qiskit_ibm_runtime import QiskitRuntimeService, Session #, Sampler, Estimator
+from qiskit_ibm_runtime import Sampler, Estimator
+from qiskit_algorithms.optimizers import SPSA
+
+class Backend(ABC):
+    ''' Abstract class for backends '''
+
+    @abstractmethod
+    def __init__(self, name:str) -> None:
+        self.name = name
+
+    def get_estimator(self) -> Estimator:
+        ''' returns backend's estimator '''
+        return None
+
+    def get_sampler(self) -> Sampler:
+        ''' returns backend's sampler '''
+        return None
+
+    def get_optimizer(self):
+        ''' returns backend's optimizer '''
+        return SPSA()
 
 class Problem(ABC):
     ''' Abstract class for Problems'''
@@ -33,7 +54,7 @@ class Algorithm(ABC):
         self.path_name: str = ''
 
     @abstractmethod
-    def run(self, hamiltonian:SparsePauliOp, backend_name:str, session=None):
+    def run(self, hamiltonian:SparsePauliOp, backend:Backend):
         ''' Runs the hamiltonian on current algorithm '''
 
 class QuantumLauncher():
