@@ -86,7 +86,7 @@ class QuantumLauncher():
         results['alg_options'] = alg_options
         results['backend_name'] = backend_name
         if save_to_file:
-            self.res_path = self.dir + '/' + self.problem.path_name + '-' + self.algorithm.path_name + '-' + str(
+            self.res_path = self.dir + '/' + self.problem.path_name + '-' + backend_name + '-' + self.algorithm.path_name + '-' + str(
                 energy) + '.pkl'
             self.result_paths.append(self.res_path)
             self.dir = path.dirname(self.res_path)

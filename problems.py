@@ -9,12 +9,13 @@ from qiskit.quantum_info import SparsePauliOp
 
 from job_shop_scheduler import get_jss_hamiltonian
 from templates import Problem
-
+import ast
 
 class QATM(Problem):
-    def __init__(self, instance_name: str, instance_path: str = None) -> None:
+    def __init__(self, onehot: str, instance_name: str, instance_path: str = None) -> None:
         super().__init__()
         self.name = 'qatm'
+        self.onehot = onehot
 
         self.instance_name = instance_name.split('.')[0]
         self.instance = self.read_instance(instance_name, instance_path)
@@ -31,7 +32,10 @@ class QATM(Problem):
 
         onehot_hamiltonian = None
         for plane, manouvers in planes.groupby(by=1):
-            h = hampy.Ham_not(hampy.H_one_in_n(manouvers.index.values.tolist(), len(cm)))
+            if self.onehot == 'exact':
+                h = hampy.Ham_not(hampy.H_one_in_n(manouvers.index.values.tolist(), len(cm)))
+            elif self.onehot == 'quadratic':
+                h = hampy.quadratic_onehot(manouvers.index.values.tolist(), len(cm))
             if onehot_hamiltonian != None:
                 onehot_hamiltonian += h
             else:
@@ -46,7 +50,7 @@ class QATM(Problem):
                 conflict_hamiltonian = hampy.H_and([p1, p2], len(cm))
 
         hamiltonian = onehot_hamiltonian + conflict_hamiltonian
-        return hamiltonian
+        return hamiltonian.simplify()
 
 
 class EC(Problem):
@@ -70,9 +74,16 @@ class EC(Problem):
                                  {2, 7}]
                 self.instance_name = instance_name
             case _:
-                raise ValueError('Instance_name not found, path not supported yet')
+                self.instance = self.read_instance(instance_name, instance_path)
                 self.instance_name = instance_name.split('.')[0]
         self.path_name = f'{self.name}/{self.instance_name}-{onehot}'
+
+    def read_instance(self, instance_name: str, instance_path: str):
+        path = os.path.join(instance_path, instance_name)
+        with open(path, 'r') as file:
+            read_file = file.read()
+        instance = ast.literal_eval(read_file)
+        return instance
 
     def get_hamiltonian(self) -> SparsePauliOp:
         ''' generating hamiltonian'''
@@ -87,15 +98,15 @@ class EC(Problem):
         hamiltonian = None
         for ohs in onehots:
             if self.onehot == 'exact':
-                part = hampy.H_one_in_n(list(ohs), size=len(self.instance))
+                part = hampy.Ham_not(hampy.H_one_in_n(list(ohs), size=len(self.instance)))
             elif self.onehot == 'quadratic':
-                part = hampy.H_one_in_n(list(ohs), size=len(self.instance))
+                part = hampy.quadratic_onehot(list(ohs), len(self.instance))
 
             if hamiltonian is None:
                 hamiltonian = part
             else:
-                hamiltonian = hamiltonian.compose(part)
-        return hampy.Ham_not(hamiltonian).simplify()
+                hamiltonian += part
+        return hamiltonian.simplify()
 
 
 class JSSP(Problem):

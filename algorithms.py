@@ -10,7 +10,7 @@ from qiskit.providers.fake_provider import FakeSherbrooke
 from qiskit.quantum_info import SparsePauliOp
 from qiskit_aer.noise import NoiseModel
 from qiskit_algorithms import QAOA
-from qiskit_algorithms.optimizers import COBYLA
+from qiskit_algorithms.optimizers import COBYLA, SPSA
 from qiskit_ibm_runtime import Sampler, Estimator, Options
 
 from templates import Algorithm
@@ -21,7 +21,7 @@ def commutator(op_a: SparsePauliOp, op_b: SparsePauliOp) -> SparsePauliOp:
     return op_a @ op_b - op_b @ op_a
 
 
-fake_backend = FakeSherbrooke()
+'''fake_backend = FakeSherbrooke()
 noise_model = NoiseModel.from_backend(fake_backend)
 options = Options()
 options.simulator = {
@@ -30,7 +30,7 @@ options.simulator = {
     "seed_simulator": 42
 }
 options.resilience_level = 1
-options.optimization_level = 1
+options.optimization_level = 1'''
 
 
 class QAOA2(Algorithm):
@@ -49,11 +49,12 @@ class QAOA2(Algorithm):
         def qaoa_callback(evaluation_count, params, mean, std):
             energies.append(mean)
 
-        optimizer = COBYLA()
         if backend_name == 'local_simulator':
             sampler = LocalSampler()
+            optimizer = COBYLA()
         else:
-            sampler = Sampler(session=session, options=options)
+            sampler = Sampler(session=session)
+            optimizer = SPSA()
 
         qaoa = QAOA(sampler, optimizer, reps=self.p, callback=qaoa_callback)
         qaoa_result = qaoa.compute_minimum_eigenvalue(hamiltonian, self.aux)
