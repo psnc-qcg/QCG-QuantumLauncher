@@ -1,10 +1,14 @@
-from templates import QuantumLauncher, from_pickle
+''' Example of how Quantum Launcher works'''
+
+from quantum_launcher import QuantumLauncher#, from_pickle
 from algorithms import QAOA2, FALQON
 from problems import EC, JSSP, QATM
 from backends import LocalBackend
+from analyzer import Analyzer
 #pr = QATM('exact', instance_name='RCP_3.txt', instance_path='data/qatm/')
 pr = JSSP(3, 'exact', instance_name='toy',optimization_problem=True)
 qaoa = QAOA2(p=3)
+qaoa = FALQON(delta_t=2, beta_0=2, n= 2)
 backend = LocalBackend()
 dir_ = 'test_data'
 launcher = QuantumLauncher(pr, qaoa, backend)
