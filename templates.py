@@ -57,3 +57,32 @@ class Algorithm(ABC):
     @abstractmethod
     def run(self, hamiltonian:SparsePauliOp, backend:Backend):
         ''' Runs the hamiltonian on current algorithm '''
+
+class QuantumLauncher(ABC):
+    ''' Template for Quantum Launchers '''
+    def __init__(self, problem: Problem,
+                algorithm: Algorithm, backend: Backend) -> None:
+        self.problem: Problem = problem
+        self.algorithm: Algorithm = algorithm
+        self.backend: Backend = backend
+        self.path = None
+        self.res = {}
+        self.dir = 'data/'
+        self.res_path = None
+        self.result_paths = []
+
+    def get_path(self) -> str:
+        ''' Outputs path of current output '''
+        return self.path
+
+    def set_dir(self, dir_path: str) -> None:
+        ''' Setting output file directory path '''
+        self.dir = dir_path
+
+    @abstractmethod
+    def run(self) -> dict:
+        ''' Run's algorithm on it's backend '''
+    @abstractmethod
+    def proccess(self, alg_options,
+                save_to_file: bool = False) -> dict:
+        ''' Runs and proccesses problem on algorithm '''

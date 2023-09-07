@@ -1,6 +1,6 @@
 ''' Example of how Quantum Launcher works'''
 
-from quantum_launcher import QuantumLauncher#, from_pickle
+from quantum_launchers import QiskitLauncher#, from_pickle
 from algorithms import QAOA2, FALQON
 from problems import EC, JSSP, QATM
 from backends import LocalBackend
@@ -11,7 +11,7 @@ qaoa = QAOA2(p=3)
 qaoa = FALQON(delta_t=2, beta_0=2, n= 2)
 backend = LocalBackend()
 dir_ = 'test_data'
-launcher = QuantumLauncher(pr, qaoa, backend)
+launcher = QiskitLauncher(pr, qaoa, backend)
 launcher.set_dir(dir_)
 inform = launcher.process('', save_to_file=True)
 print(inform)
