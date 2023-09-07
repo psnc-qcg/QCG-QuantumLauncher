@@ -52,6 +52,7 @@ class Algorithm(ABC):
     def __init__(self) -> None:
         self.name: str = ''
         self.path_name: str = ''
+        self.parameters = []
 
     @abstractmethod
     def run(self, hamiltonian:SparsePauliOp, backend:Backend):

@@ -37,6 +37,7 @@ class QAOA2(Algorithm):
         self.path_name = f'{self.name}-{p}'
         self.aux = aux
         self.p: int = p
+        self.parameters = ['p']
 
     def run(self, hamiltonian: SparsePauliOp, backend:Backend) -> dict:
         ''' Runs the QAOA algorithm '''
@@ -76,6 +77,7 @@ class FALQON(Algorithm):
         self.n = n
         self.cost_h = None
         self.n_qubits: int = 0
+        self.parameters = ['n', 'delta_t', 'beta_0']
 
     def run(self, hamiltonian: SparsePauliOp, backend:Backend):
         ''' run falqon '''
@@ -157,3 +159,5 @@ class FALQON(Algorithm):
         ansatz.measure_all()
         res = sampler.run(ansatz, betas).result()
         return res
+
+ALG_LIST = [QAOA2(), FALQON()]
