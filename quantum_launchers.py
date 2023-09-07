@@ -1,36 +1,16 @@
 ''' Quantum Launcher '''
 from os import makedirs, path
 import pickle
-from templates import Problem, Backend, Algorithm
+from templates import QuantumLauncher
 
-class QuantumLauncher():
+class QiskitLauncher(QuantumLauncher):
     ''' Global Launcher problem'''
 
-    def __init__(self, problem: Problem, algorithm: Algorithm, backend:Backend) -> None:
-        self.problem: Problem = problem
-        self.algorithm: Algorithm = algorithm
-        self.backend: Backend = backend
-        self.path = None
-        self.res = {}
-        self.dir = 'data/'
-        self.res_path = None
-        self.result_paths = []
-
     def run(self) -> dict:
-        ''' runs problem on machine'''
         return self.algorithm.run(self.problem.get_hamiltonian(), self.backend)
-
-    def get_path(self) -> str:
-        ''' Outputs path of current output '''
-        return self.path
-
-    def set_dir(self, dir_path: str) -> None:
-        ''' Setting output file directory path '''
-        self.dir = dir_path
 
     def process(self, alg_options,
                 save_to_file: bool = False) -> dict:
-        ''' Runs and proccesses problem on algorithm '''
         results = self.run()
         energy = results['energy']
         variant = self.problem.variant
