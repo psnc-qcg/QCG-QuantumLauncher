@@ -4,9 +4,9 @@ import numpy as np
 from qiskit.circuit import ParameterVector
 from qiskit.circuit.library import PauliEvolutionGate
 from qiskit.opflow import H
-from qiskit.providers.fake_provider import FakeSherbrooke
+#from qiskit.providers.fake_provider import FakeSherbrooke
 from qiskit.quantum_info import SparsePauliOp
-from qiskit_aer.noise import NoiseModel
+#from qiskit_aer.noise import NoiseModel
 from qiskit_algorithms import QAOA
 
 from templates import Algorithm, Backend
@@ -16,25 +16,11 @@ def commutator(op_a: SparsePauliOp, op_b: SparsePauliOp) -> SparsePauliOp:
     ''' Commutator '''
     return op_a @ op_b - op_b @ op_a
 
-
-'''fake_backend = FakeSherbrooke()
-noise_model = NoiseModel.from_backend(fake_backend)
-options = Options()
-options.simulator = {
-    "noise_model": noise_model,
-    "coupling_map": fake_backend.coupling_map,
-    "seed_simulator": 42
-}
-options.resilience_level = 1
-options.optimization_level = 1'''
-
-
 class QAOA2(Algorithm):
     ''' Algorithm class with QAOA '''
-
     def __init__(self, p: int = 1, aux=None):
         self.name = 'qaoa'
-        self.path_name = f'{self.name}-{p}'
+        self.path_name = f'{self.name}@{p}'
         self.aux = aux
         self.p: int = p
         self.parameters = ['p']
@@ -70,7 +56,7 @@ class FALQON(Algorithm):
     def __init__(self, driver_h=None, delta_t=0, beta_0=0, n=1):
 
         self.name = 'falqon'
-        self.path_name = f'{self.name}-{n}-{delta_t}-{beta_0}'
+        self.path_name = f'{self.name}@{n}@{delta_t}@{beta_0}'
         self.driver_h = driver_h
         self.delta_t = delta_t
         self.beta_0 = beta_0

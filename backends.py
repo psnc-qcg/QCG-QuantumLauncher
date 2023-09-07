@@ -31,3 +31,5 @@ class RemoteBackend(Backend):
 
     def get_sampler(self) -> Sampler:
         return Sampler(session=self.session)
+
+BACKEND_LIST = [LocalBackend, RemoteBackend]

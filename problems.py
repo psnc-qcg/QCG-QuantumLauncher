@@ -79,7 +79,7 @@ class EC(Problem):
                 self.instance = self.read_instance(instance_name,
                                                 instance_path)
                 self.instance_name = instance_name.split('.')[0]
-        self.path_name = f'{self.name}/{self.instance_name}-{onehot}'
+        self.path_name = f'{self.name}/{self.instance_name}@{onehot}'
 
     def read_instance(self, instance_name: str, instance_path: str):
         path = os.path.join(instance_path, instance_name)
@@ -143,7 +143,7 @@ class JSSP(Problem):
                         'H_label_by_pos': self.h_label_by_pos}
         opt = 'optimization' if optimization_problem else 'decision'
         self.variant = opt
-        self.path_name = f'{self.name}/{self.instance_name}-{max_time}-{opt}-{onehot}-'
+        self.path_name = f'{self.name}/{self.instance_name}@{max_time}@{opt}@{onehot}'
 
     def get_hamiltonian(self, optimization_problem: bool = None) -> SparsePauliOp:
         if optimization_problem is None:
