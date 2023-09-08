@@ -87,7 +87,7 @@ class Analyzer():
 def main():
     '''main'''
     my_analyzer = Analyzer()
-    my_analyzer.problem = ['instance', 'param1', 'goal', 'exact']
+    my_analyzer.problem = ['instance', 'max-time', 'goal', 'exact']
     print(my_analyzer.read_data('test_data/jssp'))
 
 if __name__ == '__main__':
