@@ -1,18 +1,18 @@
 ''' Example of how Quantum Launcher works'''
 
-from quantum_launchers import QiskitLauncher#, from_pickle
-from algorithms import QAOA2, FALQON
-from problems import EC, JSSP, QATM
-from backends import LocalBackend
-from analyzer import Analyzer
-#pr = QATM('exact', instance_name='RCP_3.txt', instance_path='data/qatm/')
-pr = JSSP(3, 'exact', instance_name='toy',optimization_problem=True)
+from problems import JSSP
+from qiskit_stuff.algorithms import QAOA2, FALQON
+from qiskit_stuff.launcher import QiskitLauncher  # , from_pickle
+from qiskit_stuff.primitive_strategy import LocalPrimitiveStrategy
+
+# pr = QATM('exact', instance_name='RCP_3.txt', instance_path='data/qatm/')
+pr = JSSP(3, 'exact', instance_name='toy', optimization_problem=True)
 qaoa = QAOA2(p=3)
-qaoa = FALQON(delta_t=2, beta_0=2, n= 2)
-backend = LocalBackend()
+qaoa = FALQON(delta_t=2, beta_0=2, n=2)
+ps = LocalPrimitiveStrategy()
 dir_ = 'test_data'
 launcher = QiskitLauncher(pr, qaoa)
-launcher.set_backend(backend)
+launcher.set_primitive_strategy(ps)
 launcher.set_dir(dir_)
 inform = launcher.process('', save_to_file=True)
 print(inform)

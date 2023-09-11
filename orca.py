@@ -1,7 +1,7 @@
 ''' Quantum Launcher for Orca '''
-from algorithms import BinaryBosonic
+from orca_stuff.algorithms import BinaryBosonic
+from orca_stuff.launcher import OrcaLauncher
 from problems import MaxCut
-from quantum_launchers import OrcaLauncher
 
 
 def main():

@@ -1,15 +1,15 @@
-''' file with backend subclasses '''
+''' file with primitive strategy subclasses '''
 
 from qiskit.primitives import Estimator as LocalEstimator
 from qiskit.primitives import Sampler as LocalSampler
 from qiskit_algorithms.optimizers import COBYLA
 from qiskit_ibm_runtime import Estimator, Sampler
 
-from templates import Backend
+from templates import PrimitiveStrategy
 
 
-class LocalBackend(Backend):
-    ''' local backend '''
+class LocalPrimitiveStrategy(PrimitiveStrategy):
+    ''' local primitive strategy '''
 
     def __init__(self) -> None:
         super().__init__('local_simulator')
@@ -24,8 +24,8 @@ class LocalBackend(Backend):
         return COBYLA()
 
 
-class RemoteBackend(Backend):
-    ''' remote backend '''
+class RemotePrimitiveStrategy(PrimitiveStrategy):
+    ''' remote primitive strategy '''
 
     def __init__(self, name: str, session: str) -> None:
         super().__init__(name)
@@ -38,4 +38,4 @@ class RemoteBackend(Backend):
         return Sampler(session=self.session)
 
 
-BACKEND_LIST = [LocalBackend, RemoteBackend]
+PRIMITIVE_STRATEGY_LIST = [LocalPrimitiveStrategy, RemotePrimitiveStrategy]

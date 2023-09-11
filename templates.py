@@ -4,14 +4,13 @@ from abc import ABC, abstractmethod
 from os import makedirs, path
 
 # from qiskit import QuantumCircuit
-from qiskit.quantum_info import SparsePauliOp
 from qiskit_algorithms.optimizers import SPSA
 # from qiskit_ibm_runtime import QiskitRuntimeService, Session #, Sampler, Estimator
 from qiskit_ibm_runtime import Sampler, Estimator
 
 
-class Backend(ABC):
-    ''' Abstract class for backends '''
+class PrimitiveStrategy(ABC):
+    ''' Abstract class for primitive startegies '''
 
     @abstractmethod
     def __init__(self, name: str, parameters: list = None) -> None:
@@ -20,15 +19,15 @@ class Backend(ABC):
         self.parameters = parameters if parameters is not None else []
 
     def get_estimator(self) -> Estimator:
-        ''' returns backend's estimator '''
+        ''' returns primitive strategy's estimator '''
         return None
 
     def get_sampler(self) -> Sampler:
-        ''' returns backend's sampler '''
+        ''' returns primitive strategy's sampler '''
         return None
 
     def get_optimizer(self):
-        ''' returns backend's optimizer '''
+        ''' returns primitive strategy's optimizer '''
         return SPSA()
 
 
@@ -65,7 +64,7 @@ class Algorithm(ABC):
 class HamiltonianAlgorithm(Algorithm):
 
     @abstractmethod
-    def run(self, problem: Problem, backend: Backend):
+    def run(self, problem: Problem, primitive_strategy: PrimitiveStrategy):
         ''' Runs the hamiltonian on current algorithm '''
 
     def check_problem(self, problem: Problem) -> bool:
@@ -102,7 +101,7 @@ class QuantumLauncher(ABC):
 
     @abstractmethod
     def run(self) -> dict:
-        ''' Run's algorithm on it's backend '''
+        ''' Run's algorithm '''
 
     def process(self, alg_options,
                 save_to_file: bool = False) -> dict:
@@ -112,10 +111,10 @@ class QuantumLauncher(ABC):
         variant = self.problem.variant
         results['variant'] = variant
         results['alg_options'] = alg_options
-        results['backend_name'] = self.backend.name
+        results['primitive_strategy'] = self.primitive_strategy.name
         if save_to_file:
             self.res_path = self.dir + '/' + self.problem.path_name + '-' + \
-                            self.backend.path_name + '-' \
+                            self.primitive_strategy.name + '-' \
                             + self.algorithm.path_name + '-' + str(energy) + '.pkl'
             self.result_paths.append(self.res_path)
             self.dir = path.dirname(self.res_path)
