@@ -1,18 +1,20 @@
 ''' File with templates '''
-from os import makedirs, path
 import pickle
 from abc import ABC, abstractmethod
-#from qiskit import QuantumCircuit
+from os import makedirs, path
+
+# from qiskit import QuantumCircuit
 from qiskit.quantum_info import SparsePauliOp
-#from qiskit_ibm_runtime import QiskitRuntimeService, Session #, Sampler, Estimator
-from qiskit_ibm_runtime import Sampler, Estimator
 from qiskit_algorithms.optimizers import SPSA
+# from qiskit_ibm_runtime import QiskitRuntimeService, Session #, Sampler, Estimator
+from qiskit_ibm_runtime import Sampler, Estimator
+
 
 class Backend(ABC):
     ''' Abstract class for backends '''
 
     @abstractmethod
-    def __init__(self, name:str, parameters:list=None) -> None:
+    def __init__(self, name: str, parameters: list = None) -> None:
         self.name = name
         self.path_name = name
         self.parameters = parameters if parameters is not None else []
@@ -29,8 +31,10 @@ class Backend(ABC):
         ''' returns backend's optimizer '''
         return SPSA()
 
+
 class Problem(ABC):
     ''' Abstract class for Problems'''
+
     @abstractmethod
     def __init__(self) -> None:
         self.variant = 'Optimization'
@@ -47,8 +51,10 @@ class Problem(ABC):
             res = pickle.load(file)
         return res
 
+
 class Algorithm(ABC):
     ''' Abstract class for Algorithms'''
+
     @abstractmethod
     def __init__(self) -> None:
         self.name: str = ''
@@ -56,16 +62,28 @@ class Algorithm(ABC):
         self.parameters = []
 
     @abstractmethod
-    def run(self, hamiltonian:SparsePauliOp, backend:Backend):
+    def check_problem(self, problem: Problem) -> bool:
+        ''' Checks whether a problem implements a method required for the algorithm'''
+
+
+class HamiltonianAlgorithm(Algorithm):
+
+    @abstractmethod
+    def run(self, hamiltonian: SparsePauliOp, backend: Backend):
         ''' Runs the hamiltonian on current algorithm '''
+
+    def check_problem(self, problem: Problem) -> bool:
+        ''' Check if the problem implements get_hamiltonian method'''
+        return callable(getattr(problem, 'get_hamiltonian', False))
+
 
 class QuantumLauncher(ABC):
     ''' Template for Quantum Launchers '''
+
     def __init__(self, problem: Problem,
-                algorithm: Algorithm, backend: Backend) -> None:
+                 algorithm: Algorithm) -> None:
         self.problem: Problem = problem
         self.algorithm: Algorithm = algorithm
-        self.backend: Backend = backend
         self.path = None
         self.res = {}
         self.dir = 'data/'
@@ -95,8 +113,8 @@ class QuantumLauncher(ABC):
         results['backend_name'] = self.backend.name
         if save_to_file:
             self.res_path = self.dir + '/' + self.problem.path_name + '-' + \
-                self.backend.path_name + '-' \
-                + self.algorithm.path_name + '-' + str(energy) + '.pkl'
+                            self.backend.path_name + '-' \
+                            + self.algorithm.path_name + '-' + str(energy) + '.pkl'
             self.result_paths.append(self.res_path)
             self.dir = path.dirname(self.res_path)
             if not path.exists(self.dir):

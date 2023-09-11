@@ -1,9 +1,10 @@
 ''' File with problem sub-classes '''
+import ast
 import os
 from collections import defaultdict
-import ast
 
 import hampy
+import networkx as nx
 import numpy as np
 import pandas as pd
 from qiskit.quantum_info import SparsePauliOp
@@ -11,8 +12,10 @@ from qiskit.quantum_info import SparsePauliOp
 from job_shop_scheduler import get_jss_hamiltonian
 from templates import Problem
 
+
 class QATM(Problem):
     ''' class for QATM problem '''
+
     def __init__(self, onehot: str, instance_name: str, instance_path: str = None) -> None:
         super().__init__()
         self.name = 'qatm'
@@ -77,7 +80,7 @@ class EC(Problem):
                 self.instance_name = instance_name
             case _:
                 self.instance = self.read_instance(instance_name,
-                                                instance_path)
+                                                   instance_path)
                 self.instance_name = instance_name.split('.')[0]
         self.path_name = f'{self.name}/{self.instance_name}@{onehot}'
 
@@ -166,3 +169,43 @@ class JSSP(Problem):
                                        lint[1::2]  # operation lengths
                                        )]
         return job_dict
+
+
+class MaxCut(Problem):
+    ''' MacCut for Orca '''
+
+    def __init__(self, instance_name: str = '', instance_path: str = '') -> None:
+        super().__init__()
+        self.name = 'maxcut'
+        self.G = nx.Graph()
+        match instance_name:
+            case 'default':
+                edge_list = [(0, 1), (0, 2), (0, 5), (1, 3), (1, 4), (2, 4), (2, 5), (3, 4), (3, 5)]
+                self.G.add_edges_from(edge_list)
+
+            case _:
+                self.instance_name = instance_name.split('.')[0]
+                raw_instance = self.read_instance(os.path.join(instance_path, instance_name))
+
+    def read_instance(self, path: str):
+        ...
+
+    def get_qubo_fn(self, Q):
+        def qubo_fn(bin_vec):
+            return np.dot(bin_vec, np.dot(Q, bin_vec))
+
+        return qubo_fn
+
+    def get_qubo(self):
+        ''' Returns Qubo function '''
+        Q = np.zeros((6, 6))
+        for (i, j) in self.G.edges:
+            Q[i, i] += -1
+            Q[j, j] += -1
+            Q[i, j] += 1
+            Q[j, i] += 1
+
+        return self.get_qubo_fn, Q
+
+    def get_hamiltonian(self) -> SparsePauliOp:
+        ...

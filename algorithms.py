@@ -1,23 +1,26 @@
 ''' file with algorithms subclasses '''
 
 import numpy as np
+from ptseries.algorithms.binary_solvers import BinaryBosonicSolver
 from qiskit.circuit import ParameterVector
 from qiskit.circuit.library import PauliEvolutionGate
 from qiskit.opflow import H
-#from qiskit.providers.fake_provider import FakeSherbrooke
+# from qiskit.providers.fake_provider import FakeSherbrooke
 from qiskit.quantum_info import SparsePauliOp
-#from qiskit_aer.noise import NoiseModel
+# from qiskit_aer.noise import NoiseModel
 from qiskit_algorithms import QAOA
 
-from templates import Algorithm, Backend
+from templates import HamiltonianAlgorithm, Backend, Problem, Algorithm
 
 
 def commutator(op_a: SparsePauliOp, op_b: SparsePauliOp) -> SparsePauliOp:
     ''' Commutator '''
     return op_a @ op_b - op_b @ op_a
 
-class QAOA2(Algorithm):
+
+class QAOA2(HamiltonianAlgorithm):
     ''' Algorithm class with QAOA '''
+
     def __init__(self, p: int = 1, aux=None):
         self.name = 'qaoa'
         self.path_name = f'{self.name}@{p}'
@@ -25,7 +28,7 @@ class QAOA2(Algorithm):
         self.p: int = p
         self.parameters = ['p']
 
-    def run(self, hamiltonian: SparsePauliOp, backend:Backend) -> dict:
+    def run(self, hamiltonian: SparsePauliOp, backend: Backend) -> dict:
         ''' Runs the QAOA algorithm '''
         energies = []
 
@@ -50,7 +53,7 @@ class QAOA2(Algorithm):
         return result
 
 
-class FALQON(Algorithm):
+class FALQON(HamiltonianAlgorithm):
     ''' Algorithm class with FALQON '''
 
     def __init__(self, driver_h=None, delta_t=0, beta_0=0, n=1):
@@ -65,7 +68,7 @@ class FALQON(Algorithm):
         self.n_qubits: int = 0
         self.parameters = ['n', 'delta_t', 'beta_0']
 
-    def run(self, hamiltonian: SparsePauliOp, backend:Backend):
+    def run(self, hamiltonian: SparsePauliOp, backend: Backend):
         ''' run falqon '''
         # TODO implement aux operator
         self.cost_h = hamiltonian
@@ -83,7 +86,7 @@ class FALQON(Algorithm):
         sampler = backend.get_sampler()
 
         best_sample, last_sample = self.falqon_subroutine(estimator,
-                                                    sampler, energies, betas, circuit_depths, cxs)
+                                                          sampler, energies, betas, circuit_depths, cxs)
 
         result = {'betas': betas,
                   'energies': energies,
@@ -145,5 +148,31 @@ class FALQON(Algorithm):
         ansatz.measure_all()
         res = sampler.run(ansatz, betas).result()
         return res
+
+
+class BinaryBosonic(Algorithm):
+    ''' Orca Algorithm '''
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.bbs = None
+
+    def run(self, qubo: tuple):
+        qubo_fn_fact, Q = qubo
+        self.bbs = BinaryBosonicSolver(6,
+                                       qubo_fn_fact(Q)
+                                       )
+        self.bbs.train(
+            learning_rate=1e-1,
+            updates=80,
+            print_frequency=20
+        )
+
+        return self.bbs.return_solution()
+
+    def check_problem(self, problem: Problem) -> bool:
+        ''' Check if the problem implements get_hamiltonian method'''
+        return callable(getattr(problem, 'get_orca_qubo', False))
+
 
 ALG_LIST = [QAOA2(), FALQON()]
