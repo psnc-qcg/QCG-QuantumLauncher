@@ -196,7 +196,7 @@ class MaxCut(Problem):
 
         return qubo_fn
 
-    def get_qubo(self):
+    def get_orca_qubo(self):
         ''' Returns Qubo function '''
         Q = np.zeros((6, 6))
         for (i, j) in self.G.edges:
@@ -206,6 +206,3 @@ class MaxCut(Problem):
             Q[j, i] += 1
 
         return self.get_qubo_fn, Q
-
-    def get_hamiltonian(self) -> SparsePauliOp:
-        ...

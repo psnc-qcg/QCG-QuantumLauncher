@@ -11,7 +11,7 @@ class QiskitLauncher(QuantumLauncher):
     def run(self) -> dict:
         if self.backend is None:
             self.backend = LocalBackend()
-        return self.algorithm.run(self.problem.get_hamiltonian(), self.backend)
+        return self.algorithm.run(self.problem, self.backend)
 
     def set_backend(self, backend: Backend) -> None:
         self.backend = backend
@@ -21,7 +21,7 @@ class OrcaLauncher(QuantumLauncher):
     ''' Quantum Launcher for Orca '''
 
     def run(self) -> dict:
-        return self.algorithm.run(self.problem.get_qubo())
+        return self.algorithm.run(self.problem)
 
 
 def from_pickle(path_: str) -> dict:

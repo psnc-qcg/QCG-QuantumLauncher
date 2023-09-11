@@ -68,9 +68,10 @@ class FALQON(HamiltonianAlgorithm):
         self.n_qubits: int = 0
         self.parameters = ['n', 'delta_t', 'beta_0']
 
-    def run(self, hamiltonian: SparsePauliOp, backend: Backend):
+    def run(self, problem: Problem, backend: Backend):
         ''' run falqon '''
         # TODO implement aux operator
+        hamiltonian = self.get_problem_data(problem)
         self.cost_h = hamiltonian
         self.n_qubits = hamiltonian.num_qubits
         if self.driver_h is None:
@@ -157,8 +158,8 @@ class BinaryBosonic(Algorithm):
         super().__init__()
         self.bbs = None
 
-    def run(self, qubo: tuple):
-        qubo_fn_fact, Q = qubo
+    def run(self, problem: Problem):
+        qubo_fn_fact, Q = self.get_problem_data(problem)
         self.bbs = BinaryBosonicSolver(6,
                                        qubo_fn_fact(Q)
                                        )
@@ -173,6 +174,14 @@ class BinaryBosonic(Algorithm):
     def check_problem(self, problem: Problem) -> bool:
         ''' Check if the problem implements get_hamiltonian method'''
         return callable(getattr(problem, 'get_orca_qubo', False))
+
+    def get_problem_data(self, problem: Problem):
+        if self.check_problem(problem):
+            return problem.get_orca_qubo()
+        else:
+            raise NotImplementedError('The problem does not have orca qubo getter implemented')
+
+
 
 
 ALG_LIST = [QAOA2(), FALQON()]
