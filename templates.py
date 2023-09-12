@@ -57,29 +57,12 @@ class Algorithm(ABC):
         self.parameters = []
 
     @abstractmethod
-    def run(self):
+    def run(self, problem: Problem):
         ...
 
     @abstractmethod
     def check_problem(self, problem: Problem) -> bool:
         ''' Checks whether a problem implements a method required for the algorithm'''
-
-
-class HamiltonianAlgorithm(Algorithm):
-
-    @abstractmethod
-    def run(self, problem: Problem, primitive_strategy: PrimitiveStrategy):
-        ''' Runs the hamiltonian on current algorithm '''
-
-    def check_problem(self, problem: Problem) -> bool:
-        ''' Check if the problem implements get_hamiltonian method'''
-        return callable(getattr(problem, 'get_hamiltonian', False))
-
-    def get_problem_data(self, problem: Problem):
-        if self.check_problem(problem):
-            return problem.get_hamiltonian()
-        else:
-            raise NotImplementedError('The problem does not have hamiltonian getter implemented')
 
 
 class QuantumLauncher(ABC):
