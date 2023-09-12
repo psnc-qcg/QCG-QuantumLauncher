@@ -5,17 +5,15 @@ from abc import abstractmethod, ABC
 from qiskit.primitives import Estimator as LocalEstimator
 from qiskit.primitives import Sampler as LocalSampler
 from qiskit_algorithms.optimizers import COBYLA, SPSA
-from qiskit_ibm_runtime import Estimator, Sampler
+from qiskit_ibm_runtime import Estimator, Sampler, Session
 
 
 class PrimitiveStrategy(ABC):
     ''' Abstract class for primitive startegies '''
 
     @abstractmethod
-    def __init__(self, name: str, parameters: list = None) -> None:
-        self.name = name
-        self.path_name = name
-        self.parameters = parameters if parameters is not None else []
+    def __init__(self) -> None:
+        super().__init__()
 
     def get_estimator(self) -> Estimator:
         ''' returns primitive strategy's estimator '''
@@ -34,7 +32,7 @@ class LocalPrimitiveStrategy(PrimitiveStrategy):
     ''' local primitive strategy '''
 
     def __init__(self) -> None:
-        super().__init__('local_simulator')
+        super().__init__()
 
     def get_estimator(self) -> Estimator:
         return LocalEstimator()
@@ -49,8 +47,7 @@ class LocalPrimitiveStrategy(PrimitiveStrategy):
 class RemotePrimitiveStrategy(PrimitiveStrategy):
     ''' remote primitive strategy '''
 
-    def __init__(self, name: str, session: str) -> None:
-        super().__init__(name)
+    def __init__(self, session: Session) -> None:
         self.session = session
 
     def get_estimator(self) -> Estimator:

@@ -8,14 +8,14 @@ from qiskit.opflow import H
 from qiskit.quantum_info import SparsePauliOp
 from qiskit_algorithms import QAOA
 
-from qiskit_stuff.primitive_strategy import PrimitiveStrategy
+from qiskit_stuff.backend import QiskitBackend
 from templates import Problem, Algorithm
 
 
 class HamiltonianAlgorithm(Algorithm):
 
     @abstractmethod
-    def run(self, problem: Problem, primitive_strategy: PrimitiveStrategy):
+    def run(self, problem: Problem, backend: QiskitBackend):
         ''' Runs the hamiltonian on current algorithm '''
 
     def check_problem(self, problem: Problem) -> bool:
@@ -44,7 +44,7 @@ class QAOA2(HamiltonianAlgorithm):
         self.p: int = p
         self.parameters = ['p']
 
-    def run(self, problem: Problem, primitive_strategy: PrimitiveStrategy) -> dict:
+    def run(self, problem: Problem, backend: QiskitBackend) -> dict:
         ''' Runs the QAOA algorithm '''
         hamiltonian = self.get_problem_data(problem)
         energies = []
@@ -52,8 +52,8 @@ class QAOA2(HamiltonianAlgorithm):
         def qaoa_callback(evaluation_count, params, mean, std):
             energies.append(mean)
 
-        sampler = primitive_strategy.get_sampler()
-        optimizer = primitive_strategy.get_optimizer()
+        sampler = backend.get_primitive_strategy().get_sampler()
+        optimizer = backend.get_primitive_strategy().get_optimizer()
 
         qaoa = QAOA(sampler, optimizer, reps=self.p, callback=qaoa_callback)
         qaoa_result = qaoa.compute_minimum_eigenvalue(hamiltonian, self.aux)
@@ -85,7 +85,7 @@ class FALQON(HamiltonianAlgorithm):
         self.n_qubits: int = 0
         self.parameters = ['n', 'delta_t', 'beta_0']
 
-    def run(self, problem: Problem, primitive_strategy: PrimitiveStrategy):
+    def run(self, problem: Problem, backend: QiskitBackend):
         ''' run falqon '''
         # TODO implement aux operator
         hamiltonian = self.get_problem_data(problem)
@@ -100,8 +100,8 @@ class FALQON(HamiltonianAlgorithm):
         circuit_depths = []
         cxs = []
 
-        estimator = primitive_strategy.get_estimator()
-        sampler = primitive_strategy.get_sampler()
+        estimator = backend.get_primitive_strategy().get_estimator()
+        sampler = backend.get_primitive_strategy().get_sampler()
 
         best_sample, last_sample = self.falqon_subroutine(estimator,
                                                           sampler, energies, betas, circuit_depths, cxs)

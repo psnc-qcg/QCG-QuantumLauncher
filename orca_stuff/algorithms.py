@@ -3,6 +3,7 @@
 from ptseries.algorithms.binary_solvers import BinaryBosonicSolver
 
 from templates import Problem, Algorithm
+from orca_stuff.backend import OrcaBackend
 
 
 class BinaryBosonic(Algorithm):
@@ -12,7 +13,7 @@ class BinaryBosonic(Algorithm):
         super().__init__()
         self.bbs = None
 
-    def run(self, problem: Problem):
+    def run(self, problem: Problem, backend: OrcaBackend):
         qubo_fn_fact, Q = self.get_problem_data(problem)
         self.bbs = BinaryBosonicSolver(6,
                                        qubo_fn_fact(Q)

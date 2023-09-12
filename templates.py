@@ -4,8 +4,18 @@ from abc import ABC, abstractmethod
 from os import makedirs, path
 
 
+class Backend(ABC):
+    ''' Abstract class for backends '''
+
+    @abstractmethod
+    def __init__(self, name: str, parameters: list = None) -> None:
+        self.name = name
+        self.path_name = name
+        self.parameters = parameters if parameters is not None else []
+
+
 class Problem(ABC):
-    ''' Abstract class for Problems'''
+    ''' Abstract class for Problems '''
 
     @abstractmethod
     def __init__(self) -> None:
@@ -21,7 +31,7 @@ class Problem(ABC):
 
 
 class Algorithm(ABC):
-    ''' Abstract class for Algorithms'''
+    """ Abstract class for Algorithms"""
 
     @abstractmethod
     def __init__(self) -> None:
@@ -30,8 +40,8 @@ class Algorithm(ABC):
         self.parameters = []
 
     @abstractmethod
-    def run(self, problem: Problem):
-        ...
+    def run(self, problem: Problem, backend: Backend):
+        ''' Runs an algorithm on a specific problem using a backend '''
 
     @abstractmethod
     def check_problem(self, problem: Problem) -> bool:
@@ -41,10 +51,11 @@ class Algorithm(ABC):
 class QuantumLauncher(ABC):
     ''' Template for Quantum Launchers '''
 
-    def __init__(self, problem: Problem,
-                 algorithm: Algorithm) -> None:
+    def __init__(self, problem: Problem, algorithm: Algorithm, backend: Backend = None) -> None:
         self.problem: Problem = problem
         self.algorithm: Algorithm = algorithm
+        self.backend = backend
+
         self.path = None
         self.res = {}
         self.dir = 'data/'
@@ -71,10 +82,10 @@ class QuantumLauncher(ABC):
         variant = self.problem.variant
         results['variant'] = variant
         results['alg_options'] = alg_options
-        results['primitive_strategy'] = self.primitive_strategy.name
+        results['backend_name'] = self.backend.name
         if save_to_file:
             self.res_path = self.dir + '/' + self.problem.path_name + '-' + \
-                            self.primitive_strategy.name + '-' \
+                            self.backend.name + '-' \
                             + self.algorithm.path_name + '-' + str(energy) + '.pkl'
             self.result_paths.append(self.res_path)
             self.dir = path.dirname(self.res_path)

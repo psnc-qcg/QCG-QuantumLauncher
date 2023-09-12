@@ -1,16 +1,10 @@
-''' Quantum Launcher '''
+''' Qiskit Launcher '''
 
 from templates import QuantumLauncher
-from qiskit_stuff.primitive_strategy import PrimitiveStrategy, LocalPrimitiveStrategy
 
 
 class QiskitLauncher(QuantumLauncher):
-    ''' Global Launcher problem'''
+    ''' Quantum Launcher for Qiskit '''
 
     def run(self) -> dict:
-        if self.primitive_strategy is None:
-            self.primitive_strategy = LocalPrimitiveStrategy()
-        return self.algorithm.run(self.problem, self.primitive_strategy)
-
-    def set_primitive_strategy(self, primitive_strategy: PrimitiveStrategy) -> None:
-        self.primitive_strategy = primitive_strategy
+        return self.algorithm.run(self.problem, self.backend)
