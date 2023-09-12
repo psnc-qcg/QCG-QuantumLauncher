@@ -1,4 +1,5 @@
 ''' file with qiskit algorithms subclasses '''
+from abc import abstractmethod
 
 import numpy as np
 from qiskit.circuit import ParameterVector
@@ -7,8 +8,25 @@ from qiskit.opflow import H
 from qiskit.quantum_info import SparsePauliOp
 from qiskit_algorithms import QAOA
 
-from templates import Problem
-from qiskit_stuff.templates import HamiltonianAlgorithm, PrimitiveStrategy
+from qiskit_stuff.primitive_strategy import PrimitiveStrategy
+from templates import Problem, Algorithm
+
+
+class HamiltonianAlgorithm(Algorithm):
+
+    @abstractmethod
+    def run(self, problem: Problem, primitive_strategy: PrimitiveStrategy):
+        ''' Runs the hamiltonian on current algorithm '''
+
+    def check_problem(self, problem: Problem) -> bool:
+        ''' Check if the problem implements get_hamiltonian method'''
+        return callable(getattr(problem, 'get_hamiltonian', False))
+
+    def get_problem_data(self, problem: Problem):
+        if self.check_problem(problem):
+            return problem.get_hamiltonian()
+        else:
+            raise NotImplementedError('The problem does not have hamiltonian getter implemented')
 
 
 def commutator(op_a: SparsePauliOp, op_b: SparsePauliOp) -> SparsePauliOp:

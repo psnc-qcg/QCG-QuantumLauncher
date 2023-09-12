@@ -1,11 +1,33 @@
 ''' file with primitive strategy subclasses '''
 
+from abc import abstractmethod, ABC
+
 from qiskit.primitives import Estimator as LocalEstimator
 from qiskit.primitives import Sampler as LocalSampler
-from qiskit_algorithms.optimizers import COBYLA
+from qiskit_algorithms.optimizers import COBYLA, SPSA
 from qiskit_ibm_runtime import Estimator, Sampler
 
-from qiskit_stuff.templates import PrimitiveStrategy
+
+class PrimitiveStrategy(ABC):
+    ''' Abstract class for primitive startegies '''
+
+    @abstractmethod
+    def __init__(self, name: str, parameters: list = None) -> None:
+        self.name = name
+        self.path_name = name
+        self.parameters = parameters if parameters is not None else []
+
+    def get_estimator(self) -> Estimator:
+        ''' returns primitive strategy's estimator '''
+        return None
+
+    def get_sampler(self) -> Sampler:
+        ''' returns primitive strategy's sampler '''
+        return None
+
+    def get_optimizer(self):
+        ''' returns primitive strategy's optimizer '''
+        return SPSA()
 
 
 class LocalPrimitiveStrategy(PrimitiveStrategy):
