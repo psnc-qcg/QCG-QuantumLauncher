@@ -1,7 +1,7 @@
 ''' Quantum Launcher '''
 
-from templates import QuantumLauncher, PrimitiveStrategy
-from .primitive_strategy import LocalPrimitiveStrategy
+from templates import QuantumLauncher
+from qiskit_stuff.primitive_strategy import PrimitiveStrategy, LocalPrimitiveStrategy
 
 
 class QiskitLauncher(QuantumLauncher):

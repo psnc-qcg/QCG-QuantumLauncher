@@ -5,7 +5,7 @@ from qiskit.primitives import Sampler as LocalSampler
 from qiskit_algorithms.optimizers import COBYLA
 from qiskit_ibm_runtime import Estimator, Sampler
 
-from templates import PrimitiveStrategy
+from qiskit_stuff.templates import PrimitiveStrategy
 
 
 class LocalPrimitiveStrategy(PrimitiveStrategy):

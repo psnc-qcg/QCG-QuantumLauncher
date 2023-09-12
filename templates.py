@@ -3,33 +3,6 @@ import pickle
 from abc import ABC, abstractmethod
 from os import makedirs, path
 
-# from qiskit import QuantumCircuit
-from qiskit_algorithms.optimizers import SPSA
-# from qiskit_ibm_runtime import QiskitRuntimeService, Session #, Sampler, Estimator
-from qiskit_ibm_runtime import Sampler, Estimator
-
-
-class PrimitiveStrategy(ABC):
-    ''' Abstract class for primitive startegies '''
-
-    @abstractmethod
-    def __init__(self, name: str, parameters: list = None) -> None:
-        self.name = name
-        self.path_name = name
-        self.parameters = parameters if parameters is not None else []
-
-    def get_estimator(self) -> Estimator:
-        ''' returns primitive strategy's estimator '''
-        return None
-
-    def get_sampler(self) -> Sampler:
-        ''' returns primitive strategy's sampler '''
-        return None
-
-    def get_optimizer(self):
-        ''' returns primitive strategy's optimizer '''
-        return SPSA()
-
 
 class Problem(ABC):
     ''' Abstract class for Problems'''
