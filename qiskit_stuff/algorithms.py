@@ -25,8 +25,9 @@ class QAOA2(HamiltonianAlgorithm):
         self.p: int = p
         self.parameters = ['p']
 
-    def run(self, hamiltonian: SparsePauliOp, primitive_strategy: PrimitiveStrategy) -> dict:
+    def run(self, problem: Problem, primitive_strategy: PrimitiveStrategy) -> dict:
         ''' Runs the QAOA algorithm '''
+        hamiltonian = self.get_problem_data(problem)
         energies = []
 
         def qaoa_callback(evaluation_count, params, mean, std):

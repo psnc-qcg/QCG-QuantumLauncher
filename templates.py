@@ -57,6 +57,10 @@ class Algorithm(ABC):
         self.parameters = []
 
     @abstractmethod
+    def run(self):
+        ...
+
+    @abstractmethod
     def check_problem(self, problem: Problem) -> bool:
         ''' Checks whether a problem implements a method required for the algorithm'''
 
