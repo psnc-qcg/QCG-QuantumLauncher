@@ -7,7 +7,8 @@ from qiskit.opflow import H
 from qiskit.quantum_info import SparsePauliOp
 from qiskit_algorithms import QAOA
 
-from templates import HamiltonianAlgorithm, PrimitiveStrategy, Problem
+from templates import PrimitiveStrategy, Problem
+from qiskit_stuff.templates import HamiltonianAlgorithm
 
 
 def commutator(op_a: SparsePauliOp, op_b: SparsePauliOp) -> SparsePauliOp:

@@ -1,6 +1,6 @@
 from abc import abstractmethod
 
-from primitive_strategy import PrimitiveStrategy
+from qiskit_stuff.primitive_strategy import PrimitiveStrategy
 from templates import Algorithm, Problem
 
 
