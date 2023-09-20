@@ -206,3 +206,13 @@ class MaxCut(Problem):
             Q[j, i] += 1
 
         return self.get_qubo_fn, Q
+
+    def get_hamiltonian(self):
+        h = None
+        n = self.G.number_of_nodes()
+        for edge in self.G.edges():
+            if h is None:
+                h = hampy.Ham_not(hampy.H_one_in_n(edge, n))
+            else:
+                h += hampy.Ham_not(hampy.H_one_in_n(edge, n))
+        return h.simplify()
