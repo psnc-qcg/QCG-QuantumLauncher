@@ -7,6 +7,7 @@ import hampy
 import networkx as nx
 import numpy as np
 import pandas as pd
+from qat.core import Observable, Term
 from qiskit.quantum_info import SparsePauliOp
 
 from job_shop_scheduler import get_jss_hamiltonian
@@ -32,7 +33,7 @@ class QATM(Problem):
 
         return np.loadtxt(cm_path), pd.read_csv(aircrafts_path, delimiter=' ', header=None)
 
-    def get_hamiltonian(self) -> SparsePauliOp:
+    def get_qiskit_hamiltonian(self) -> SparsePauliOp:
         cm, planes = self.instance
 
         onehot_hamiltonian = None
@@ -91,7 +92,7 @@ class EC(Problem):
         instance = ast.literal_eval(read_file)
         return instance
 
-    def get_hamiltonian(self) -> SparsePauliOp:
+    def get_qiskit_hamiltonian(self) -> SparsePauliOp:
         ''' generating hamiltonian'''
         elements = set().union(*self.instance)
         onehots = []
@@ -148,7 +149,7 @@ class JSSP(Problem):
         self.variant = opt
         self.path_name = f'{self.name}/{self.instance_name}@{max_time}@{opt}@{onehot}'
 
-    def get_hamiltonian(self, optimization_problem: bool = None) -> SparsePauliOp:
+    def get_qiskit_hamiltonian(self, optimization_problem: bool = None) -> SparsePauliOp:
         if optimization_problem is None:
             optimization_problem = self.optimization_problem
 
@@ -207,7 +208,7 @@ class MaxCut(Problem):
 
         return self.get_qubo_fn, Q
 
-    def get_hamiltonian(self):
+    def get_qiskit_hamiltonian(self):
         h = None
         n = self.G.number_of_nodes()
         for edge in self.G.edges():
@@ -216,3 +217,11 @@ class MaxCut(Problem):
             else:
                 h += hampy.Ham_not(hampy.H_one_in_n(edge, n))
         return h.simplify()
+
+    def get_atos_hamiltonian(self):
+        line_obs = Observable(self.G.number_of_nodes())
+        for i, j in self.G.edges():
+            # print(i,j)
+            line_obs.add_term(Term(0.5, "ZZ", [i, j]))
+        line_obs.add_term(Term(-0.5, 'I', [0]))
+        return line_obs

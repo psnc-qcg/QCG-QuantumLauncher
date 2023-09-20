@@ -12,19 +12,19 @@ from qiskit_stuff.backend import QiskitBackend
 from templates import Problem, Algorithm
 
 
-class HamiltonianAlgorithm(Algorithm):
+class QiskitHamiltonianAlgorithm(Algorithm):
 
     @abstractmethod
     def run(self, problem: Problem, backend: QiskitBackend):
         ''' Runs the hamiltonian on current algorithm '''
 
     def check_problem(self, problem: Problem) -> bool:
-        ''' Check if the problem implements get_hamiltonian method'''
-        return callable(getattr(problem, 'get_hamiltonian', False))
+        ''' Check if the problem implements get_qiskit_hamiltonian method'''
+        return callable(getattr(problem, 'get_qiskit_hamiltonian', False))
 
     def get_problem_data(self, problem: Problem):
         if self.check_problem(problem):
-            return problem.get_hamiltonian()
+            return problem.get_qiskit_hamiltonian()
         else:
             raise NotImplementedError('The problem does not have hamiltonian getter implemented')
 
@@ -34,7 +34,7 @@ def commutator(op_a: SparsePauliOp, op_b: SparsePauliOp) -> SparsePauliOp:
     return op_a @ op_b - op_b @ op_a
 
 
-class QAOA2(HamiltonianAlgorithm):
+class QAOA2(QiskitHamiltonianAlgorithm):
     ''' Algorithm class with QAOA '''
 
     def __init__(self, p: int = 1, aux=None):
@@ -70,7 +70,7 @@ class QAOA2(HamiltonianAlgorithm):
         return result
 
 
-class FALQON(HamiltonianAlgorithm):
+class FALQON(QiskitHamiltonianAlgorithm):
     ''' Algorithm class with FALQON '''
 
     def __init__(self, driver_h=None, delta_t=0, beta_0=0, n=1):
