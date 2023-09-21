@@ -114,6 +114,37 @@ class EC(Problem):
             else:
                 hamiltonian += part
         return hamiltonian.simplify()
+    
+    def get_atos_hamiltonian(self):
+        line_obs = Observable(len(self.instance))
+        elements = set().union(*self.instance)
+        onehots = []
+        for ele in elements:
+            ohs = set()
+            for i, subset in enumerate(self.instance):
+                if ele in subset:
+                    ohs.add(i)
+            onehots.append(ohs)
+        for ohs in onehots:
+            if self.onehot == 'exact':
+                # part = hampy.Ham_not(hampy.H_one_in_n(list(ohs), size=len(self.instance)))
+                oneh = None
+                for elem1 in ohs:
+                    
+                    obs1 = Observable(len(self.instance), pauli_terms=[Term(0.5, "I", [0]), Term(-0.5, "Z", [elem1])])
+                    c = ohs.copy()
+                    c.remove(elem1)
+                    for elem2 in c:
+                        obs2 = Observable(len(self.instance), pauli_terms=[Term(0.5, "I", [elem2]), Term(0.5, "Z", [elem2])])
+                        part0 = (obs1^obs2)
+                    
+                    oneh = part0 if oneh is None else oneh + part0
+                obs3 = Observable(len(self.instance), pauli_terms=[Term(1, "I", [0])])
+                part = obs3 - oneh
+            # elif self.onehot == 'quadratic':
+            #     part = hampy.quadratic_onehot(list(ohs), len(self.instance))
+            line_obs += part
+        return line_obs
 
 
 class JSSP(Problem):
