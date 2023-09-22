@@ -1,4 +1,4 @@
-''' File with problem sub-classes '''
+""" File with problem sub-classes """
 import ast
 import os
 from collections import defaultdict
@@ -15,7 +15,7 @@ from templates import Problem
 
 
 class QATM(Problem):
-    ''' class for QATM problem '''
+    """ class for QATM problem """
 
     def __init__(self, onehot: str, instance_name: str, instance_path: str = None) -> None:
         super().__init__()
@@ -24,10 +24,10 @@ class QATM(Problem):
 
         self.instance_name = instance_name.split('.')[0]
         self.instance = self.read_instance(instance_name, instance_path)
-        self.path_name = f'{self.name}/{self.instance_name}'
+        self.path = f'{self.name}/{self.instance_name}'
 
     def read_instance(self, instance_name: str, instance_path: str):
-        ''' reads instance of the problem '''
+        """ reads instance of the problem """
         cm_path = os.path.join(instance_path, 'CM_' + instance_name)
         aircrafts_path = os.path.join(instance_path, 'aircrafts_' + instance_name)
 
@@ -60,7 +60,7 @@ class QATM(Problem):
 
 
 class EC(Problem):
-    ''' Class for exact cover problem '''
+    """ Class for exact cover problem """
 
     def __init__(self, onehot: str, instance_name: str, instance_path: str = None) -> None:
         super().__init__()
@@ -83,7 +83,7 @@ class EC(Problem):
                 self.instance = self.read_instance(instance_name,
                                                    instance_path)
                 self.instance_name = instance_name.split('.')[0]
-        self.path_name = f'{self.name}/{self.instance_name}@{onehot}'
+        self.path = f'{self.name}/{self.instance_name}@{onehot}'
 
     def read_instance(self, instance_name: str, instance_path: str):
         path = os.path.join(instance_path, instance_name)
@@ -93,7 +93,7 @@ class EC(Problem):
         return instance
 
     def get_qiskit_hamiltonian(self) -> SparsePauliOp:
-        ''' generating hamiltonian'''
+        """ generating hamiltonian"""
         elements = set().union(*self.instance)
         onehots = []
         for ele in elements:
@@ -117,7 +117,7 @@ class EC(Problem):
 
 
 class JSSP(Problem):
-    ''' Ckass for Job Shop Shedueling Problem '''
+    """ Ckass for Job Shop Shedueling Problem """
 
     def __init__(self, max_time: int, onehot: str, instance_name: str = '', instance_path: str = '',
                  optimization_problem: bool = False) -> None:
@@ -147,7 +147,7 @@ class JSSP(Problem):
                         'H_label_by_pos': self.h_label_by_pos}
         opt = 'optimization' if optimization_problem else 'decision'
         self.variant = opt
-        self.path_name = f'{self.name}/{self.instance_name}@{max_time}@{opt}@{onehot}'
+        self.path = f'{self.name}/{self.instance_name}@{max_time}@{opt}@{onehot}'
 
     def get_qiskit_hamiltonian(self, optimization_problem: bool = None) -> SparsePauliOp:
         if optimization_problem is None:
@@ -159,7 +159,7 @@ class JSSP(Problem):
             return self.h_d
 
     def read_instance(self, path: str):
-        ''' Sth '''
+        """ Sth """
         job_dict = defaultdict(list)
         with open(path, 'r', encoding='utf-8') as file_:
             file_.readline()
@@ -173,7 +173,7 @@ class JSSP(Problem):
 
 
 class MaxCut(Problem):
-    ''' MacCut for Orca '''
+    """ MacCut for Orca """
 
     def __init__(self, instance_name: str = '', instance_path: str = '') -> None:
         super().__init__()
@@ -189,7 +189,8 @@ class MaxCut(Problem):
                 raw_instance = self.read_instance(os.path.join(instance_path, instance_name))
 
     def read_instance(self, path: str):
-        ...
+        """ Reads the instance of the problem from path file """
+        return None
 
     def get_qubo_fn(self, Q):
         def qubo_fn(bin_vec):
@@ -198,7 +199,7 @@ class MaxCut(Problem):
         return qubo_fn
 
     def get_orca_qubo(self):
-        ''' Returns Qubo function '''
+        """ Returns Qubo function """
         Q = np.zeros((6, 6))
         for (i, j) in self.G.edges:
             Q[i, i] += -1
@@ -209,14 +210,14 @@ class MaxCut(Problem):
         return self.get_qubo_fn, Q
 
     def get_qiskit_hamiltonian(self):
-        h = None
+        ham = None
         n = self.G.number_of_nodes()
         for edge in self.G.edges():
-            if h is None:
-                h = hampy.Ham_not(hampy.H_one_in_n(edge, n))
+            if ham is None:
+                ham = hampy.Ham_not(hampy.H_one_in_n(edge, n))
             else:
-                h += hampy.Ham_not(hampy.H_one_in_n(edge, n))
-        return h.simplify()
+                ham += hampy.Ham_not(hampy.H_one_in_n(edge, n))
+        return ham.simplify()
 
     def get_atos_hamiltonian(self):
         line_obs = Observable(self.G.number_of_nodes())

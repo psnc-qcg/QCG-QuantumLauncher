@@ -1,4 +1,4 @@
-''' file with orca algorithms subclasses '''
+""" file with orca algorithms subclasses """
 
 from qat.plugins import ScipyMinimizePlugin
 from qat.qpus import get_default_qpu
@@ -9,7 +9,7 @@ from templates import Problem, Algorithm
 
 
 class QAOA2(Algorithm):
-    ''' Algorithm class with QAOA '''
+    """ Algorithm class with QAOA """
 
     def __init__(self, p: int = 1, aux=None):
         self.name = 'qaoa'
@@ -20,7 +20,7 @@ class QAOA2(Algorithm):
 
     def run(self, problem: Problem, backend: AtosBackend) -> dict:
 
-        ''' Runs the QAOA algorithm '''
+        """ Runs the QAOA algorithm """
         observable = self.get_problem_data(problem)
 
         circuit = AnsatzFactory.qaoa_circuit(observable, self.p, strategy='default')
@@ -35,7 +35,7 @@ class QAOA2(Algorithm):
         return result
 
     def check_problem(self, problem: Problem) -> bool:
-        ''' Check if the problem implements get_hamiltonian method'''
+        """ Check if the problem implements get_hamiltonian method"""
         return callable(getattr(problem, 'get_atos_hamiltonian', False))
 
     def get_problem_data(self, problem: Problem):

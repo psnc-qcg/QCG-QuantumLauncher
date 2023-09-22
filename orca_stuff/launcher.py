@@ -1,11 +1,11 @@
-''' Orca Launcher '''
+""" Orca Launcher """
 
 from orca_stuff.backend import OrcaBackend
 from templates import QuantumLauncher
 
 
 class OrcaLauncher(QuantumLauncher):
-    ''' Quantum Launcher for Orca '''
+    """ Quantum Launcher for Orca """
 
     def run(self) -> dict:
         if self.backend is None:

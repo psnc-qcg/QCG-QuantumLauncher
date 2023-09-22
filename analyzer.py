@@ -1,4 +1,4 @@
-''' Analyzer for problems '''
+""" Analyzer for problems """
 import os
 import pickle
 import pandas as pd
@@ -8,32 +8,32 @@ from algorithms import ALG_LIST
 from backends import BACKEND_LIST
 
 class Analyzer():
-    ''' Abstract class for Analyzers '''
+    """ Abstract class for Analyzers """
     def __init__(self) -> None:
         self.alg_dict = {j.name:j.parameters for j in ALG_LIST}
         self.backend_dict = {}
         self.problem = []
 
     def read_result(self, log_path:str):
-        ''' Reads the result '''
+        """ Reads the result """
         with open(log_path, 'rb') as file_:
             res = pickle.load(file_)
         return res
 
     def set_problem(self, problem) -> None:
-        ''' Set's problem for further use '''
+        """ Set's problem for further use """
         self.problem = problem
 
     def set_backend(self, backends:list) -> None:
-        ''' Set's backend for further use '''
+        """ Set's backend for further use """
         self.backend_dict = {j.name:j.parameters for j in backends}
 
     def set_algorithms(self, algorithms:list) -> None:
-        ''' Set's algorithms for further use '''
+        """ Set's algorithms for further use """
         self.alg_dict = {j.name:j.parameters for j in algorithms}
 
     def _create_name(self, data:dict, names:dict) -> list[str]:
-        ''' changes dict to list of str '''
+        """ changes dict to list of str """
         res = []
         for cat in data:
             for i in range(data[cat]):
@@ -42,7 +42,7 @@ class Analyzer():
         return res
 
     def read_data(self, path:str) -> pd.DataFrame:
-        ''' Analyzes data and transforms it into pandas.DataFrame'''
+        """ Analyzes data and transforms it into pandas.DataFrame"""
         if path == '__test__':
             dirs = ['100-test@1@2@onehot-local_backend-qaoa@1.01.pkl','110-test@1@3.11@exact-backend-falqon@1.2@1@1.01.pkl']
         else:
@@ -85,7 +85,7 @@ class Analyzer():
         return data_frame
 
 def main():
-    '''main'''
+    """main"""
     my_analyzer = Analyzer()
     my_analyzer.problem = ['instance', 'max-time', 'goal', 'exact']
     print(my_analyzer.read_data('test_data/jssp'))

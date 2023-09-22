@@ -1,4 +1,4 @@
-''' file with qiskit algorithms subclasses '''
+""" file with qiskit algorithms subclasses """
 from abc import abstractmethod
 
 import numpy as np
@@ -13,13 +13,13 @@ from templates import Problem, Algorithm
 
 
 class QiskitHamiltonianAlgorithm(Algorithm):
-
+    """ Abstract class for algorithms using Qiskit Hamiltonian (SparsePauliOp) objects """
     @abstractmethod
     def run(self, problem: Problem, backend: QiskitBackend):
-        ''' Runs the hamiltonian on current algorithm '''
+        """ Runs the hamiltonian on current algorithm """
 
     def check_problem(self, problem: Problem) -> bool:
-        ''' Check if the problem implements get_qiskit_hamiltonian method'''
+        """ Check if the problem implements get_qiskit_hamiltonian method"""
         return callable(getattr(problem, 'get_qiskit_hamiltonian', False))
 
     def get_problem_data(self, problem: Problem):
@@ -30,22 +30,22 @@ class QiskitHamiltonianAlgorithm(Algorithm):
 
 
 def commutator(op_a: SparsePauliOp, op_b: SparsePauliOp) -> SparsePauliOp:
-    ''' Commutator '''
+    """ Commutator """
     return op_a @ op_b - op_b @ op_a
 
 
 class QAOA2(QiskitHamiltonianAlgorithm):
-    ''' Algorithm class with QAOA '''
+    """ Algorithm class with QAOA """
 
     def __init__(self, p: int = 1, aux=None):
         self.name = 'qaoa'
-        self.path_name = f'{self.name}@{p}'
+        self.path = f'{self.name}@{p}'
         self.aux = aux
         self.p: int = p
         self.parameters = ['p']
 
     def run(self, problem: Problem, backend: QiskitBackend) -> dict:
-        ''' Runs the QAOA algorithm '''
+        """ Runs the QAOA algorithm """
         hamiltonian = self.get_problem_data(problem)
         energies = []
 
@@ -71,12 +71,12 @@ class QAOA2(QiskitHamiltonianAlgorithm):
 
 
 class FALQON(QiskitHamiltonianAlgorithm):
-    ''' Algorithm class with FALQON '''
+    """ Algorithm class with FALQON """
 
     def __init__(self, driver_h=None, delta_t=0, beta_0=0, n=1):
 
         self.name = 'falqon'
-        self.path_name = f'{self.name}@{n}@{delta_t}@{beta_0}'
+        self.path = f'{self.name}@{n}@{delta_t}@{beta_0}'
         self.driver_h = driver_h
         self.delta_t = delta_t
         self.beta_0 = beta_0
@@ -86,7 +86,6 @@ class FALQON(QiskitHamiltonianAlgorithm):
         self.parameters = ['n', 'delta_t', 'beta_0']
 
     def run(self, problem: Problem, backend: QiskitBackend):
-        ''' run falqon '''
         # TODO implement aux operator
         hamiltonian = self.get_problem_data(problem)
         self.cost_h = hamiltonian
@@ -120,7 +119,7 @@ class FALQON(QiskitHamiltonianAlgorithm):
         return result
 
     def build_ansatz(self, betas):
-        ''' building ansatz circuit '''
+        """ building ansatz circuit """
         circ = (H ^ self.cost_h.num_qubits).to_circuit()
         params = ParameterVector("beta", length=len(betas))
         for param in params:
@@ -130,7 +129,7 @@ class FALQON(QiskitHamiltonianAlgorithm):
 
     def falqon_subroutine(self, estimator,
                           sampler, energies, betas, circuit_depths, cxs):
-        ''' subroutine for falqon '''
+        """ subroutine for falqon """
         for i in range(self.n):
             betas, energy, depth, cx_count = self.run_falqon(betas, estimator)
             print(i, energy)
@@ -143,7 +142,7 @@ class FALQON(QiskitHamiltonianAlgorithm):
         return best_sample, last_sample
 
     def run_falqon(self, betas, estimator):
-        ''' Method to run FALQON algorithm '''
+        """ Method to run FALQON algorithm """
         ansatz = self.build_ansatz(betas)
         comm_h = complex(0, 1) * commutator(self.driver_h, self.cost_h)
         beta = -1 * estimator.run(ansatz, comm_h, betas).result().values[0]
@@ -161,7 +160,7 @@ class FALQON(QiskitHamiltonianAlgorithm):
         return betas, energy, depth, cx_count
 
     def sample_at(self, betas, sampler):
-        ''' Not sure yet '''
+        """ Not sure yet """
         ansatz = self.build_ansatz(betas)
         ansatz.measure_all()
         res = sampler.run(ansatz, betas).result()

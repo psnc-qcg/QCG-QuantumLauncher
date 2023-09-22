@@ -32,7 +32,7 @@ class LocalPrimitiveStrategy(PrimitiveStrategy):
     ''' local primitive strategy '''
 
     def __init__(self) -> None:
-        super().__init__()
+        pass
 
     def get_estimator(self) -> Estimator:
         return LocalEstimator()
