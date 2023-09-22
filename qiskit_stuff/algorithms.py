@@ -39,10 +39,13 @@ class QAOA2(QiskitHamiltonianAlgorithm):
 
     def __init__(self, p: int = 1, aux=None):
         self.name = 'qaoa'
-        self.path = f'{self.name}@{p}'
         self.aux = aux
         self.p: int = p
         self.parameters = ['p']
+        self._set_path()
+
+    def _set_path(self) -> None:
+        self.path = f'{self.name}@{self.p}'
 
     def run(self, problem: Problem, backend: QiskitBackend) -> dict:
         """ Runs the QAOA algorithm """
@@ -76,7 +79,6 @@ class FALQON(QiskitHamiltonianAlgorithm):
     def __init__(self, driver_h=None, delta_t=0, beta_0=0, n=1):
 
         self.name = 'falqon'
-        self.path = f'{self.name}@{n}@{delta_t}@{beta_0}'
         self.driver_h = driver_h
         self.delta_t = delta_t
         self.beta_0 = beta_0
@@ -84,6 +86,10 @@ class FALQON(QiskitHamiltonianAlgorithm):
         self.cost_h = None
         self.n_qubits: int = 0
         self.parameters = ['n', 'delta_t', 'beta_0']
+        self._set_path()
+
+    def _set_path(self) -> None:
+        self.path = self.path = f'{self.name}@{self.n}@{self.delta_t}@{self.beta_0}'
 
     def run(self, problem: Problem, backend: QiskitBackend):
         # TODO implement aux operator

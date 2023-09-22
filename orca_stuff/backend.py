@@ -6,3 +6,6 @@ class OrcaBackend(Backend):
 
     def __init__(self, name: str) -> None:
         super().__init__(name)
+
+    def _set_path(self) -> None:
+        self.path = f'{self.name}'

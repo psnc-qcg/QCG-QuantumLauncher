@@ -13,6 +13,10 @@ class Backend(ABC):
         self.path = name
         self.parameters = parameters if parameters is not None else []
 
+    @abstractmethod
+    def _set_path(self) -> None:
+        self.path = f'{self.name}'
+
 
 class Problem(ABC):
     """ Abstract class for Problems """
@@ -21,6 +25,12 @@ class Problem(ABC):
     def __init__(self) -> None:
         self.variant = 'Optimization'
         self.path = ''
+        self.name = ''
+        self.instance_name = ''
+
+    @abstractmethod
+    def _set_path(self) -> None:
+        self.path = f'{self.name}/{self.instance_name}'
 
     def read_result(self, exp, log_path):
         """ pickling files """
@@ -38,6 +48,10 @@ class Algorithm(ABC):
         self.name: str = ''
         self.path: str = ''
         self.parameters = []
+
+    @abstractmethod
+    def _set_path(self) -> None:
+        self.path = f'{self.name}'
 
     @abstractmethod
     def run(self, problem: Problem, backend: Backend):

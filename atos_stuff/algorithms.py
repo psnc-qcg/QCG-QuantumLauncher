@@ -13,10 +13,13 @@ class QAOA2(Algorithm):
 
     def __init__(self, p: int = 1, aux=None):
         self.name = 'qaoa'
-        self.path_name = f'{self.name}@{p}'
         self.aux = aux
         self.p: int = p
         self.parameters = ['p']
+        self._set_path()
+
+    def _set_path(self) -> None:
+        self.path = f'{self.name}@{self.p}'
 
     def run(self, problem: Problem, backend: AtosBackend) -> dict:
 

@@ -24,6 +24,9 @@ class QATM(Problem):
 
         self.instance_name = instance_name.split('.')[0]
         self.instance = self.read_instance(instance_name, instance_path)
+        self._set_path()
+
+    def _set_path(self) -> None:
         self.path = f'{self.name}/{self.instance_name}'
 
     def read_instance(self, instance_name: str, instance_path: str):
@@ -83,7 +86,11 @@ class EC(Problem):
                 self.instance = self.read_instance(instance_name,
                                                    instance_path)
                 self.instance_name = instance_name.split('.')[0]
-        self.path = f'{self.name}/{self.instance_name}@{onehot}'
+        self.onehot = onehot
+        self._set_path()
+
+    def _set_path(self) -> None:
+        self.path = f'{self.name}/{self.instance_name}@{self.onehot}'
 
     def read_instance(self, instance_name: str, instance_path: str):
         path = os.path.join(instance_path, instance_name)
@@ -147,7 +154,11 @@ class JSSP(Problem):
                         'H_label_by_pos': self.h_label_by_pos}
         opt = 'optimization' if optimization_problem else 'decision'
         self.variant = opt
-        self.path = f'{self.name}/{self.instance_name}@{max_time}@{opt}@{onehot}'
+        self.opt = opt
+        self._set_path()
+
+    def _set_path(self) -> None:
+        self.path = f'{self.name}/{self.instance_name}@{self.max_time}@{self.opt}@{self.onehot}'
 
     def get_qiskit_hamiltonian(self, optimization_problem: bool = None) -> SparsePauliOp:
         if optimization_problem is None:
@@ -175,19 +186,24 @@ class JSSP(Problem):
 class MaxCut(Problem):
     """ MacCut for Orca """
 
+    def _set_path(self) -> None:
+        self.path = f'{self.name}/{self.instance_name}'
+
     def __init__(self, instance_name: str = '', instance_path: str = '') -> None:
         super().__init__()
         self.name = 'maxcut'
         self.G = nx.Graph()
         match instance_name:
             case 'default':
+                self.instance_name = instance_name
                 edge_list = [(0, 1), (0, 2), (0, 5), (1, 3), (1, 4), (2, 4), (2, 5), (3, 4), (3, 5)]
                 self.G.add_edges_from(edge_list)
 
             case _:
                 self.instance_name = instance_name.split('.')[0]
                 raw_instance = self.read_instance(os.path.join(instance_path, instance_name))
-
+        self._set_path()
+        
     def read_instance(self, path: str):
         """ Reads the instance of the problem from path file """
         return None
