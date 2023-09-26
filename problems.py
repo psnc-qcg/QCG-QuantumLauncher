@@ -125,24 +125,29 @@ class EC(Problem):
                 if ele in subset:
                     ohs.add(i)
             onehots.append(ohs)
+
         for ohs in onehots:
             if self.onehot == 'exact':
-                # part = hampy.Ham_not(hampy.H_one_in_n(list(ohs), size=len(self.instance)))
                 oneh = None
                 for elem1 in ohs:
-                    
                     obs1 = Observable(len(self.instance), pauli_terms=[Term(0.5, "I", [0]), Term(-0.5, "Z", [elem1])])
                     c = ohs.copy()
                     c.remove(elem1)
-                    for elem2 in c:
-                        obs2 = Observable(len(self.instance), pauli_terms=[Term(0.5, "I", [elem2]), Term(0.5, "Z", [elem2])])
-                        part0 = (obs1^obs2)
-                    
-                    oneh = part0 if oneh is None else oneh + part0
+                    for elem2 in c: 
+                        obs1 *= Observable(len(self.instance), pauli_terms=[Term(0.5, "I", [elem2]), Term(0.5, "Z", [elem2])])
+                    oneh = obs1 if oneh is None else oneh + obs1
                 obs3 = Observable(len(self.instance), pauli_terms=[Term(1, "I", [0])])
                 part = obs3 - oneh
-            # elif self.onehot == 'quadratic':
-            #     part = hampy.quadratic_onehot(list(ohs), len(self.instance))
+            elif self.onehot == 'quadratic':
+                # part = hampy.quadratic_onehot(list(ohs), len(self.instance))
+                part = None
+                for elem in ohs:
+                    if part is None:
+                        part = Observable(len(self.instance), pauli_terms=[Term(0.5, "I", [0]), Term(-0.5, "Z", [elem])])
+                    else:
+                        part += Observable(len(self.instance), pauli_terms=[Term(0.5, "I", [0]), Term(-0.5, "Z", [elem])])
+                part = Observable(len(self.instance), pauli_terms=[Term(1, "I", [0])]) - part
+                part *= part
             line_obs += part
         return line_obs
 
