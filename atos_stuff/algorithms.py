@@ -33,9 +33,14 @@ class QAOA2(Algorithm):
         stack = ScipyMinimizePlugin(method="COBYLA",
                                     tol=1e-5,
                                     options={"maxiter": 200}) | qpu
-        result = stack.submit(job)
+        optimization_result = stack.submit(job)
+        sjob = job(**eval(optimization_result.meta_data["parameter_map"]))
+        sjob = sjob.circuit.to_job(nbshots=1024)
+        sample_result = stack.submit(sjob)
+        
+        dict_results = {"optimization_result": optimization_result, "sample_result": sample_result}
 
-        return result
+        return dict_results
 
     def check_problem(self, problem: Problem) -> bool:
         """ Check if the problem implements get_hamiltonian method"""
@@ -45,4 +50,4 @@ class QAOA2(Algorithm):
         if self.check_problem(problem):
             return problem.get_atos_hamiltonian()
         else:
-            raise NotImplementedError('The problem does not have atos hemiltonian getter implemented')
+            raise NotImplementedError('The problem does not have atos hamiltonian getter implemented')
