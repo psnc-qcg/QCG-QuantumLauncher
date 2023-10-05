@@ -65,7 +65,8 @@ class QATM(Problem):
 class EC(Problem):
     """ Class for exact cover problem """
 
-    def __init__(self, onehot: str, instance_name: str, instance_path: str = None) -> None:
+    def __init__(self, onehot: str, instance_name: str | None = None,
+                instance_path: str = None) -> None:
         super().__init__()
         self.name = 'ec'
         self.onehot = onehot
@@ -82,6 +83,8 @@ class EC(Problem):
                                  {2, 3, 6, 7},
                                  {2, 7}]
                 self.instance_name = instance_name
+            case None:
+                self.instance = None
             case _:
                 self.instance = self.read_instance(instance_name,
                                                    instance_path)
@@ -167,8 +170,8 @@ class EC(Problem):
 class JSSP(Problem):
     """ Class for Job Shop Shedueling Problem """
 
-    def __init__(self, max_time: int, onehot: str, instance_name: str = '', instance_path: str = '',
-                 optimization_problem: bool = False) -> None:
+    def __init__(self, max_time: int, onehot: str, instance_name: str | None = None,
+                 instance_path: str = '', optimization_problem: bool = False) -> None:
         super().__init__()
         self.name = 'jssp'
         self.max_time = max_time
@@ -180,6 +183,8 @@ class JSSP(Problem):
                 self.instance = {"cupcakes": [("mixer", 2), ("oven", 1)],
                                  "smoothie": [("mixer", 1)],
                                  "lasagna": [("oven", 2)]}
+            case None:
+                self.instance = None
             case _:
                 self.instance_name = instance_name.split('.')[0]
                 raw_instance = self.read_instance(os.path.join(instance_path, instance_name))
@@ -236,7 +241,7 @@ class MaxCut(Problem):
     def _set_path(self) -> None:
         self.path = f'{self.name}/{self.instance_name}'
 
-    def __init__(self, instance_name: str = '', instance_path: str = '') -> None:
+    def __init__(self, instance_name: str | None = None, instance_path: str = '') -> None:
         super().__init__()
         self.name = 'maxcut'
         self.G = nx.Graph()
@@ -245,7 +250,8 @@ class MaxCut(Problem):
                 self.instance_name = instance_name
                 edge_list = [(0, 1), (0, 2), (0, 5), (1, 3), (1, 4), (2, 4), (2, 5), (3, 4), (3, 5)]
                 self.G.add_edges_from(edge_list)
-
+            case None:
+                self.G = None
             case _:
                 self.instance_name = instance_name.split('.')[0]
                 raw_instance = self.read_instance(os.path.join(instance_path, instance_name))

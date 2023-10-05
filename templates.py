@@ -31,9 +31,9 @@ class Problem(ABC):
 
     def set_instance(self, instance: any, instance_name: str | None = None):
         """ Sets an instance of problem """
-        message= f"Setting instance for problem: {self.__class__.__name__}, hasn't been implemented"
+        message= f"\n\033[91mSetting instance for problem: {self.__class__.__name__}, hasn't been implemented\033[0m"
         print(message)
-        print("Forcing the instance, this method isn't safe")
+        print("\n\033[91mForcing the instance anyway, this method may not be safe !!\n\033[0m")
         if instance_name is not None:
             self.instance_name = instance_name
         self.instance = instance
