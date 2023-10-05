@@ -17,24 +17,23 @@ from utils import ham_from_qiskit_to_atos
 class QATM(Problem):
     """ class for QATM problem """
 
-    def __init__(self, onehot: str, instance_name: str, instance_path: str = None) -> None:
+    def __init__(self, onehot: str, instance_name: str) -> None:
         super().__init__()
         self.name = 'qatm'
         self.onehot = onehot
 
         self.instance_name = instance_name.split('.')[0]
-        self.instance = self.read_instance(instance_name, instance_path)
         self._set_path()
 
     def _set_path(self) -> None:
         self.path = f'{self.name}/{self.instance_name}'
 
-    def read_instance(self, instance_name: str, instance_path: str):
-        """ reads instance of the problem """
+    def read_instance(self, instance_path: str, instance_name: str) -> None:
+        self.instance_name = instance_name.split('.', 1)[0]
         cm_path = os.path.join(instance_path, 'CM_' + instance_name)
         aircrafts_path = os.path.join(instance_path, 'aircrafts_' + instance_name)
 
-        return np.loadtxt(cm_path), pd.read_csv(aircrafts_path, delimiter=' ', header=None)
+        self.instance = np.loadtxt(cm_path), pd.read_csv(aircrafts_path, delimiter=' ', header=None)
 
     def get_qiskit_hamiltonian(self) -> SparsePauliOp:
         cm, planes = self.instance
@@ -68,47 +67,35 @@ class QATM(Problem):
 class EC(Problem):
     """ Class for exact cover problem """
 
-    def __init__(self, onehot: str, instance_name: str | None = None,
-                instance_path: str = None) -> None:
+    def __init__(self, onehot: str) -> None:
         super().__init__()
         self.name = 'ec'
-        self.onehot = onehot
-        match instance_name:
-            case 'micro':
-                self.instance = [{1, 2},
-                                 {1}]
-                self.instance_name = instance_name
-            case 'toy':
-                self.instance = [{1, 4, 7},
-                                 {1, 4},
-                                 {4, 5, 7},
-                                 {3, 5, 6},
-                                 {2, 3, 6, 7},
-                                 {2, 7}]
-                self.instance_name = instance_name
-            case None:
-                self.instance = None
-            case _:
-                self.instance = self.read_instance(instance_name,
-                                                   instance_path)
-                self.instance_name = instance_name.split('.')[0]
         self.onehot = onehot
         self._set_path()
 
     def set_instance(self, instance:list[set[int]], instance_name:str | None=None) -> None:
-        if instance_name is not None:
-            self.instance_name = instance_name
-        self.instance_name = instance
+        super().set_instance(instance, instance_name)
+        if instance is None:
+            match instance_name:
+                case 'micro':
+                    self.instance = [{1, 2},
+                                    {1}]
+                case 'toy':
+                    self.instance = [{1, 4, 7},
+                                    {1, 4},
+                                    {4, 5, 7},
+                                    {3, 5, 6},
+                                    {2, 3, 6, 7},
+                                    {2, 7}]
+
+    def read_instance(self, instance_path:str) -> None:
+        self.instance_name = instance_path.rsplit('/', 1)[1].split('.')[0]
+        with open(instance_path, 'r', encoding='utf-8') as file:
+            read_file = file.read()
+        self.instance = ast.literal_eval(read_file)
 
     def _set_path(self) -> None:
         self.path = f'{self.name}/{self.instance_name}@{self.onehot}'
-
-    def read_instance(self, instance_name: str, instance_path: str):
-        path = os.path.join(instance_path, instance_name)
-        with open(path, 'r', encoding='utf-8') as file:
-            read_file = file.read()
-        instance = ast.literal_eval(read_file)
-        return instance
 
     def get_qiskit_hamiltonian(self) -> SparsePauliOp:
         """ generating hamiltonian"""
@@ -133,37 +120,23 @@ class EC(Problem):
                 hamiltonian += part
         return hamiltonian.simplify()
 
+
     def get_atos_hamiltonian(self):
         return ham_from_qiskit_to_atos(self.get_qiskit_hamiltonian())
-
 
 class JSSP(Problem):
     """ Class for Job Shop Shedueling Problem """
 
-    def __init__(self, max_time: int, onehot: str, instance_name: str | None = None,
-                 instance_path: str = '', optimization_problem: bool = False) -> None:
+    def __init__(self, max_time: int, onehot: str, optimization_problem: bool = False) -> None:
         super().__init__()
         self.name = 'jssp'
         self.max_time = max_time
         self.onehot = onehot
         self.optimization_problem = optimization_problem
-        match instance_name:
-            case 'toy':
-                self.instance_name = instance_name
-                self.instance = {"cupcakes": [("mixer", 2), ("oven", 1)],
-                                 "smoothie": [("mixer", 1)],
-                                 "lasagna": [("oven", 2)]}
-            case None:
-                self.instance = None
-            case _:
-                self.instance_name = instance_name.split('.')[0]
-                raw_instance = self.read_instance(os.path.join(instance_path, instance_name))
-                self.instance = {k: [(m, 1) if t < 6 else (m, 2) for m, t in v] for k, v in raw_instance.items()}
-
         self.h_d, self.h_o, self.h_pos_by_label, self.h_label_by_pos = get_jss_hamiltonian(self.instance, max_time,
                                                                                            onehot)
 
-        self.results = {'instance_name': instance_name,
+        self.results = {'instance_name': self.instance_name,
                         'max_time': max_time,
                         'onehot': onehot,
                         'H_pos_by_label': self.h_pos_by_label,
@@ -175,9 +148,27 @@ class JSSP(Problem):
 
     def set_instance(self, instance:dict[str, list[tuple[str, int]]],
                       instance_name:str | None= None) -> None:
-        if instance_name is not None:
-            self.instance_name = instance_name
-        self.instance = instance
+        super().set_instance(instance, instance_name)
+        self.results['instance_name'] = instance_name
+        if instance is None:
+            match instance_name:
+                case 'toy':
+                    self.instance = {"cupcakes": [("mixer", 2), ("oven", 1)],
+                                    "smoothie": [("mixer", 1)],
+                                    "lasagna": [("oven", 2)]}
+
+    def read_instance(self, instance_path:str) -> None:
+        self.instance_name = instance_path.rsplit('/',1)[1].split('.', 1)[0]     
+        raw_instance = defaultdict(list)
+        with open(instance_path, 'r', encoding='utf-8') as file_:
+            file_.readline()
+            for i, line in enumerate(file_):
+                lint = list(map(int, line.split()))
+                raw_instance[i + 1] = [x for x in
+                                   zip(lint[::2],  # machines
+                                       lint[1::2]  # operation lengths
+                                       )]
+        self.instance={k:[(m,1) if t<6 else (m,2) for m, t in v] for k, v in raw_instance.items()}
 
     def _set_path(self) -> None:
         self.path = f'{self.name}/{self.instance_name}@{self.max_time}@{self.opt}@{self.onehot}'
@@ -211,38 +202,22 @@ class JSSP(Problem):
 class MaxCut(Problem):
     """ MacCut for Orca """
 
-    def _set_path(self) -> None:
-        self.path = f'{self.name}/{self.instance_name}'
-
-    def __init__(self, instance_name: str | None = None, instance_path: str = '') -> None:
+    def __init__(self) -> None:
         super().__init__()
         self.name = 'maxcut'
-        self.G = nx.Graph()
-        match instance_name:
-            case 'default':
-                self.instance_name = instance_name
-                edge_list = [(0, 1), (0, 2), (0, 5), (1, 3), (1, 4), (2, 4), (2, 5), (3, 4), (3, 5)]
-                self.G.add_edges_from(edge_list)
-            case None:
-                self.G = None
-            case _:
-                self.instance_name = instance_name.split('.')[0]
-                raw_instance = self.read_instance(os.path.join(instance_path, instance_name))
         self._set_path()
 
+    def set_instance(self, instance:nx.Graph | None = None, instance_name:str | None=None) -> None:
+        super().set_instance(instance, instance_name)
+        if instance is None:
+            match instance_name:
+                case 'default':
+                    self.instance = nx.Graph()
+                    edge_list = [(0, 1), (0, 2), (0, 5), (1, 3), (1, 4), (2, 4), (2, 5), (3, 4), (3, 5)]
+                    self.instance.add_edges_from(edge_list)
 
-    def set_instance(self, nodes:list, edges:list, instance_name:str | None=None) -> None:
-        """ Sets and instance of a problem from nodes and edges """
-        if instance_name is not None:
-            self.instance_name = instance_name
-        graph = nx.Graph()
-        graph.add_nodes_from(nodes)
-        graph.add_edges_from(edges)
-        self.G = graph
-
-    def read_instance(self, path: str):
-        """ Reads the instance of the problem from path file """
-        return None
+    def _set_path(self) -> None:
+        self.path = f'{self.name}/{self.instance_name}'
 
     def get_qubo_fn(self, Q):
         def qubo_fn(bin_vec):
@@ -253,7 +228,7 @@ class MaxCut(Problem):
     def get_orca_qubo(self):
         """ Returns Qubo function """
         Q = np.zeros((6, 6))
-        for (i, j) in self.G.edges:
+        for (i, j) in self.instance.edges:
             Q[i, i] += -1
             Q[j, j] += -1
             Q[i, j] += 1
@@ -263,8 +238,8 @@ class MaxCut(Problem):
 
     def get_qiskit_hamiltonian(self):
         ham = None
-        n = self.G.number_of_nodes()
-        for edge in self.G.edges():
+        n = self.instance.number_of_nodes()
+        for edge in self.instance.edges():
             if ham is None:
                 ham = hampy.Ham_not(hampy.H_one_in_n(edge, n))
             else:

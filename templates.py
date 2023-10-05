@@ -26,17 +26,20 @@ class Problem(ABC):
         self.variant = 'Optimization'
         self.path = ''
         self.name = ''
-        self.instance_name = ''
+        self.instance_name = 'unnamed'
         self.instance = None
 
     def set_instance(self, instance: any, instance_name: str | None = None):
         """ Sets an instance of problem """
-        message= f"\n\033[91mSetting instance for problem: {self.__class__.__name__}, hasn't been implemented\033[0m"
-        print(message)
-        print("\n\033[91mForcing the instance anyway, this method may not be safe !!\n\033[0m")
         if instance_name is not None:
             self.instance_name = instance_name
         self.instance = instance
+
+    def read_instance(self, instance_path:str) -> None:
+        """ Reads an instance of problem from file """
+        self.instance_name = instance_path.rsplit('/', 1)[1].split('.', 1)[0]
+        with open(instance_path, 'rb') as file:
+            self.instance = pickle.load(file)
 
     @abstractmethod
     def _set_path(self) -> None:
