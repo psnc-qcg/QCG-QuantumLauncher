@@ -89,6 +89,11 @@ class EC(Problem):
         self.onehot = onehot
         self._set_path()
 
+    def set_instance(self, instance:list[set[int]], instance_name:str | None=None) -> None:
+        if instance_name is not None:
+            self.instance_name = instance_name
+        self.instance_name = instance
+
     def _set_path(self) -> None:
         self.path = f'{self.name}/{self.instance_name}@{self.onehot}'
 
@@ -160,7 +165,7 @@ class EC(Problem):
 
 
 class JSSP(Problem):
-    """ Ckass for Job Shop Shedueling Problem """
+    """ Class for Job Shop Shedueling Problem """
 
     def __init__(self, max_time: int, onehot: str, instance_name: str = '', instance_path: str = '',
                  optimization_problem: bool = False) -> None:
@@ -192,6 +197,12 @@ class JSSP(Problem):
         self.variant = opt
         self.opt = opt
         self._set_path()
+
+    def set_instance(self, instance:dict[str, list[tuple[str, int]]],
+                      instance_name:str | None= None) -> None:
+        if instance_name is not None:
+            self.instance_name = instance_name
+        self.instance = instance
 
     def _set_path(self) -> None:
         self.path = f'{self.name}/{self.instance_name}@{self.max_time}@{self.opt}@{self.onehot}'
@@ -239,7 +250,16 @@ class MaxCut(Problem):
                 self.instance_name = instance_name.split('.')[0]
                 raw_instance = self.read_instance(os.path.join(instance_path, instance_name))
         self._set_path()
-        
+
+    def set_instance(self, nodes:list, edges:list, instance_name:str | None=None) -> None:
+        """ Sets and instance of a problem from nodes and edges """
+        if instance_name is not None:
+            self.instance_name = instance_name
+        graph = nx.Graph()
+        graph.add_nodes_from(nodes)
+        graph.add_edges_from(edges)
+        self.G = graph
+
     def read_instance(self, path: str):
         """ Reads the instance of the problem from path file """
         return None
