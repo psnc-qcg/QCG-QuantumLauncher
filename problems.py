@@ -10,7 +10,7 @@ import pandas as pd
 from qat.core import Observable, Term
 from qiskit.quantum_info import SparsePauliOp
 
-from job_shop_scheduler import get_jss_hamiltonian
+from job_shop_scheduler import get_jss_hamiltonian_qiskit, get_jss_hamiltonian_atos
 from templates import Problem
 
 
@@ -180,8 +180,11 @@ class JSSP(Problem):
                 raw_instance = self.read_instance(os.path.join(instance_path, instance_name))
                 self.instance = {k: [(m, 1) if t < 6 else (m, 2) for m, t in v] for k, v in raw_instance.items()}
 
-        self.h_d, self.h_o, self.h_pos_by_label, self.h_label_by_pos = get_jss_hamiltonian(self.instance, max_time,
+        self.h_d_q, self.h_o_q, self.h_pos_by_label, self.h_label_by_pos = get_jss_hamiltonian_qiskit(self.instance, max_time,
                                                                                            onehot)
+        self.h_d_a, self.h_o_a, self.h_pos_by_label, self.h_label_by_pos = get_jss_hamiltonian_atos(self.instance, max_time,
+                                                                                           onehot)
+                                        
 
         self.results = {'instance_name': instance_name,
                         'max_time': max_time,
@@ -190,20 +193,25 @@ class JSSP(Problem):
                         'H_label_by_pos': self.h_label_by_pos}
         opt = 'optimization' if optimization_problem else 'decision'
         self.variant = opt
-        self.opt = opt
-        self._set_path()
-
-    def _set_path(self) -> None:
-        self.path = f'{self.name}/{self.instance_name}@{self.max_time}@{self.opt}@{self.onehot}'
+        self.path_name = f'{self.name}/{self.instance_name}@{max_time}@{opt}@{onehot}'
 
     def get_qiskit_hamiltonian(self, optimization_problem: bool = None) -> SparsePauliOp:
         if optimization_problem is None:
             optimization_problem = self.optimization_problem
 
         if optimization_problem:
-            return self.h_o
+            return self.h_o_q
         else:
-            return self.h_d
+            return self.h_d_q
+        
+    def get_atos_hamiltonian(self, optimization_problem: bool = None) -> SparsePauliOp:
+        if optimization_problem is None:
+            optimization_problem = self.optimization_problem
+
+        if optimization_problem:
+            return self.h_o_a
+        else:
+            return self.h_d_a
 
     def read_instance(self, path: str):
         """ Sth """
