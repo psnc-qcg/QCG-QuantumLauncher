@@ -27,6 +27,16 @@ class Problem(ABC):
         self.path = ''
         self.name = ''
         self.instance_name = ''
+        self.instance = None
+
+    def set_instance(self, instance: any, instance_name: str | None = None):
+        """ Sets an instance of problem """
+        message= f"Setting instance for problem: {self.__class__.__name__}, hasn't been implemented"
+        print(message)
+        print("Forcing the instance, this method isn't safe")
+        if instance_name is not None:
+            self.instance_name = instance_name
+        self.instance = instance
 
     @abstractmethod
     def _set_path(self) -> None:
