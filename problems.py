@@ -10,8 +10,9 @@ import pandas as pd
 from qat.core import Observable, Term
 from qiskit.quantum_info import SparsePauliOp
 
-from job_shop_scheduler import get_jss_hamiltonian_qiskit, get_jss_hamiltonian_atos
+from jssp.qiskit_scheduler import get_jss_hamiltonian
 from templates import Problem
+from utils import ham_from_qiskit_to_atos
 
 
 class QATM(Problem):
@@ -60,6 +61,9 @@ class QATM(Problem):
 
         hamiltonian = onehot_hamiltonian + conflict_hamiltonian
         return hamiltonian.simplify()
+
+    def get_atos_hamiltonian(self):
+        return ham_from_qiskit_to_atos(self.get_qiskit_hamiltonian())
 
 
 class EC(Problem):
@@ -123,40 +127,7 @@ class EC(Problem):
         return hamiltonian.simplify()
     
     def get_atos_hamiltonian(self):
-        line_obs = Observable(len(self.instance))
-        elements = set().union(*self.instance)
-        onehots = []
-        for ele in elements:
-            ohs = set()
-            for i, subset in enumerate(self.instance):
-                if ele in subset:
-                    ohs.add(i)
-            onehots.append(ohs)
-
-        for ohs in onehots:
-            if self.onehot == 'exact':
-                oneh = None
-                for elem1 in ohs:
-                    obs1 = Observable(len(self.instance), pauli_terms=[Term(0.5, "I", [0]), Term(-0.5, "Z", [elem1])])
-                    c = ohs.copy()
-                    c.remove(elem1)
-                    for elem2 in c: 
-                        obs1 *= Observable(len(self.instance), pauli_terms=[Term(0.5, "I", [elem2]), Term(0.5, "Z", [elem2])])
-                    oneh = obs1 if oneh is None else oneh + obs1
-                obs3 = Observable(len(self.instance), pauli_terms=[Term(1, "I", [0])])
-                part = obs3 - oneh
-            elif self.onehot == 'quadratic':
-                # part = hampy.quadratic_onehot(list(ohs), len(self.instance))
-                part = None
-                for elem in ohs:
-                    if part is None:
-                        part = Observable(len(self.instance), pauli_terms=[Term(0.5, "I", [0]), Term(-0.5, "Z", [elem])])
-                    else:
-                        part += Observable(len(self.instance), pauli_terms=[Term(0.5, "I", [0]), Term(-0.5, "Z", [elem])])
-                part = Observable(len(self.instance), pauli_terms=[Term(1, "I", [0])]) - part
-                part *= part
-            line_obs += part
-        return line_obs
+        return ham_from_qiskit_to_atos(self.get_qiskit_hamiltonian())
 
 
 class JSSP(Problem):
@@ -180,11 +151,8 @@ class JSSP(Problem):
                 raw_instance = self.read_instance(os.path.join(instance_path, instance_name))
                 self.instance = {k: [(m, 1) if t < 6 else (m, 2) for m, t in v] for k, v in raw_instance.items()}
 
-        self.h_d_q, self.h_o_q, self.h_pos_by_label, self.h_label_by_pos = get_jss_hamiltonian_qiskit(self.instance, max_time,
+        self.h_d, self.h_o, self.h_pos_by_label, self.h_label_by_pos = get_jss_hamiltonian(self.instance, max_time,
                                                                                            onehot)
-        self.h_d_a, self.h_o_a, self.h_pos_by_label, self.h_label_by_pos = get_jss_hamiltonian_atos(self.instance, max_time,
-                                                                                           onehot)
-                                        
 
         self.results = {'instance_name': instance_name,
                         'max_time': max_time,
@@ -193,25 +161,23 @@ class JSSP(Problem):
                         'H_label_by_pos': self.h_label_by_pos}
         opt = 'optimization' if optimization_problem else 'decision'
         self.variant = opt
-        self.path_name = f'{self.name}/{self.instance_name}@{max_time}@{opt}@{onehot}'
+        self.opt = opt
+        self._set_path()
+
+    def _set_path(self) -> None:
+        self.path = f'{self.name}/{self.instance_name}@{self.max_time}@{self.opt}@{self.onehot}'
 
     def get_qiskit_hamiltonian(self, optimization_problem: bool = None) -> SparsePauliOp:
         if optimization_problem is None:
             optimization_problem = self.optimization_problem
 
         if optimization_problem:
-            return self.h_o_q
+            return self.h_o
         else:
-            return self.h_d_q
+            return self.h_d
         
-    def get_atos_hamiltonian(self, optimization_problem: bool = None) -> SparsePauliOp:
-        if optimization_problem is None:
-            optimization_problem = self.optimization_problem
-
-        if optimization_problem:
-            return self.h_o_a
-        else:
-            return self.h_d_a
+    def get_atos_hamiltonian(self):
+        return ham_from_qiskit_to_atos(self.get_qiskit_hamiltonian())
 
     def read_instance(self, path: str):
         """ Sth """
@@ -280,9 +246,4 @@ class MaxCut(Problem):
         return ham.simplify()
 
     def get_atos_hamiltonian(self):
-        line_obs = Observable(self.G.number_of_nodes())
-        for i, j in self.G.edges():
-            # print(i,j)
-            line_obs.add_term(Term(0.5, "ZZ", [i, j]))
-        line_obs.add_term(Term(-0.5, 'I', [0]))
-        return line_obs
+        return ham_from_qiskit_to_atos(self.get_qiskit_hamiltonian())
