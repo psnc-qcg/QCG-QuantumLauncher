@@ -1,5 +1,5 @@
-from qiskit.quantum_info import SparsePauliOp
 from qat.core import Observable, Term
+from qiskit.quantum_info import SparsePauliOp
 
 
 def ham_from_qiskit_to_atos(q_h: SparsePauliOp) -> Observable:

@@ -1,16 +1,17 @@
 from __future__ import print_function
 
 from bisect import bisect_right
-from jssp.scheduler import JobShopScheduler, KeyList
-from jssp.scheduler import get_label
 
 import hampy
 
+from jssp.scheduler import JobShopScheduler, KeyList
+from jssp.scheduler import get_label
 
 
 def get_jss_hamiltonian(job_dict, max_time, onehot):
     scheduler = QiskitScheduler(job_dict, max_time, onehot)
     return scheduler.get_hamiltonian()
+
 
 class QiskitScheduler(JobShopScheduler):
 
@@ -19,7 +20,6 @@ class QiskitScheduler(JobShopScheduler):
         self.H_pos_by_label = dict()
         self.H_label_by_pos = dict()
         self.onehot = onehot
-
 
     def _add_one_start_constraint(self, lagrange_one_hot=1):
         for task in self.tasks:

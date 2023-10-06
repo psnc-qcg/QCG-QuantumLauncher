@@ -2,8 +2,8 @@
 
 from ptseries.algorithms.binary_solvers import BinaryBosonicSolver
 
-from templates import Problem, Algorithm
 from orca_stuff.backend import OrcaBackend
+from templates import Problem, Algorithm
 
 
 class BinaryBosonic(Algorithm):

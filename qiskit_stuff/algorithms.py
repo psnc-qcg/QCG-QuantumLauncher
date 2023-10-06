@@ -14,6 +14,7 @@ from templates import Problem, Algorithm
 
 class QiskitHamiltonianAlgorithm(Algorithm):
     """ Abstract class for algorithms using Qiskit Hamiltonian (SparsePauliOp) objects """
+
     @abstractmethod
     def run(self, problem: Problem, backend: QiskitBackend):
         """ Runs the hamiltonian on current algorithm """

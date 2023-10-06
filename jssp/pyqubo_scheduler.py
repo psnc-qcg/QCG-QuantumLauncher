@@ -1,12 +1,15 @@
 from __future__ import print_function
 
 from bisect import bisect_right
+
 from pyqubo import Binary
+
 from jssp.scheduler import JobShopScheduler, KeyList
 from jssp.scheduler import get_label
 
 
-def get_jss_bqm(job_dict, max_time, disable_till=None, disable_since=None, disabled_variables=None, lagrange_one_hot=3, lagrange_precedence=1, lagrange_share=2):
+def get_jss_bqm(job_dict, max_time, disable_till=None, disable_since=None, disabled_variables=None, lagrange_one_hot=3,
+                lagrange_precedence=1, lagrange_share=2):
     if disable_till is None:
         disable_till = {}
     if disable_since is None:
@@ -19,6 +22,7 @@ def get_jss_bqm(job_dict, max_time, disable_till=None, disable_since=None, disab
                              lagrange_one_hot,
                              lagrange_precedence,
                              lagrange_share)
+
 
 class DWaveScheduler(JobShopScheduler):
 
@@ -33,7 +37,7 @@ class DWaveScheduler(JobShopScheduler):
             H_term = 0
             for label in task_times:
                 if label in self.absurd_times:
-                   continue
+                    continue
                 if label not in self.H_vars:
                     var = Binary(label)
                     self.H_vars[label] = var
@@ -135,7 +139,7 @@ class DWaveScheduler(JobShopScheduler):
         self._add_precedence_constraint(lagrange_precedence)
         self._add_share_machine_constraint(lagrange_share)
         # Get BQM
-        #bqm = dwavebinarycsp.stitch(self.csp, **stitch_kwargs)
+        # bqm = dwavebinarycsp.stitch(self.csp, **stitch_kwargs)
 
         # Edit BQM to encourage the shortest schedule
         # Overview of this added penalty:
@@ -173,9 +177,9 @@ class DWaveScheduler(JobShopScheduler):
         #
         # - Therefore, with this penalty scheme, all optimal solution penalties < any non-optimal
         #   solution penalties
-        base = len(self.last_task_indices) + 1     # Base for exponent
+        base = len(self.last_task_indices) + 1  # Base for exponent
         # Get our pruned (remove_absurd_times) variable list so we don't undo pruning
-        #pruned_variables = list(bqm.variables)
+        # pruned_variables = list(bqm.variables)
         for i in self.last_task_indices:
             task = self.tasks[i]
 
@@ -187,7 +191,7 @@ class DWaveScheduler(JobShopScheduler):
                     continue
 
                 # Add bias to variable
-                bias = 2 * base**(end_time - self.max_time)
+                bias = 2 * base ** (end_time - self.max_time)
                 label = get_label(task, t)
                 if label in self.absurd_times:
                     continue

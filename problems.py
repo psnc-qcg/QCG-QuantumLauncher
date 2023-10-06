@@ -7,7 +7,6 @@ import hampy
 import networkx as nx
 import numpy as np
 import pandas as pd
-from qat.core import Observable, Term
 from qiskit.quantum_info import SparsePauliOp
 
 from jssp.qiskit_scheduler import get_jss_hamiltonian
@@ -125,7 +124,7 @@ class EC(Problem):
             else:
                 hamiltonian += part
         return hamiltonian.simplify()
-    
+
     def get_atos_hamiltonian(self):
         return ham_from_qiskit_to_atos(self.get_qiskit_hamiltonian())
 
@@ -175,7 +174,7 @@ class JSSP(Problem):
             return self.h_o
         else:
             return self.h_d
-        
+
     def get_atos_hamiltonian(self):
         return ham_from_qiskit_to_atos(self.get_qiskit_hamiltonian())
 
@@ -213,7 +212,7 @@ class MaxCut(Problem):
                 self.instance_name = instance_name.split('.')[0]
                 raw_instance = self.read_instance(os.path.join(instance_path, instance_name))
         self._set_path()
-        
+
     def read_instance(self, path: str):
         """ Reads the instance of the problem from path file """
         return None

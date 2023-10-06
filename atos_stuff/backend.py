@@ -1,6 +1,7 @@
 """ Backend class for Atos """
 from templates import Backend
 
+
 class AtosBackend(Backend):
     """ local backend """
 

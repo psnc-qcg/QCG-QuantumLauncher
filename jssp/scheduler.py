@@ -1,5 +1,3 @@
-
-
 def get_label(task, time):
     return f"{task.job}_{task.position},{time}"
 
@@ -30,6 +28,7 @@ class KeyList:
         key = self.key_function(item)
         return key
 
+
 class JobShopScheduler:
     def __init__(self, job_dict, max_time=None):
         self.tasks = []
@@ -57,7 +56,6 @@ class JobShopScheduler:
 
         if self.max_time is None:
             self.max_time = total_time
-
 
     def _remove_absurd_times(self, disable_till: dict, disable_since, disabled_variables):
         predecessor_time = 0

@@ -37,7 +37,7 @@ class QAOA2(Algorithm):
         sjob = job(**eval(optimization_result.meta_data["parameter_map"]))
         sjob = sjob.circuit.to_job(nbshots=1024)
         sample_result = stack.submit(sjob)
-        
+
         dict_results = {"optimization_result": optimization_result, "sample_result": sample_result}
 
         return dict_results

@@ -2,7 +2,7 @@
 from qiskit_ibm_runtime import Session
 
 from qiskit_stuff.primitive_strategy import LocalPrimitiveStrategy, \
-        RemotePrimitiveStrategy, PrimitiveStrategy
+    RemotePrimitiveStrategy, PrimitiveStrategy
 from templates import Backend
 
 
