@@ -6,7 +6,8 @@ from problems import MaxCut
 
 def main():
     """ main """
-    problem = MaxCut(instance_name='default')
+    problem = MaxCut()
+    problem.set_instance(instance_name='default')
     alg = BinaryBosonic()
     launcher = OrcaLauncher(problem, alg)
     print(launcher.run())

@@ -6,7 +6,8 @@ from problems import MaxCut
 
 def main():
     ''' main '''
-    pr = MaxCut(instance_name='default')
+    pr = MaxCut()
+    pr.set_instance(instance_name='default')
     alg = QAOA2()
     launcher = AtosLauncher(pr, alg)
     print(launcher.run())
