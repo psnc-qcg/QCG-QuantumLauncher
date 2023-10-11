@@ -7,7 +7,8 @@ from qiskit_stuff.launcher import QiskitLauncher  # , from_pickle
 
 # pr = QATM('exact', instance_name='RCP_3.txt', instance_path='data/qatm/')
 # pr = JSSP(3, 'exact', instance_name='toy', optimization_problem=True)
-pr = MaxCut(instance_name='default')
+pr = MaxCut()
+pr.set_instance(instance_name='default')
 qaoa = QAOA2(p=3)
 # qaoa = FALQON(delta_t=2, beta_0=2, n=2)
 backend = QiskitBackend('local_simulator')
