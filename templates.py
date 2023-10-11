@@ -2,6 +2,7 @@
 import pickle
 from abc import ABC, abstractmethod
 from os import makedirs, path
+from qiskit.quantum_info import SparsePauliOp
 
 
 class Backend(ABC):
@@ -52,6 +53,13 @@ class Problem(ABC):
             res = pickle.load(file)
         return res
 
+    def get_qiskit_hamiltonian(self) -> SparsePauliOp:
+        """ returns qiskit hamiltonian """
+        raise NotImplementedError(f"Class {self.__class__.__name__} doesn't have implemented hamiltonian for qiskit yet")
+
+    def get_atos_hamiltonian(self):
+        """ returns atos hamiltonian """
+        raise NotImplementedError(f"Class {self.__class__.__name__} doesn't have implemented hamiltonian for atos yet")
 
 class Algorithm(ABC):
     """ Abstract class for Algorithms"""
