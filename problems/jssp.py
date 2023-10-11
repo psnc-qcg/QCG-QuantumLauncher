@@ -26,7 +26,7 @@ class JSSP(Problem):
         self.opt = opt
         self._set_path()
 
-    def set_instance(self, instance:dict[str, list[tuple[str, int]]],
+    def set_instance(self, instance:dict[str, list[tuple[str, int]]]|None = None,
                       instance_name:str | None= None) -> None:
         super().set_instance(instance, instance_name)
         self.results['instance_name'] = instance_name

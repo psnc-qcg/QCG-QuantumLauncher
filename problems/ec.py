@@ -14,7 +14,8 @@ class EC(Problem):
         self.onehot = onehot
         self._set_path()
 
-    def set_instance(self, instance:list[set[int]], instance_name:str | None=None) -> None:
+    def set_instance(self, instance:list[set[int]] | None = None,
+                    instance_name:str | None=None) -> None:
         super().set_instance(instance, instance_name)
         if instance is None:
             match instance_name:
