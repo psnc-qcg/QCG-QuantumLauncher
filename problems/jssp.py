@@ -1,7 +1,8 @@
 """ Job Shop Sheduling Problem """
 from collections import defaultdict
+import os
 from qiskit.quantum_info import SparsePauliOp
-from job_shop_scheduler import get_jss_hamiltonian
+from jssp.qiskit_scheduler import get_jss_hamiltonian
 from templates import Problem
 
 class JSSP(Problem):
