@@ -1,14 +1,17 @@
 ''' Example of how Quantum Launcher works'''
 
-from problems import MaxCut
+from problems import MaxCut, EC, QATM, JSSP
 from qiskit_stuff.algorithms import QAOA2
 from qiskit_stuff.backend import QiskitBackend
 from qiskit_stuff.launcher import QiskitLauncher  # , from_pickle
 
-# pr = QATM('exact', instance_name='RCP_3.txt', instance_path='data/qatm/')
+pr = QATM('exact', instance_name='RCP_3.txt')
+pr.read_instance(instance_name='RCP_3.txt', instance_path='../qatm/')
 # pr = JSSP(3, 'exact', instance_name='toy', optimization_problem=True)
-pr = MaxCut()
-pr.set_instance(instance_name='default')
+#pr = MaxCut()
+#pr = EC('exact', instance_name='toy')
+#pr.set_instance(None, 'toy')
+#pr = QATM('exact', '', '')
 qaoa = QAOA2(p=3)
 # qaoa = FALQON(delta_t=2, beta_0=2, n=2)
 backend = QiskitBackend('local_simulator')

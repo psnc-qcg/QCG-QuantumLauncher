@@ -2,8 +2,8 @@
 import hampy
 import numpy as np
 import networkx as nx
-from qat.core import Observable, Term
 from templates import Problem
+from utils import ham_from_qiskit_to_atos
 
 class MaxCut(Problem):
     """ MacCut for Orca """
@@ -53,9 +53,4 @@ class MaxCut(Problem):
         return ham.simplify()
 
     def get_atos_hamiltonian(self):
-        line_obs = Observable(self.instance.number_of_nodes())
-        for i, j in self.instance.edges():
-            # print(i,j)
-            line_obs.add_term(Term(0.5, "ZZ", [i, j]))
-        line_obs.add_term(Term(-0.5, 'I', [0]))
-        return line_obs
+        return ham_from_qiskit_to_atos(self.get_qiskit_hamiltonian())

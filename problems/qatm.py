@@ -5,6 +5,7 @@ import numpy as np
 import pandas as pd
 from qiskit.quantum_info import SparsePauliOp
 from templates import Problem
+from utils import ham_from_qiskit_to_atos
 
 class QATM(Problem):
     """ class for QATM problem """
@@ -22,8 +23,9 @@ class QATM(Problem):
 
     def read_instance(self, instance_path: str, instance_name: str) -> None:
         self.instance_name = instance_name.split('.', 1)[0]
-        cm_path = os.path.join(instance_path, 'CM_' + instance_name)
-        aircrafts_path = os.path.join(instance_path, 'aircrafts_' + instance_name)
+        program_directory = os.path.dirname(__file__)
+        cm_path = os.path.join(program_directory, instance_path, 'CM_' + instance_name)
+        aircrafts_path = os.path.join(program_directory, instance_path, 'aircrafts_' + instance_name)
 
         self.instance = np.loadtxt(cm_path), pd.read_csv(aircrafts_path, delimiter=' ', header=None)
 
@@ -51,3 +53,6 @@ class QATM(Problem):
 
         hamiltonian = onehot_hamiltonian + conflict_hamiltonian
         return hamiltonian.simplify()
+
+    def get_atos_hamiltonian(self):
+        return ham_from_qiskit_to_atos(self.get_qiskit_hamiltonian())

@@ -4,6 +4,7 @@ import os
 from qiskit.quantum_info import SparsePauliOp
 from jssp.qiskit_scheduler import get_jss_hamiltonian
 from templates import Problem
+from utils import ham_from_qiskit_to_atos
 
 class JSSP(Problem):
     """ Ckass for Job Shop Shedueling Problem """
@@ -39,9 +40,6 @@ class JSSP(Problem):
         self.opt = opt
         self._set_path()
 
-    def set_instance(self, instance: any, instance_name: str | None = None):
-        return super().set_instance(instance, instance_name)
-
     def _set_path(self) -> None:
         self.path = f'{self.name}/{self.instance_name}@{self.max_time}@{self.opt}@{self.onehot}'
 
@@ -53,6 +51,10 @@ class JSSP(Problem):
             return self.h_o
         else:
             return self.h_d
+        
+
+    def get_atos_hamiltonian(self):
+        return ham_from_qiskit_to_atos(self.get_qiskit_hamiltonian())
 
     def read_instance(self, path: str):
         """ Sth """
