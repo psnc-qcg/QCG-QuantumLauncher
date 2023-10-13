@@ -31,10 +31,9 @@ class EC(Problem):
                                                    instance_path)
                 self.instance_name = instance_name.split('.')[0]
         self.onehot = onehot
-        self._set_path()
 
-    def _set_path(self) -> None:
-        self.path = f'{self.name}/{self.instance_name}@{self.onehot}'
+    def _get_path(self) -> str:
+        return f'{self.name}/{self.instance_name}@{self.onehot}'
 
     def read_instance(self, instance_name: str, instance_path: str):
         path = os.path.join(instance_path, instance_name)

@@ -16,10 +16,9 @@ class QATM(Problem):
         self.onehot = onehot
 
         self.instance_name = instance_name.split('.')[0]
-        self._set_path()
 
-    def _set_path(self) -> None:
-        self.path = f'{self.name}/{self.instance_name}'
+    def _get_path(self) -> str:
+        return f'{self.name}/{self.instance_name}'
 
     def read_instance(self, instance_path: str, instance_name: str) -> None:
         self.instance_name = instance_name.split('.', 1)[0]

@@ -12,14 +12,14 @@ class QAOA2(Algorithm):
     """ Algorithm class with QAOA """
 
     def __init__(self, p: int = 1, aux=None):
+        super().__init__()
         self.name = 'qaoa'
         self.aux = aux
         self.p: int = p
         self.parameters = ['p']
-        self._set_path()
 
-    def _set_path(self) -> None:
-        self.path = f'{self.name}@{self.p}'
+    def _get_path(self) -> str:
+        return f'{self.name}@{self.p}'
 
     def run(self, problem: Problem, backend: AtosBackend) -> dict:
 

@@ -11,7 +11,6 @@ class MaxCut(Problem):
     def __init__(self) -> None:
         super().__init__()
         self.name = 'maxcut'
-        self._set_path()
 
     def set_instance(self, instance:nx.Graph | None = None, instance_name:str | None=None) -> None:
         super().set_instance(instance, instance_name)
@@ -19,11 +18,12 @@ class MaxCut(Problem):
             match instance_name:
                 case 'default':
                     self.instance = nx.Graph()
-                    edge_list = [(0, 1), (0, 2), (0, 5), (1, 3), (1, 4), (2, 4), (2, 5), (3, 4), (3, 5)]
+                    edge_list = [(0, 1), (0, 2), (0, 5), (1, 3), (1, 4),
+                                 (2, 4), (2, 5), (3, 4), (3, 5)]
                     self.instance.add_edges_from(edge_list)
 
-    def _set_path(self) -> None:
-        self.path = f'{self.name}/{self.instance_name}'
+    def _get_path(self) -> str:
+        return f'{self.name}/{self.instance_name}'
 
     def get_qubo_fn(self, Q):
         def qubo_fn(bin_vec):

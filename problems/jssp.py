@@ -38,10 +38,9 @@ class JSSP(Problem):
         opt = 'optimization' if optimization_problem else 'decision'
         self.variant = opt
         self.opt = opt
-        self._set_path()
 
-    def _set_path(self) -> None:
-        self.path = f'{self.name}/{self.instance_name}@{self.max_time}@{self.opt}@{self.onehot}'
+    def _get_path(self) -> str:
+        return f'{self.name}/{self.instance_name}@{self.max_time}@{self.opt}@{self.onehot}'
 
     def get_qiskit_hamiltonian(self, optimization_problem: bool = None) -> SparsePauliOp:
         if optimization_problem is None:

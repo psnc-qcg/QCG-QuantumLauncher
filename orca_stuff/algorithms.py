@@ -12,10 +12,9 @@ class BinaryBosonic(Algorithm):
     def __init__(self) -> None:
         super().__init__()
         self.bbs = None
-        self._set_path()
 
-    def _set_path(self) -> None:
-        self.path = 'BinaryBosonic'
+    def _get_path(self) -> str:
+        return 'BinaryBosonic'
 
     def run(self, problem: Problem, backend: OrcaBackend):
         qubo_fn_fact, Q = self.get_problem_data(problem)
