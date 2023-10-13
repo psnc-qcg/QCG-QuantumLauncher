@@ -34,12 +34,17 @@ class Problem(ABC):
     """ Abstract class for Problems """
 
     @abstractmethod
-    def __init__(self) -> None:
+    def __init__(self, instance:any = None,
+                instance_name:str|None=None, instance_path:str|None=None) -> None:
         self.variant:str = 'Optimization'
         self._path:str | None = None
         self.name:str = ''
-        self.instance_name:str = 'unnamed'
+        self.instance_name:str = 'unnamed' if instance_name is None else instance_name
         self.instance:any = None
+        if instance_path is not None:
+            self.read_instance(instance_path)
+        else:
+            self.set_instance(instance=instance, instance_name=instance_name)
 
     def set_instance(self, instance: any, instance_name: str | None = None):
         """ Sets an instance of problem """

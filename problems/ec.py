@@ -9,38 +9,36 @@ from utils import ham_from_qiskit_to_atos
 class EC(Problem):
     """ Class for exact cover problem """
 
-    def __init__(self, onehot: str, instance_name: str, instance_path: str = None) -> None:
-        super().__init__()
+    def __init__(self, onehot: str, instance:any = None,
+                 instance_name: str|None = None, instance_path: str = None) -> None:
+        super().__init__(instance=instance, instance_name=instance_name,
+                         instance_path=instance_path)
         self.name = 'ec'
-        self.onehot = onehot
-        match instance_name:
-            case 'micro':
-                self.instance = [{1, 2},
-                                 {1}]
-                self.instance_name = instance_name
-            case 'toy':
-                self.instance = [{1, 4, 7},
-                                 {1, 4},
-                                 {4, 5, 7},
-                                 {3, 5, 6},
-                                 {2, 3, 6, 7},
-                                 {2, 7}]
-                self.instance_name = instance_name
-            case _:
-                self.instance = self.read_instance(instance_name,
-                                                   instance_path)
-                self.instance_name = instance_name.split('.')[0]
         self.onehot = onehot
 
     def _get_path(self) -> str:
         return f'{self.name}/{self.instance_name}@{self.onehot}'
 
-    def read_instance(self, instance_name: str, instance_path: str):
-        path = os.path.join(instance_path, instance_name)
-        with open(path, 'r', encoding='utf-8') as file:
+    def set_instance(self, instance: any, instance_name: str | None = None):
+        super().set_instance(instance, instance_name)
+        if instance is None:
+            match instance_name:
+                case 'micro':
+                    self.instance = [{1, 2},
+                                    {1}]
+                case 'toy':
+                    self.instance = [{1, 4, 7},
+                                    {1, 4},
+                                    {4, 5, 7},
+                                    {3, 5, 6},
+                                    {2, 3, 6, 7},
+                                    {2, 7}]
+
+
+    def read_instance(self, instance_path: str):
+        with open(instance_path, 'r', encoding='utf-8') as file:
             read_file = file.read()
-        instance = ast.literal_eval(read_file)
-        return instance
+        self.instance = ast.literal_eval(read_file)
 
     def get_qiskit_hamiltonian(self) -> SparsePauliOp:
         """ generating hamiltonian"""
