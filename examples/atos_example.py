@@ -1,7 +1,7 @@
 ''' Quantum Launcher for Atos '''
 from atos_stuff.algorithms import QAOA2
 from atos_stuff.launcher import AtosLauncher
-from problems import MaxCut, EC
+from problems import EC
 
 
 def main():
