@@ -38,8 +38,8 @@ def commutator(op_a: SparsePauliOp, op_b: SparsePauliOp) -> SparsePauliOp:
 class QAOA2(QiskitHamiltonianAlgorithm):
     """ Algorithm class with QAOA """
 
-    def __init__(self, p: int = 1, aux=None):
-        super().__init__()
+    def __init__(self, p: int = 1, aux=None, **alg_kwargs):
+        super().__init__(**alg_kwargs)
         self.name = 'qaoa'
         self.aux = aux
         self.p: int = p
@@ -59,7 +59,7 @@ class QAOA2(QiskitHamiltonianAlgorithm):
         sampler = backend.get_primitive_strategy().get_sampler()
         optimizer = backend.get_primitive_strategy().get_optimizer()
 
-        qaoa = QAOA(sampler, optimizer, reps=self.p, callback=qaoa_callback)
+        qaoa = QAOA(sampler, optimizer, reps=self.p, callback=qaoa_callback, **self.alg_kwargs)
         qaoa_result = qaoa.compute_minimum_eigenvalue(hamiltonian, self.aux)
         depth = qaoa.ansatz.decompose(reps=10).depth()
         if 'cx' in qaoa.ansatz.decompose(reps=10).count_ops():

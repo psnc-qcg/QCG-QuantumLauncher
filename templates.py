@@ -94,10 +94,11 @@ class Algorithm(ABC):
     """ Abstract class for Algorithms"""
 
     @abstractmethod
-    def __init__(self) -> None:
+    def __init__(self, **alg_kwargs) -> None:
         self.name: str = ''
         self._path: str | None = None
         self.parameters:list = []
+        self.alg_kwargs = alg_kwargs
 
     @property
     def path(self) -> str:
