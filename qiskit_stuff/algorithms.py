@@ -7,6 +7,7 @@ from qiskit.circuit.library import PauliEvolutionGate
 from qiskit.opflow import H
 from qiskit.quantum_info import SparsePauliOp
 from qiskit_algorithms import QAOA
+from qiskit_algorithms.optimizers import SciPyOptimizer
 
 from qiskit_stuff.backend import QiskitBackend
 from templates import Problem, Algorithm
@@ -44,9 +45,16 @@ class QAOA2(QiskitHamiltonianAlgorithm):
         self.aux = aux
         self.p: int = p
         self.parameters = ['p']
+        self.optimizer = None
 
     def _get_path(self) -> str:
         return f'{self.name}@{self.p}'
+
+    def set_optimizer(self, optimizer: SciPyOptimizer) -> None:
+        self.optimizer = optimizer
+
+    def get_optimizer(self) -> SciPyOptimizer:
+        return self.optimizer
 
     def run(self, problem: Problem, backend: QiskitBackend) -> dict:
         """ Runs the QAOA algorithm """
@@ -57,9 +65,10 @@ class QAOA2(QiskitHamiltonianAlgorithm):
             energies.append(mean)
 
         sampler = backend.get_primitive_strategy().get_sampler()
-        optimizer = backend.get_primitive_strategy().get_optimizer()
+        if self.optimizer is None:
+            self.optimizer = backend.get_primitive_strategy().get_optimizer()
 
-        qaoa = QAOA(sampler, optimizer, reps=self.p, callback=qaoa_callback, **self.alg_kwargs)
+        qaoa = QAOA(sampler, self.optimizer, reps=self.p, callback=qaoa_callback, **self.alg_kwargs)
         qaoa_result = qaoa.compute_minimum_eigenvalue(hamiltonian, self.aux)
         depth = qaoa.ansatz.decompose(reps=10).depth()
         if 'cx' in qaoa.ansatz.decompose(reps=10).count_ops():
