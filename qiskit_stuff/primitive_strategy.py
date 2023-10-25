@@ -15,15 +15,18 @@ class PrimitiveStrategy(ABC):
     def __init__(self) -> None:
         super().__init__()
 
-    def get_estimator(self) -> Estimator:
+    @property
+    def estimator(self) -> Estimator:
         ''' returns primitive strategy's estimator '''
         return None
 
-    def get_sampler(self) -> Sampler:
+    @property
+    def sampler(self) -> Sampler:
         ''' returns primitive strategy's sampler '''
         return None
 
-    def get_optimizer(self):
+    @property
+    def optimizer(self):
         ''' returns primitive strategy's optimizer '''
         return SPSA()
 
@@ -34,13 +37,16 @@ class LocalPrimitiveStrategy(PrimitiveStrategy):
     def __init__(self) -> None:
         pass
 
-    def get_estimator(self) -> Estimator:
+    @property
+    def estimator(self) -> Estimator:
         return LocalEstimator()
 
-    def get_sampler(self) -> Sampler:
+    @property
+    def sampler(self) -> Sampler:
         return LocalSampler()
 
-    def get_optimizer(self):
+    @property
+    def optimizer(self):
         return COBYLA()
 
 
@@ -50,10 +56,12 @@ class RemotePrimitiveStrategy(PrimitiveStrategy):
     def __init__(self, session: Session) -> None:
         self.session = session
 
-    def get_estimator(self) -> Estimator:
+    @property
+    def estimator(self) -> Estimator:
         return Estimator(session=self.session)
 
-    def get_sampler(self) -> Sampler:
+    @property
+    def sampler(self) -> Sampler:
         return Sampler(session=self.session)
 
 

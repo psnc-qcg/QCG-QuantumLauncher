@@ -68,6 +68,10 @@ def test_qatm():
     try:
         pr = QATM('exact', instance_name='RCP_3.txt')
         pr.read_instance(instance_name='RCP_3.txt', instance_path='qatm/')
+    except Exception as ex:
+        print('\033[91mSomething with QATM problem (most likely lack of data file)\033[0m')
+        print(ex)
+    try:
         qaoa = QAOA2(p=3)
         backend = QiskitBackend('local_simulator')
         launcher = QiskitLauncher(pr, qaoa, backend)

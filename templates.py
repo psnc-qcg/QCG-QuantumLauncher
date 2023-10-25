@@ -11,7 +11,7 @@ class Backend(ABC):
     @abstractmethod
     def __init__(self, name: str, parameters: list = None) -> None:
         self.name:str = name
-        self._path:str | None = None
+        self.path:str | None = None
         self.parameters = parameters if parameters is not None else []
 
     @property
@@ -37,7 +37,7 @@ class Problem(ABC):
     def __init__(self, instance:any = None,
                 instance_name:str|None=None, instance_path:str|None=None) -> None:
         self.variant:str = 'Optimization'
-        self._path:str | None = None
+        self.path:str | None = None
         self.name:str = ''
         self.instance_name:str = 'unnamed' if instance_name is None else instance_name
         self.instance:any = None
@@ -96,7 +96,7 @@ class Algorithm(ABC):
     @abstractmethod
     def __init__(self, **alg_kwargs) -> None:
         self.name: str = ''
-        self._path: str | None = None
+        self.path: str | None = None
         self.parameters:list = []
         self.alg_kwargs = alg_kwargs
 

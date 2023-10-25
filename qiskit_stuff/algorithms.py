@@ -49,12 +49,14 @@ class QAOA2(QiskitHamiltonianAlgorithm):
 
     def _get_path(self) -> str:
         return f'{self.name}@{self.p}'
+    
+    @property
+    def optimizer(self) -> SciPyOptimizer:
+        return self._optimizer
 
-    def set_optimizer(self, optimizer: SciPyOptimizer) -> None:
-        self.optimizer = optimizer
-
-    def get_optimizer(self) -> SciPyOptimizer:
-        return self.optimizer
+    @optimizer.setter
+    def optimizer(self, optimizer: SciPyOptimizer) -> None:
+        self._optimizer = optimizer
 
     def run(self, problem: Problem, backend: QiskitBackend) -> dict:
         """ Runs the QAOA algorithm """
@@ -64,9 +66,9 @@ class QAOA2(QiskitHamiltonianAlgorithm):
         def qaoa_callback(evaluation_count, params, mean, std):
             energies.append(mean)
 
-        sampler = backend.get_primitive_strategy().get_sampler()
+        sampler = backend.get_primitive_strategy().sampler
         if self.optimizer is None:
-            self.optimizer = backend.get_primitive_strategy().get_optimizer()
+            self.optimizer = backend.get_primitive_strategy().optimizer
 
         qaoa = QAOA(sampler, self.optimizer, reps=self.p, callback=qaoa_callback, **self.alg_kwargs)
         qaoa_result = qaoa.compute_minimum_eigenvalue(hamiltonian, self.aux)
@@ -114,8 +116,8 @@ class FALQON(QiskitHamiltonianAlgorithm):
         circuit_depths = []
         cxs = []
 
-        estimator = backend.get_primitive_strategy().get_estimator()
-        sampler = backend.get_primitive_strategy().get_sampler()
+        estimator = backend.get_primitive_strategy().estimator
+        sampler = backend.get_primitive_strategy().sampler
 
         best_sample, last_sample = self.falqon_subroutine(estimator,
                                                           sampler, energies, betas, circuit_depths, cxs)
