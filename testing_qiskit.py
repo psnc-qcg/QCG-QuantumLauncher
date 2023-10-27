@@ -9,6 +9,7 @@ except Exception as ex:
 
 TESTING_DIR = 'testing'
 
+
 def test_ec():
     """ Testing function for Exact Cover """
     try:
@@ -17,7 +18,7 @@ def test_ec():
         qaoa = QAOA2(p=3)
         backend = QiskitBackend('local_simulator')
         launcher = QuantumLauncher(pr, qaoa, backend)
-        
+
         launcher.set_dir(TESTING_DIR)
         inform = launcher.process('', save_to_file=True)
         if inform is None:
@@ -27,6 +28,7 @@ def test_ec():
         print('\033[91mSomething with EC problem/QAOA went wrong\033[0m')
         print(ex)
 
+
 def test_jssp():
     """ Testing function for Job Shop Shedueling Problem """
     try:
@@ -34,7 +36,7 @@ def test_jssp():
         qaoa = QAOA2(p=3)
         backend = QiskitBackend('local_simulator')
         launcher = QuantumLauncher(pr, qaoa, backend)
-        
+
         launcher.set_dir(TESTING_DIR)
         inform = launcher.process('', save_to_file=True)
         if inform is None:
@@ -44,6 +46,7 @@ def test_jssp():
         print('\033[91mSomething with JSSP problem/QAOA went wrong\033[0m')
         print(ex)
 
+
 def test_maxcut():
     """ Testing function for Max Cut """
     try:
@@ -52,7 +55,7 @@ def test_maxcut():
         qaoa = QAOA2(p=3)
         backend = QiskitBackend('local_simulator')
         launcher = QuantumLauncher(pr, qaoa, backend)
-        
+
         launcher.set_dir(TESTING_DIR)
         inform = launcher.process('', save_to_file=True)
         if inform is None:
@@ -61,6 +64,7 @@ def test_maxcut():
     except Exception as ex:
         print('\033[91mSomething with MaxCut problem/QAOA went wrong\033[0m')
         print(ex)
+
 
 def test_qatm():
     """ Testing function for QATM """
@@ -74,7 +78,7 @@ def test_qatm():
         qaoa = QAOA2(p=3)
         backend = QiskitBackend('local_simulator')
         launcher = QuantumLauncher(pr, qaoa, backend)
-        
+
         launcher.set_dir(TESTING_DIR)
         inform = launcher.process('', save_to_file=True)
         if inform is None:
@@ -84,6 +88,7 @@ def test_qatm():
         print('\033[91mSomething with QATM problem/QAOA went wrong\033[0m')
         print(ex)
 
+
 def test_falqon():
     """ Testing function for Falqon, using Exact Cover """
     try:
@@ -91,7 +96,7 @@ def test_falqon():
         falqon = FALQON()
         backend = QiskitBackend('local_simulator')
         launcher = QuantumLauncher(pr, falqon, backend)
-        
+
         launcher.set_dir(TESTING_DIR)
         inform = launcher.process('', save_to_file=True)
         if inform is None:
@@ -101,6 +106,7 @@ def test_falqon():
         print('\033[91mSomething with Falqon went wrong\033[0m')
         print(ex)
 
+
 def main():
     """ Main """
     test_ec()
@@ -109,6 +115,7 @@ def main():
     test_qatm()
     test_falqon()
     print(f'\033[94mAll Data saved to {TESTING_DIR} folder\033[0m')
+
 
 if __name__ == '__main__':
     main()

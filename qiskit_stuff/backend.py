@@ -6,8 +6,10 @@ from qiskit_stuff.primitive_strategy import LocalPrimitiveStrategy, \
 from templates import Backend
 from .qiskit_template import QiskitStuff
 
+
 class QiskitBackend(Backend, QiskitStuff):
     """ local backend """
+
     def __init__(self, name: str, session: Session = None) -> None:
         super().__init__(name)
         self.session = session

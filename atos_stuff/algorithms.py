@@ -5,8 +5,9 @@ from qat.qpus import get_default_qpu
 from qat.vsolve.ansatz import AnsatzFactory
 
 from templates import Problem, Algorithm
-from .backend import AtosBackend
 from .atos_templates import AtosStuff
+from .backend import AtosBackend
+
 
 class QAOA2(Algorithm, AtosStuff):
     """ Algorithm class with QAOA """

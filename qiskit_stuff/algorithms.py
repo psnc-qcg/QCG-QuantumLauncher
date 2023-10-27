@@ -9,9 +9,9 @@ from qiskit.quantum_info import SparsePauliOp
 from qiskit_algorithms import QAOA
 from qiskit_algorithms.optimizers import SciPyOptimizer
 
+from templates import Problem, Algorithm
 from .backend import QiskitBackend
 from .qiskit_template import QiskitStuff
-from templates import Problem, Algorithm
 
 
 class QiskitHamiltonianAlgorithm(Algorithm, QiskitStuff):
@@ -50,7 +50,7 @@ class QAOA2(QiskitHamiltonianAlgorithm):
 
     def _get_path(self) -> str:
         return f'{self.name}@{self.p}'
-    
+
     @property
     def optimizer(self) -> SciPyOptimizer:
         return self._optimizer

@@ -1,17 +1,19 @@
 """ Max Cut Problem """
 import networkx as nx
+
 from templates import Problem
+
 
 class MaxCut(Problem):
     """ MacCut for Orca """
 
-    def __init__(self, instance:nx.Graph|None = None, instance_name:str | None = None,
-                 instance_path:str|None=None) -> None:
+    def __init__(self, instance: nx.Graph | None = None, instance_name: str | None = None,
+                 instance_path: str | None = None) -> None:
         super().__init__(instance=instance, instance_name=instance_name,
                          instance_path=instance_path)
         self.name = 'maxcut'
 
-    def set_instance(self, instance:None = None, instance_name:str | None=None) -> None:
+    def set_instance(self, instance: None = None, instance_name: str | None = None) -> None:
         super().set_instance(instance, instance_name)
         if instance is None:
             match instance_name:

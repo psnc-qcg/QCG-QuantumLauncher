@@ -1,9 +1,11 @@
-from qiskit.quantum_info import SparsePauliOp
-#from .launcher import QiskitProblem
+# from .launcher import QiskitProblem
 import hampy
 import numpy as np
+from qiskit.quantum_info import SparsePauliOp
+
 import problems
 from .qiskit_template import QiskitStuff
+
 
 class ECQiskit(problems.EC, QiskitStuff):
     def get_qiskit_hamiltonian(self) -> SparsePauliOp:
@@ -29,6 +31,7 @@ class ECQiskit(problems.EC, QiskitStuff):
                 hamiltonian += part
         return hamiltonian.simplify()
 
+
 class JSSPQiskit(problems.JSSP, QiskitStuff):
     def get_qiskit_hamiltonian(self, optimization_problem: bool = None) -> SparsePauliOp:
         if optimization_problem is None:
@@ -38,7 +41,8 @@ class JSSPQiskit(problems.JSSP, QiskitStuff):
             return self.h_o
         else:
             return self.h_d
- 
+
+
 class MaxCutQiskit(problems.MaxCut, QiskitStuff):
     def get_qiskit_hamiltonian(self):
         ham = None
@@ -49,6 +53,7 @@ class MaxCutQiskit(problems.MaxCut, QiskitStuff):
             else:
                 ham += hampy.Ham_not(hampy.H_one_in_n(edge, n))
         return ham.simplify()
+
 
 class QATMQiskit(problems.QATM, QiskitStuff):
     def get_qiskit_hamiltonian(self) -> SparsePauliOp:

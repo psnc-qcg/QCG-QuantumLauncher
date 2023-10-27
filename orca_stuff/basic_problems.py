@@ -1,7 +1,9 @@
 """ Basic problems for Orca """
 import numpy as np
-from .orca_templates import OrcaStuff
+
 from problems import MaxCut
+from .orca_templates import OrcaStuff
+
 
 class MaxCutOrca(MaxCut, OrcaStuff):
     def get_qubo_fn(self, Q):

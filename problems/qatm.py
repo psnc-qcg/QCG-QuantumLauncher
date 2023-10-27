@@ -1,14 +1,17 @@
 """ QATM Problem """
 import os
+
 import numpy as np
 import pandas as pd
+
 from templates import Problem
+
 
 class QATM(Problem):
     """ class for QATM problem """
 
-    def __init__(self, onehot: str, instance:any = None, instance_name:str | None = None,
-                 instance_path:str|None=None) -> None:
+    def __init__(self, onehot: str, instance: any = None, instance_name: str | None = None,
+                 instance_path: str | None = None) -> None:
         super().__init__(instance=instance, instance_name=instance_name,
                          instance_path=instance_path)
         self.name = 'qatm'

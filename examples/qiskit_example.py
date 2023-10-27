@@ -1,8 +1,8 @@
 ''' Example of how Quantum Launcher works'''
-from templates import QuantumLauncher
 from problems import JSSP
 from qiskit_stuff.algorithms import FALQON
 from qiskit_stuff.backend import QiskitBackend
+from templates import QuantumLauncher
 
 
 def main():

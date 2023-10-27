@@ -2,6 +2,7 @@
 import pickle
 from abc import ABC, abstractmethod
 from os import makedirs, path
+
 from qiskit.quantum_info import SparsePauliOp
 
 
@@ -10,8 +11,8 @@ class Backend(ABC):
 
     @abstractmethod
     def __init__(self, name: str, parameters: list = None) -> None:
-        self.name:str = name
-        self.path:str | None = None
+        self.name: str = name
+        self.path: str | None = None
         self.parameters = parameters if parameters is not None else []
 
     @property
@@ -22,23 +23,24 @@ class Backend(ABC):
         return self._get_path()
 
     @path.setter
-    def path(self, new_path:str) -> None:
+    def path(self, new_path: str) -> None:
         self._path = new_path
 
     def _get_path(self) -> str:
         return f'{self.name}'
 
+
 class Problem(ABC):
     """ Abstract class for Problems """
 
     @abstractmethod
-    def __init__(self, instance:any = None,
-                instance_name:str|None=None, instance_path:str|None=None) -> None:
-        self.variant:str = 'Optimization'
-        self.path:str | None = None
-        self.name:str = ''
-        self.instance_name:str = 'unnamed' if instance_name is None else instance_name
-        self.instance:any = None
+    def __init__(self, instance: any = None,
+                 instance_name: str | None = None, instance_path: str | None = None) -> None:
+        self.variant: str = 'Optimization'
+        self.path: str | None = None
+        self.name: str = ''
+        self.instance_name: str = 'unnamed' if instance_name is None else instance_name
+        self.instance: any = None
         if instance_path is not None:
             self.read_instance(instance_path)
         else:
@@ -50,7 +52,7 @@ class Problem(ABC):
             self.instance_name = instance_name
         self.instance = instance
 
-    def read_instance(self, instance_path:str) -> None:
+    def read_instance(self, instance_path: str) -> None:
         """ Reads an instance of problem from file """
         self.instance_name = instance_path.rsplit('/', 1)[1].split('.', 1)[0]
         with open(instance_path, 'rb') as file:
@@ -64,14 +66,13 @@ class Problem(ABC):
         return self._get_path()
 
     @path.setter
-    def path(self, new_path:str|None):
+    def path(self, new_path: str | None):
         self._path = new_path
 
     @abstractmethod
     def _get_path(self) -> str:
         """ return's common path """
         return f'{self.name}/{self.instance_name}'
-
 
     def read_result(self, exp, log_path):
         """ pickling files """
@@ -82,11 +83,13 @@ class Problem(ABC):
 
     def get_qiskit_hamiltonian(self) -> SparsePauliOp:
         """ returns qiskit hamiltonian """
-        raise NotImplementedError(f"Class {self.__class__.__name__} doesn't have implemented hamiltonian for qiskit yet")
+        raise NotImplementedError(
+            f"Class {self.__class__.__name__} doesn't have implemented hamiltonian for qiskit yet")
 
     def get_atos_hamiltonian(self):
         """ returns atos hamiltonian """
         raise NotImplementedError(f"Class {self.__class__.__name__} doesn't have implemented hamiltonian for atos yet")
+
 
 class Algorithm(ABC):
     """ Abstract class for Algorithms"""
@@ -95,7 +98,7 @@ class Algorithm(ABC):
     def __init__(self, **alg_kwargs) -> None:
         self.name: str = ''
         self.path: str | None = None
-        self.parameters:list = []
+        self.parameters: list = []
         self.alg_kwargs = alg_kwargs
 
     @property
@@ -106,7 +109,7 @@ class Algorithm(ABC):
         return self._get_path()
 
     @path.setter
-    def path(self, new_path:str|None):
+    def path(self, new_path: str | None):
         self._path = new_path
 
     @abstractmethod
@@ -120,6 +123,7 @@ class Algorithm(ABC):
     @abstractmethod
     def check_problem(self, problem: Problem) -> bool:
         """ Checks whether a problem implements a method required for the algorithm"""
+
 
 class QuantumLauncher(ABC):
     """ Template for Quantum Launchers """

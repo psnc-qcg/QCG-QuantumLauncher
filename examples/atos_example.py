@@ -1,7 +1,7 @@
 ''' Quantum Launcher for Atos '''
-from templates import QuantumLauncher
 import atos_stuff
 from problems import EC
+from templates import QuantumLauncher
 
 
 def main():
