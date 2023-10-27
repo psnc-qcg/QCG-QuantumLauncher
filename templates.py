@@ -3,8 +3,6 @@ import pickle
 from abc import ABC, abstractmethod
 from os import makedirs, path
 
-from qiskit.quantum_info import SparsePauliOp
-
 
 class Backend(ABC):
     """ Abstract class for backends """
@@ -46,7 +44,7 @@ class Problem(ABC):
         else:
             self.set_instance(instance=instance, instance_name=instance_name)
 
-    def set_instance(self, instance: any, instance_name: str | None = None):
+    def set_instance(self, instance: any, instance_name: str | None = None) -> None:
         """ Sets an instance of problem """
         if instance_name is not None:
             self.instance_name = instance_name
@@ -66,7 +64,7 @@ class Problem(ABC):
         return self._get_path()
 
     @path.setter
-    def path(self, new_path: str | None):
+    def path(self, new_path: str | None) -> None:
         self._path = new_path
 
     @abstractmethod
@@ -80,15 +78,6 @@ class Problem(ABC):
         with open(log_path, 'rb') as file:
             res = pickle.load(file)
         return res
-
-    def get_qiskit_hamiltonian(self) -> SparsePauliOp:
-        """ returns qiskit hamiltonian """
-        raise NotImplementedError(
-            f"Class {self.__class__.__name__} doesn't have implemented hamiltonian for qiskit yet")
-
-    def get_atos_hamiltonian(self):
-        """ returns atos hamiltonian """
-        raise NotImplementedError(f"Class {self.__class__.__name__} doesn't have implemented hamiltonian for atos yet")
 
 
 class Algorithm(ABC):
@@ -109,7 +98,7 @@ class Algorithm(ABC):
         return self._get_path()
 
     @path.setter
-    def path(self, new_path: str | None):
+    def path(self, new_path: str | None) -> None:
         self._path = new_path
 
     @abstractmethod
@@ -119,10 +108,6 @@ class Algorithm(ABC):
     @abstractmethod
     def run(self, problem: Problem, backend: Backend):
         """ Runs an algorithm on a specific problem using a backend """
-
-    @abstractmethod
-    def check_problem(self, problem: Problem) -> bool:
-        """ Checks whether a problem implements a method required for the algorithm"""
 
 
 class QuantumLauncher(ABC):

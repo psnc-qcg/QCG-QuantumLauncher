@@ -25,7 +25,7 @@ class QAOA2(Algorithm, AtosStuff):
     def run(self, problem: Problem, backend: AtosBackend) -> dict:
 
         """ Runs the QAOA algorithm """
-        observable = self.get_problem_data(problem)
+        observable = problem.get_atos_hamiltonian()
 
         circuit = AnsatzFactory.qaoa_circuit(observable, self.p, strategy='default')
 
@@ -42,13 +42,3 @@ class QAOA2(Algorithm, AtosStuff):
         dict_results = {"optimization_result": optimization_result, "sample_result": sample_result}
 
         return dict_results
-
-    def check_problem(self, problem: Problem) -> bool:
-        """ Check if the problem implements get_hamiltonian method"""
-        return callable(getattr(problem, 'get_atos_hamiltonian', False))
-
-    def get_problem_data(self, problem: Problem):
-        if self.check_problem(problem):
-            return problem.get_atos_hamiltonian()
-        else:
-            raise NotImplementedError('The problem does not have atos hamiltonian getter implemented')

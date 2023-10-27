@@ -18,7 +18,7 @@ class BinaryBosonic(Algorithm, OrcaStuff):
         return 'BinaryBosonic'
 
     def run(self, problem: Problem, backend: OrcaBackend):
-        qubo_fn_fact, Q = self.get_problem_data(problem)
+        qubo_fn_fact, Q = problem.get_orca_qubo()
         self.bbs = BinaryBosonicSolver(6,
                                        qubo_fn_fact(Q)
                                        )
@@ -29,13 +29,3 @@ class BinaryBosonic(Algorithm, OrcaStuff):
         )
 
         return self.bbs.return_solution()
-
-    def check_problem(self, problem: Problem) -> bool:
-        """ Check if the problem implements get_hamiltonian method"""
-        return callable(getattr(problem, 'get_orca_qubo', False))
-
-    def get_problem_data(self, problem: Problem):
-        if self.check_problem(problem):
-            return problem.get_orca_qubo()
-        else:
-            raise NotImplementedError('The problem does not have orca qubo getter implemented')

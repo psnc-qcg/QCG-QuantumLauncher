@@ -21,16 +21,6 @@ class QiskitHamiltonianAlgorithm(Algorithm, QiskitStuff):
     def run(self, problem: Problem, backend: QiskitBackend):
         """ Runs the hamiltonian on current algorithm """
 
-    def check_problem(self, problem: Problem) -> bool:
-        """ Check if the problem implements get_qiskit_hamiltonian method"""
-        return callable(getattr(problem, 'get_qiskit_hamiltonian', False))
-
-    def get_problem_data(self, problem: Problem):
-        if self.check_problem(problem):
-            return problem.get_qiskit_hamiltonian()
-        else:
-            raise NotImplementedError('The problem does not have hamiltonian getter implemented')
-
 
 def commutator(op_a: SparsePauliOp, op_b: SparsePauliOp) -> SparsePauliOp:
     """ Commutator """
@@ -61,7 +51,7 @@ class QAOA2(QiskitHamiltonianAlgorithm):
 
     def run(self, problem: Problem, backend: QiskitBackend) -> dict:
         """ Runs the QAOA algorithm """
-        hamiltonian = self.get_problem_data(problem)
+        hamiltonian = problem.get_qiskit_hamiltonian()
         energies = []
 
         def qaoa_callback(evaluation_count, params, mean, std):
@@ -105,7 +95,7 @@ class FALQON(QiskitHamiltonianAlgorithm):
 
     def run(self, problem: Problem, backend: QiskitBackend):
         # TODO implement aux operator
-        hamiltonian = self.get_problem_data(problem)
+        hamiltonian = problem.get_qiskit_hamiltonian()
         self.cost_h = hamiltonian
         self.n_qubits = hamiltonian.num_qubits
         if self.driver_h is None:
