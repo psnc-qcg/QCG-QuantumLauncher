@@ -4,11 +4,11 @@ from qat.plugins import ScipyMinimizePlugin
 from qat.qpus import get_default_qpu
 from qat.vsolve.ansatz import AnsatzFactory
 
-from atos_stuff.backend import AtosBackend
 from templates import Problem, Algorithm
+from .backend import AtosBackend
+from .atos_templates import AtosStuff
 
-
-class QAOA2(Algorithm):
+class QAOA2(Algorithm, AtosStuff):
     """ Algorithm class with QAOA """
 
     def __init__(self, p: int = 1, aux=None):
