@@ -6,6 +6,3 @@ class AtosStuff:
     @property
     def SYSTEM_CLASS(self):
         return AtosStuff
-
-    def get_atos_hamiltonian(self):
-        return ham_from_qiskit_to_atos(self.get_qiskit_hamiltonian())
