@@ -4,11 +4,11 @@ from qiskit_ibm_runtime import Session
 from qiskit_stuff.primitive_strategy import LocalPrimitiveStrategy, \
     RemotePrimitiveStrategy, PrimitiveStrategy
 from templates import Backend
+from .qiskit_template import QiskitStuff
 
-
-class QiskitBackend(Backend):
+class QiskitBackend(Backend, QiskitStuff):
     """ local backend """
-
+    PROBLEM_CLASS = QiskitStuff
     def __init__(self, name: str, session: Session = None) -> None:
         super().__init__(name)
         self.session = session

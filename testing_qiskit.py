@@ -1,9 +1,8 @@
 """ File for testing all qiskit problems """
 try:
     from problems import EC, JSSP, MaxCut, QATM
-    from qiskit_stuff.algorithms import QAOA2, FALQON
-    from qiskit_stuff.backend import QiskitBackend
-    from qiskit_stuff.launcher import QiskitLauncher
+    from templates import QuantumLauncher
+    from qiskit_stuff import *
 except Exception as ex:
     print('\033[91mImport Error\033[0m')
     print(ex)
@@ -17,7 +16,7 @@ def test_ec():
         pr.set_instance(instance_name='toy', instance=None)
         qaoa = QAOA2(p=3)
         backend = QiskitBackend('local_simulator')
-        launcher = QiskitLauncher(pr, qaoa, backend)
+        launcher = QuantumLauncher(pr, qaoa, backend)
         
         launcher.set_dir(TESTING_DIR)
         inform = launcher.process('', save_to_file=True)
@@ -34,7 +33,7 @@ def test_jssp():
         pr = JSSP(3, 'exact', instance_name='toy', optimization_problem=True)
         qaoa = QAOA2(p=3)
         backend = QiskitBackend('local_simulator')
-        launcher = QiskitLauncher(pr, qaoa, backend)
+        launcher = QuantumLauncher(pr, qaoa, backend)
         
         launcher.set_dir(TESTING_DIR)
         inform = launcher.process('', save_to_file=True)
@@ -52,7 +51,7 @@ def test_maxcut():
         pr.set_instance(instance_name='default')
         qaoa = QAOA2(p=3)
         backend = QiskitBackend('local_simulator')
-        launcher = QiskitLauncher(pr, qaoa, backend)
+        launcher = QuantumLauncher(pr, qaoa, backend)
         
         launcher.set_dir(TESTING_DIR)
         inform = launcher.process('', save_to_file=True)
@@ -74,7 +73,7 @@ def test_qatm():
     try:
         qaoa = QAOA2(p=3)
         backend = QiskitBackend('local_simulator')
-        launcher = QiskitLauncher(pr, qaoa, backend)
+        launcher = QuantumLauncher(pr, qaoa, backend)
         
         launcher.set_dir(TESTING_DIR)
         inform = launcher.process('', save_to_file=True)
@@ -91,7 +90,7 @@ def test_falqon():
         pr = EC('exact', instance_name='toy')
         falqon = FALQON()
         backend = QiskitBackend('local_simulator')
-        launcher = QiskitLauncher(pr, falqon, backend)
+        launcher = QuantumLauncher(pr, falqon, backend)
         
         launcher.set_dir(TESTING_DIR)
         inform = launcher.process('', save_to_file=True)

@@ -28,8 +28,6 @@ class Backend(ABC):
     def _get_path(self) -> str:
         return f'{self.name}'
 
-
-
 class Problem(ABC):
     """ Abstract class for Problems """
 
@@ -123,7 +121,6 @@ class Algorithm(ABC):
     def check_problem(self, problem: Problem) -> bool:
         """ Checks whether a problem implements a method required for the algorithm"""
 
-
 class QuantumLauncher(ABC):
     """ Template for Quantum Launchers """
 
@@ -147,9 +144,12 @@ class QuantumLauncher(ABC):
         """ Setting output file directory path """
         self.dir = dir_path
 
-    @abstractmethod
     def run(self) -> dict:
         """ Run's algorithm """
+        problem_class = list(set(self.problem.__class__.__subclasses__()) &
+                             set(self.backend.PROBLEM_CLASS.__subclasses__()))[0]
+        self.problem.__class__ = problem_class
+        return self.algorithm.run(self.problem, self.backend)
 
     def process(self, alg_options,
                 save_to_file: bool = False) -> dict:

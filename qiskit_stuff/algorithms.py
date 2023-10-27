@@ -9,11 +9,12 @@ from qiskit.quantum_info import SparsePauliOp
 from qiskit_algorithms import QAOA
 from qiskit_algorithms.optimizers import SciPyOptimizer
 
-from qiskit_stuff.backend import QiskitBackend
+from .backend import QiskitBackend
+from .qiskit_template import QiskitStuff
 from templates import Problem, Algorithm
 
 
-class QiskitHamiltonianAlgorithm(Algorithm):
+class QiskitHamiltonianAlgorithm(Algorithm, QiskitStuff):
     """ Abstract class for algorithms using Qiskit Hamiltonian (SparsePauliOp) objects """
 
     @abstractmethod

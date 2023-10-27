@@ -1,14 +1,15 @@
 ''' Quantum Launcher for Atos '''
-from atos_stuff.algorithms import QAOA2
-from atos_stuff.launcher import AtosLauncher
+from templates import QuantumLauncher
+import atos_stuff
 from problems import EC
 
 
 def main():
     ''' main '''
     pr = EC('exact', 'toy')
-    alg = QAOA2()
-    launcher = AtosLauncher(pr, alg)
+    alg = atos_stuff.QAOA2()
+    backend = atos_stuff.AtosBackend('local')
+    launcher = QuantumLauncher(pr, alg, backend)
     print(launcher.run())
 
 
