@@ -8,7 +8,6 @@ from .qiskit_template import QiskitStuff
 
 class QiskitBackend(Backend, QiskitStuff):
     """ local backend """
-    PROBLEM_CLASS = QiskitStuff
     def __init__(self, name: str, session: Session = None) -> None:
         super().__init__(name)
         self.session = session

@@ -147,7 +147,7 @@ class QuantumLauncher(ABC):
     def run(self) -> dict:
         """ Run's algorithm """
         problem_class = list(set(self.problem.__class__.__subclasses__()) &
-                             set(self.backend.PROBLEM_CLASS.__subclasses__()))[0]
+                             set(self.algorithm.SYSTEM_CLASS.__subclasses__()))[0]
         self.problem.__class__ = problem_class
         return self.algorithm.run(self.problem, self.backend)
 
