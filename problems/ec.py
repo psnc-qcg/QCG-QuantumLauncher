@@ -1,8 +1,6 @@
 """ Exact Cover Problem """
 import ast
-import os
 from templates import Problem
-from utils import ham_from_qiskit_to_atos
 
 class EC(Problem):
     """ Class for exact cover problem """
@@ -36,6 +34,3 @@ class EC(Problem):
         with open(instance_path, 'r', encoding='utf-8') as file:
             read_file = file.read()
         self.instance = ast.literal_eval(read_file)
-
-    def get_atos_hamiltonian(self):
-        return ham_from_qiskit_to_atos(self.get_qiskit_hamiltonian())

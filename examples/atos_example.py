@@ -6,7 +6,7 @@ from problems import EC
 
 def main():
     ''' main '''
-    pr = EC('exact', 'toy')
+    pr = EC('exact', instance_name='toy')
     alg = atos_stuff.QAOA2()
     backend = atos_stuff.AtosBackend('local')
     launcher = QuantumLauncher(pr, alg, backend)

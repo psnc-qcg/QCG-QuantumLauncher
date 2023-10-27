@@ -1,10 +1,7 @@
 """ Job Shop Sheduling Problem """
 from collections import defaultdict
-import os
-from qiskit.quantum_info import SparsePauliOp
 from jssp.qiskit_scheduler import get_jss_hamiltonian
 from templates import Problem
-from utils import ham_from_qiskit_to_atos
 
 class JSSP(Problem):
     """ Ckass for Job Shop Shedueling Problem """
@@ -33,19 +30,6 @@ class JSSP(Problem):
 
     def _get_path(self) -> str:
         return f'{self.name}/{self.instance_name}@{self.max_time}@{self.opt}@{self.onehot}'
-
-    def get_qiskit_hamiltonian(self, optimization_problem: bool = None) -> SparsePauliOp:
-        if optimization_problem is None:
-            optimization_problem = self.optimization_problem
-
-        if optimization_problem:
-            return self.h_o
-        else:
-            return self.h_d
-        
-
-    def get_atos_hamiltonian(self):
-        return ham_from_qiskit_to_atos(self.get_qiskit_hamiltonian())
 
     def set_instance(self, instance: any, instance_name: str | None = None):
         super().set_instance(instance, instance_name)
