@@ -70,7 +70,7 @@ def test_qatm():
     """ Testing function for QATM """
     try:
         pr = QATM('exact', instance_name='RCP_3.txt')
-        pr.read_instance(instance_name='RCP_3.txt', instance_path='qatm/')
+        pr.read_instance(instance_name='RCP_3.txt', instance_path='../data/qatm/')
     except Exception as ex:
         print('\033[91mSomething with QATM problem (most likely lack of data file)\033[0m')
         print(ex)
