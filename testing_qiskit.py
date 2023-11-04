@@ -17,10 +17,9 @@ def test_ec():
         pr.set_instance(instance_name='toy', instance=None)
         qaoa = QAOA2(p=3)
         backend = QiskitBackend('local_simulator')
-        launcher = QuantumLauncher(pr, qaoa, backend)
+        launcher = QuantumLauncher(pr, qaoa, backend, path=TESTING_DIR)
 
-        launcher.set_dir(TESTING_DIR)
-        inform = launcher.process('', save_to_file=True)
+        inform = launcher.process(save_pickle=True, save_txt=True)
         if inform is None:
             raise ValueError('The Output is empty')
         print('\033[92mExact Cover finished properly\033[0m')
@@ -35,10 +34,9 @@ def test_jssp():
         pr = JSSP(3, 'exact', instance_name='toy', optimization_problem=True)
         qaoa = QAOA2(p=3)
         backend = QiskitBackend('local_simulator')
-        launcher = QuantumLauncher(pr, qaoa, backend)
+        launcher = QuantumLauncher(pr, qaoa, backend, path=TESTING_DIR)
 
-        launcher.set_dir(TESTING_DIR)
-        inform = launcher.process('', save_to_file=True)
+        inform = launcher.process(save_pickle=True)
         if inform is None:
             raise ValueError('The Output is empty')
         print('\033[92mJSSP finished properly\033[0m')
@@ -54,10 +52,9 @@ def test_maxcut():
         pr.set_instance(instance_name='default')
         qaoa = QAOA2(p=3)
         backend = QiskitBackend('local_simulator')
-        launcher = QuantumLauncher(pr, qaoa, backend)
+        launcher = QuantumLauncher(pr, qaoa, backend, path=TESTING_DIR)
 
-        launcher.set_dir(TESTING_DIR)
-        inform = launcher.process('', save_to_file=True)
+        inform = launcher.process(save_pickle=True)
         if inform is None:
             raise ValueError('The Output is empty')
         print('\033[92mMaxCut finished properly\033[0m')
@@ -77,10 +74,9 @@ def test_qatm():
     try:
         qaoa = QAOA2(p=3)
         backend = QiskitBackend('local_simulator')
-        launcher = QuantumLauncher(pr, qaoa, backend)
+        launcher = QuantumLauncher(pr, qaoa, backend, path=TESTING_DIR)
 
-        launcher.set_dir(TESTING_DIR)
-        inform = launcher.process('', save_to_file=True)
+        inform = launcher.process(save_pickle=True)
         if inform is None:
             raise ValueError('The Output is empty')
         print('\033[92mQATM finished properly\033[0m')
@@ -95,10 +91,9 @@ def test_falqon():
         pr = EC('exact', instance_name='toy')
         falqon = FALQON()
         backend = QiskitBackend('local_simulator')
-        launcher = QuantumLauncher(pr, falqon, backend)
+        launcher = QuantumLauncher(pr, falqon, backend, path=TESTING_DIR)
 
-        launcher.set_dir(TESTING_DIR)
-        inform = launcher.process('', save_to_file=True)
+        inform = launcher.process(save_to_file=True)
         if inform is None:
             raise ValueError('The Output is empty')
         print('\033[92mFALQON finished properly\033[0m')

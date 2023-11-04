@@ -1,10 +1,67 @@
 """ File with templates """
 import pickle
 from abc import ABC, abstractmethod
-from os import makedirs, path
+import os
+
+class _FileSavingSupportClass:
+    def _save_results_pickle(self, results:dict, file_name:str) -> None:
+        with open(file_name, mode='wb') as file:
+            pickle.dump(results, file)
+
+    def _save_results_txt(self, results:dict, file_name:str) -> None:
+        with open(file_name, mode='w', encoding='utf-8') as file:
+            file.write(results.__str__())
+
+    def _save_results_csv(self, results:dict, file_name:str) -> None:
+        print('\033[93mSaving to csv has not been implemented yet\033[0m')
+
+    def _save_results_json(self, results:dict, file_name:str) -> None:
+        print('\033[93mSaving to json has not been implemented yet\033[0m')
+
+    def _save_results(self, path_pickle:str|None = None, path_txt:str|None = None,
+                      path_csv:str|None = None, path_json:str|None = None) -> None:
+        dir = os.path.dirname(self._res_path)
+        if not os.path.exists(dir):
+            os.makedirs(dir)
+        if path_pickle:
+            if path_pickle is True:
+                path_pickle = self._res_path + '.pkl'
+            self._save_results_pickle(self.res, path_pickle)
+        if path_txt:
+            if path_txt is True:
+                path_txt = self._res_path + '.txt'
+            self._save_results_txt(self.res, path_txt)
+        if path_csv:
+            if path_csv is True:
+                path_csv = self._res_path + '.csv'
+            self._save_results_csv(self.res, path_csv)
+        if path_json:
+            if path_json is True:
+                path_json = self._res_path + '.json'
+            self._save_results_json(self.res, path_json)
 
 
-class Backend(ABC):
+class _SupportClass(ABC):
+    @property
+    def setup(self) -> dict:
+        return f'setup for {self.__class__.__name__} has not been implemented yet'
+
+    @property
+    def path(self) -> str:
+        if self._path is not None:
+            return self._path
+        return self._get_path()
+
+    @path.setter
+    def path(self, new_path: str | None) -> None:
+        self._path = new_path
+
+    @abstractmethod
+    def _get_path():
+        pass
+
+
+class Backend(_SupportClass, ABC):
     """ Abstract class for backends """
 
     @abstractmethod
@@ -13,22 +70,11 @@ class Backend(ABC):
         self.path: str | None = None
         self.parameters = parameters if parameters is not None else []
 
-    @property
-    def path(self) -> str:
-        """ Backend's path """
-        if self._path is not None:
-            return self._path
-        return self._get_path()
-
-    @path.setter
-    def path(self, new_path: str) -> None:
-        self._path = new_path
-
-    def _get_path(self) -> str:
+    def _get_path(self):
         return f'{self.name}'
 
 
-class Problem(ABC):
+class Problem(_SupportClass, ABC):
     """ Abstract class for Problems """
 
     @abstractmethod
@@ -56,17 +102,6 @@ class Problem(ABC):
         with open(instance_path, 'rb') as file:
             self.instance = pickle.load(file)
 
-    @property
-    def path(self) -> str:
-        """ Problem's path """
-        if self._path is not None:
-            return self._path
-        return self._get_path()
-
-    @path.setter
-    def path(self, new_path: str | None) -> None:
-        self._path = new_path
-
     @abstractmethod
     def _get_path(self) -> str:
         """ return's common path """
@@ -80,7 +115,7 @@ class Problem(ABC):
         return res
 
 
-class Algorithm(ABC):
+class Algorithm(_SupportClass, ABC):
     """ Abstract class for Algorithms"""
 
     @abstractmethod
@@ -89,17 +124,6 @@ class Algorithm(ABC):
         self.path: str | None = None
         self.parameters: list = []
         self.alg_kwargs = alg_kwargs
-
-    @property
-    def path(self) -> str:
-        """ Algorithm's path """
-        if self._path is not None:
-            return self._path
-        return self._get_path()
-
-    @path.setter
-    def path(self, new_path: str | None) -> None:
-        self._path = new_path
 
     @abstractmethod
     def _get_path(self) -> str:
@@ -110,55 +134,54 @@ class Algorithm(ABC):
         """ Runs an algorithm on a specific problem using a backend """
 
 
-class QuantumLauncher(ABC):
+class QuantumLauncher(ABC, _FileSavingSupportClass):
     """ Template for Quantum Launchers """
 
-    def __init__(self, problem: Problem, algorithm: Algorithm, backend: Backend = None) -> None:
+    def __init__(self, problem: Problem, algorithm: Algorithm, backend: Backend = None,
+                 path:str = 'results/') -> None:
         self.problem: Problem = problem
         self.algorithm: Algorithm = algorithm
-        self.backend = backend
+        self.backend: Backend = backend
 
-        self.path = None
-        self.res = {}
-        self.dir = 'data/'
-        self.res_path = None
-        self.result_paths = []
+        self.path: str = path
+        self.res: dict = {}
+        self._res_path: str|None = None
 
-    @property
-    def get_path(self) -> str:
-        """ Outputs path of current output """
-        return self.path
-
-    def set_dir(self, dir_path: str) -> None:
-        """ Setting output file directory path """
-        self.dir = dir_path
-
-    def run(self) -> dict:
+    def _run(self) -> dict:
         """ Run's algorithm """
         problem_class = list(set(self.problem.__class__.__subclasses__()) &
                              set(self.algorithm.SYSTEM_CLASS.__subclasses__()))[0]
         self.problem.__class__ = problem_class
         return self.algorithm.run(self.problem, self.backend)
 
-    def process(self, alg_options,
-                save_to_file: bool = False) -> dict:
+    def process(self, save_to_file: bool = False,
+                save_pickle:str|bool = False, save_txt:str|bool = False,
+                save_csv:str|bool = False, save_json:str|bool = False) -> dict:
         """ Run's and process'es the data """
-        results = self.run()
+        results = self._run()
         energy = results['energy']
         variant = self.problem.variant
         results['variant'] = variant
-        results['alg_options'] = alg_options
         results['backend_name'] = self.backend.name
+
+        self.res['problem_setup'] = self.problem.setup
+        self.res['algorithm_setup'] = self.algorithm.setup
+        self.res['backend_setup'] = self.backend.setup
+        self.res['results'] = results
+
+        self._res_path = self.path + '/' + self.problem.path + '-' + \
+                        self.backend.path + '-' \
+                        + self.algorithm.path + '-' + str(energy)
+
         if save_to_file:
-            self.res_path = self.dir + '/' + self.problem.path + '-' + \
-                            self.backend.path + '-' \
-                            + self.algorithm.path + '-' + str(energy) + '.pkl'
-            self.result_paths.append(self.res_path)
-            self.dir = path.dirname(self.res_path)
-            if not path.exists(self.dir):
-                makedirs(self.dir)
-            with open(self.res_path, 'wb') as file:
+            print('\033[93msave_to_file will be removed soon, change into save_pickle\033[0m')
+            self.dir = os.path.dirname(self._res_path)
+            if not os.path.exists(self.dir):
+                os.makedirs(self.dir)
+            with open(self._res_path + '.pkl', 'wb') as file:
                 pickle.dump(results, file)
-        self.res = {}
-        self.res = results
-        return results
+
+        if save_pickle or save_txt or save_csv or save_json:
+            self._save_results(save_pickle, save_txt, save_csv, save_json)
+
+        return self.res
