@@ -87,3 +87,69 @@ class ECOrca(EC, OrcaStuff):
             Q[i][i] = -self.hr_dict[i]
 
         return self.qubo_fn_fact, Q
+
+
+class JSSPOrca(JSSP, OrcaStuff):
+    gamma = 1
+    lagrange_one_hot = 1
+    lagrange_precedence = 2
+    lagrange_share = 5
+
+
+    def calculate_instance_size(self):
+        # Calculate instance size for training
+        _, variables, _ = get_jss_bqm(self.jobs, self.max_time, self.config,
+                                                          lagrange_one_hot=self.lagrange_one_hot,
+                                                          lagrange_precedence=self.lagrange_precedence,
+                                                          lagrange_share=self.lagrange_share)
+        return len(variables)
+
+    def get_len_all_jobs(self):
+        result = 0
+        for job in self.jobs.values():
+            result += len(job)
+        return result
+
+    def one_hot_to_jobs(self, binary_vector):
+        actually_its_qubo, variables, model = get_jss_bqm(self.jobs, self.max_time, self.config,
+                                                          lagrange_one_hot=self.lagrange_one_hot,
+                                                          lagrange_precedence=self.lagrange_precedence,
+                                                          lagrange_share=self.lagrange_share)
+        result = [variables[i] for i in range(len(variables)) if binary_vector[i] == 1]
+        return result
+
+    def qubo_fn_fact(self, Q):
+        # define the QUBO cost function
+        def qubo_fn(bin_vec):
+            return np.dot(bin_vec, np.dot(Q, bin_vec)) + self.gamma * (np.sum(bin_vec) - self.get_len_all_jobs()) ** 2
+        return qubo_fn
+
+    def get_orca_qubo(self):
+        # Define the matrix Q used for QUBO
+        self.jobs = []
+        self.config = {}
+        self.config['parameters'] = {}
+        self.config['parameters']['job_shop_scheduler'] = {}
+        self.config['parameters']['job_shop_scheduler']['problem_version'] = "optimization"
+        a = get_jss_bqm(self.instance, self.max_time, self.config,
+                            lagrange_one_hot=self.lagrange_one_hot,
+                            lagrange_precedence=self.lagrange_precedence,
+                            lagrange_share=self.lagrange_share)
+        print(f'\n{a = }\n')
+        actually_its_qubo, variables, model, k = a
+        reverse_dict_map = {v: i for i, v in enumerate(variables)}
+
+        Q = np.zeros((self.instance_size, self.instance_size))
+        print(actually_its_qubo[2])
+
+        for (label_i, label_j), value in actually_its_qubo[1].items():
+            i = reverse_dict_map[label_i]
+            j = reverse_dict_map[label_j]
+            Q[i, j] += value
+            Q[j, i] = Q[i, j]
+
+        for label_i, value in actually_its_qubo[0].items():
+            i = reverse_dict_map[label_i]
+            Q[i, i] += value
+        print(Q)
+        return self.qubo_fn_fact, Q / max(np.max(Q), -np.min(Q))
