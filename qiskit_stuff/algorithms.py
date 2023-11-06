@@ -1,12 +1,15 @@
 """ file with qiskit algorithms subclasses """
+import json
 from abc import abstractmethod
 
 import numpy as np
+from qiskit import qpy
 from qiskit.circuit import ParameterVector
 from qiskit.circuit.library import PauliEvolutionGate
 from qiskit.opflow import H
 from qiskit.quantum_info import SparsePauliOp
 from qiskit_algorithms import QAOA
+from qiskit_algorithms.minimum_eigensolvers import SamplingVQEResult
 from qiskit_algorithms.optimizers import SciPyOptimizer
 
 from templates import Problem, Algorithm
@@ -48,6 +51,33 @@ class QAOA2(QiskitHamiltonianAlgorithm):
     @optimizer.setter
     def optimizer(self, optimizer: SciPyOptimizer) -> None:
         self._optimizer = optimizer
+
+    def parse_samplingVQEResult(self, res: SamplingVQEResult, res_path) -> dict:
+        res_dict = {}
+        for k, v in vars(res).items():
+            if k[0] == "_":
+                key = k[1:]
+            else:
+                key = k
+            try:
+                res_dict = {**res_dict, **json.loads(json.dumps({key: v}))}
+            except TypeError as ex:
+                if str(ex) == 'Object of type complex128 is not JSON serializable':
+                    res_dict = {**res_dict, **json.loads(json.dumps({key: v}, default=repr))}
+                elif str(ex) == 'Object of type ndarray is not JSON serializable':
+                    res_dict = {**res_dict, **json.loads(json.dumps({key: v}, default=repr))}
+                elif str(ex) == 'keys must be str, int, float, bool or None, not ParameterVectorElement':
+                    res_dict = {**res_dict, **json.loads(json.dumps({key: str(v)}))}
+                elif str(ex) == 'Object of type OptimizerResult is not JSON serializable':
+                    # recursion ftw
+                    new_v = self.parse_samplingVQEResult(v, res_path)
+                    res_dict = {**res_dict, **json.loads(json.dumps({key: new_v}))}
+                elif str(ex) == 'Object of type QuantumCircuit is not JSON serializable':
+                    path = res_path + '.qpy'
+                    with open(path, 'wb') as f:
+                        qpy.dump(v, f)
+                    res_dict = {**res_dict, **{key: path}}
+        return res_dict
 
     def run(self, problem: Problem, backend: QiskitBackend) -> dict:
         """ Runs the QAOA algorithm """

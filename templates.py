@@ -1,25 +1,39 @@
 """ File with templates """
+import json
+import os
 import pickle
 from abc import ABC, abstractmethod
-import os
+
 
 class _FileSavingSupportClass:
-    def _save_results_pickle(self, results:dict, file_name:str) -> None:
+
+    def fix_json(self, o: object):
+        if o.__class__.__name__ == 'SamplingVQEResult':
+            parsed = self.algorithm.parse_samplingVQEResult(o, self._res_path)
+            return parsed
+        elif o.__class__.__name__ == 'complex128':
+            return repr(o)
+        else:
+            print('Name of object not known, returning None as a json encodable')
+            return None
+
+    def _save_results_pickle(self, results: dict, file_name: str) -> None:
         with open(file_name, mode='wb') as file:
             pickle.dump(results, file)
 
-    def _save_results_txt(self, results:dict, file_name:str) -> None:
+    def _save_results_txt(self, results: dict, file_name: str) -> None:
         with open(file_name, mode='w', encoding='utf-8') as file:
             file.write(results.__str__())
 
-    def _save_results_csv(self, results:dict, file_name:str) -> None:
+    def _save_results_csv(self, results: dict, file_name: str) -> None:
         print('\033[93mSaving to csv has not been implemented yet\033[0m')
 
-    def _save_results_json(self, results:dict, file_name:str) -> None:
-        print('\033[93mSaving to json has not been implemented yet\033[0m')
+    def _save_results_json(self, results: dict, file_name: str) -> None:
+        with open(file_name, mode='w', encoding='utf-8') as file:
+            json.dump(results, file, default=self.fix_json, indent=4)
 
-    def _save_results(self, path_pickle:str|None = None, path_txt:str|None = None,
-                      path_csv:str|None = None, path_json:str|None = None) -> None:
+    def _save_results(self, path_pickle: str | None = None, path_txt: str | None = None,
+                      path_csv: str | None = None, path_json: str | None = None) -> None:
         dir = os.path.dirname(self._res_path)
         if not os.path.exists(dir):
             os.makedirs(dir)
@@ -129,6 +143,11 @@ class Algorithm(_SupportClass, ABC):
     def _get_path(self) -> str:
         """ return's common path """
 
+    def parse_result_to_json(self, o: object) -> dict:
+        """ Parses results so that it can be saved as a json file """
+        print('Algorithm does not have the parse_result_to_json method implemented')
+        return dict(o)
+
     @abstractmethod
     def run(self, problem: Problem, backend: Backend):
         """ Runs an algorithm on a specific problem using a backend """
@@ -138,14 +157,14 @@ class QuantumLauncher(ABC, _FileSavingSupportClass):
     """ Template for Quantum Launchers """
 
     def __init__(self, problem: Problem, algorithm: Algorithm, backend: Backend = None,
-                 path:str = 'results/') -> None:
+                 path: str = 'results/') -> None:
         self.problem: Problem = problem
         self.algorithm: Algorithm = algorithm
         self.backend: Backend = backend
 
         self.path: str = path
         self.res: dict = {}
-        self._res_path: str|None = None
+        self._res_path: str | None = None
 
     def _run(self) -> dict:
         """ Run's algorithm """
@@ -155,8 +174,8 @@ class QuantumLauncher(ABC, _FileSavingSupportClass):
         return self.algorithm.run(self.problem, self.backend)
 
     def process(self, save_to_file: bool = False,
-                save_pickle:str|bool = False, save_txt:str|bool = False,
-                save_csv:str|bool = False, save_json:str|bool = False) -> dict:
+                save_pickle: str | bool = False, save_txt: str | bool = False,
+                save_csv: str | bool = False, save_json: str | bool = False) -> dict:
         """ Run's and process'es the data """
         results = self._run()
         energy = results['energy']
@@ -170,8 +189,8 @@ class QuantumLauncher(ABC, _FileSavingSupportClass):
         self.res['results'] = results
 
         self._res_path = self.path + '/' + self.problem.path + '-' + \
-                        self.backend.path + '-' \
-                        + self.algorithm.path + '-' + str(energy)
+                         self.backend.path + '-' \
+                         + self.algorithm.path + '-' + str(energy)
 
         if save_to_file:
             print('\033[93msave_to_file will be removed soon, change into save_pickle\033[0m')
