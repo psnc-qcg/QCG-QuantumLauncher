@@ -14,6 +14,13 @@ class EC(Problem):
         self.name = 'ec'
         self.onehot = onehot
 
+    @property
+    def setup(self) -> dict:
+        return {
+            'onehot':self.onehot,
+            'instance_name':self.instance_name
+        }
+
     def _get_path(self) -> str:
         return f'{self.name}/{self.instance_name}@{self.onehot}'
 

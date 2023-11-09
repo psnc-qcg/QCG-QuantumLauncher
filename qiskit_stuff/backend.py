@@ -15,6 +15,13 @@ class QiskitBackend(Backend, QiskitStuff):
         self.session = session
         self._set_primitive_strategy_on_backend_name()
         self.strategy = None
+            
+    @property
+    def setup(self) -> dict:
+        return {
+            'name':self.name,
+            'session':self.session
+        }
 
     def _set_primitive_strategy_on_backend_name(self) -> None:
         if self.name == 'local_simulator':

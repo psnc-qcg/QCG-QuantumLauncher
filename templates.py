@@ -14,7 +14,7 @@ class _FileSavingSupportClass:
         elif o.__class__.__name__ == 'complex128':
             return repr(o)
         else:
-            print('Name of object not known, returning None as a json encodable')
+            print(f'Name of object {o.__class__} not known, returning None as a json encodable')
             return None
 
     def _save_results_pickle(self, results: dict, file_name: str) -> None:
@@ -35,7 +35,8 @@ class _FileSavingSupportClass:
     def _save_results(self, path_pickle: str | None = None, path_txt: str | None = None,
                       path_csv: str | None = None, path_json: str | None = None) -> None:
         dir = os.path.dirname(self._res_path)
-        if not os.path.exists(dir):
+        if not os.path.exists(dir) and (path_pickle is True or path_txt is True
+                                        or path_json is True or path_csv is True):
             os.makedirs(dir)
         if path_pickle:
             if path_pickle is True:
@@ -188,15 +189,16 @@ class QuantumLauncher(ABC, _FileSavingSupportClass):
         self.res['backend_setup'] = self.backend.setup
         self.res['results'] = results
 
-        self._res_path = self.path + '/' + self.problem.path + '-' + \
+        self._file_path = self.problem.path + '-' + \
                          self.backend.path + '-' \
                          + self.algorithm.path + '-' + str(energy)
-
+        
+        self._res_path = os.path.join(self.path, self._file_path)
         if save_to_file:
             print('\033[93msave_to_file will be removed soon, change into save_pickle\033[0m')
-            self.dir = os.path.dirname(self._res_path)
-            if not os.path.exists(self.dir):
-                os.makedirs(self.dir)
+            self._dir = os.path.dirname(self._res_path)
+            if not os.path.exists(self._dir):
+                os.makedirs(self._dir)
             with open(self._res_path + '.pkl', 'wb') as file:
                 pickle.dump(results, file)
 

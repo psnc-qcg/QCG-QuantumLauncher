@@ -12,6 +12,12 @@ class MaxCut(Problem):
         super().__init__(instance=instance, instance_name=instance_name,
                          instance_path=instance_path)
         self.name = 'maxcut'
+    
+    @property
+    def setup(self) -> dict:
+        return {
+            'instance_name':self.instance_name
+        }
 
     def set_instance(self, instance: None = None, instance_name: str | None = None) -> None:
         super().set_instance(instance, instance_name)

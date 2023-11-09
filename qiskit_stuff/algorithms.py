@@ -40,6 +40,15 @@ class QAOA2(QiskitHamiltonianAlgorithm):
         self.p: int = p
         self.parameters = ['p']
         self.optimizer = None
+    
+    @property
+    def setup(self) -> dict:
+        return {
+            'aux':self.aux,
+            'p':self.p,
+            'parameters':self.parameters,
+            'arg_kwargs':self.alg_kwargs
+        }
 
     def _get_path(self) -> str:
         return f'{self.name}@{self.p}'
@@ -119,6 +128,19 @@ class FALQON(QiskitHamiltonianAlgorithm):
         self.cost_h = None
         self.n_qubits: int = 0
         self.parameters = ['n', 'delta_t', 'beta_0']
+    
+    @property
+    def setup(self) -> dict:
+        return {
+            'driver_h':self.driver_h,
+            'delta_t':self.delta_t,
+            'beta_0':self.beta_0,
+            'n':self.n,
+            'cost_h':self.cost_h,
+            'n_qubits':self.n_qubits,
+            'parameters':self.parameters,
+            'arg_kwargs':self.alg_kwargs
+        }
 
     def _get_path(self) -> str:
         return f'{self.name}@{self.n}@{self.delta_t}@{self.beta_0}'

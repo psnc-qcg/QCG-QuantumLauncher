@@ -29,6 +29,15 @@ class JSSP(Problem):
         opt = 'optimization' if optimization_problem else 'decision'
         self.variant = opt
         self.opt = opt
+    
+    @property
+    def setup(self) -> dict:
+        return {
+            'max_time':self.max_time,
+            'onehot':self.onehot,
+            'optimization_problem':self.optimization_problem,
+            'instance_name':self.instance_name
+        }
 
     def _get_path(self) -> str:
         return f'{self.name}/{self.instance_name}@{self.max_time}@{self.opt}@{self.onehot}'
