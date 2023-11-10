@@ -189,7 +189,7 @@ class QuantumLauncher(ABC, _FileSavingSupportClass):
         self.res['backend_setup'] = self.backend.setup
         self.res['results'] = results
 
-        self._file_name = self.problem.name + '-' + \
+        self._file_name = self.problem.path + '-' + \
                           self.backend.path + '-' \
                           + self.algorithm.path + '-' + str(energy)
 

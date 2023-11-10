@@ -29,4 +29,4 @@ class MaxCut(Problem):
                     self.instance.add_edges_from(edge_list)
 
     def _get_path(self) -> str:
-        return f'{self.name}/{self.instance_name}'
+        return f'{self.name}@{self.instance_name}'

@@ -39,7 +39,7 @@ class JSSP(Problem):
         }
 
     def _get_path(self) -> str:
-        return f'{self.name}/{self.instance_name}@{self.max_time}@{self.opt}@{self.onehot}'
+        return f'{self.name}@{self.instance_name}@{self.max_time}@{self.opt}@{self.onehot}'
 
     def set_instance(self, instance: any, instance_name: str | None = None):
         super().set_instance(instance, instance_name)
