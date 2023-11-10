@@ -34,25 +34,25 @@ class _FileSavingSupportClass:
 
     def _save_results(self, path_pickle: str | None = None, path_txt: str | None = None,
                       path_csv: str | None = None, path_json: str | None = None) -> None:
-        dir = os.path.dirname(self._res_path)
+        dir = os.path.dirname(self._full_path)
         if not os.path.exists(dir) and (path_pickle is True or path_txt is True
                                         or path_json is True or path_csv is True):
             os.makedirs(dir)
         if path_pickle:
             if path_pickle is True:
-                path_pickle = self._res_path + '.pkl'
+                path_pickle = self._full_path + '.pkl'
             self._save_results_pickle(self.res, path_pickle)
         if path_txt:
             if path_txt is True:
-                path_txt = self._res_path + '.txt'
+                path_txt = self._full_path + '.txt'
             self._save_results_txt(self.res, path_txt)
         if path_csv:
             if path_csv is True:
-                path_csv = self._res_path + '.csv'
+                path_csv = self._full_path + '.csv'
             self._save_results_csv(self.res, path_csv)
         if path_json:
             if path_json is True:
-                path_json = self._res_path + '.json'
+                path_json = self._full_path + '.json'
             self._save_results_json(self.res, path_json)
 
 
@@ -97,7 +97,7 @@ class Problem(_SupportClass, ABC):
                  instance_name: str | None = None, instance_path: str | None = None) -> None:
         self.variant: str = 'Optimization'
         self.path: str | None = None
-        self.name: str = ''
+        self.name = type(self).__name__.lower()
         self.instance_name: str = 'unnamed' if instance_name is None else instance_name
         self.instance: any = None
         if instance_path is not None:
@@ -135,7 +135,7 @@ class Algorithm(_SupportClass, ABC):
 
     @abstractmethod
     def __init__(self, **alg_kwargs) -> None:
-        self.name: str = ''
+        self.name: str = type(self).__name__.lower()
         self.path: str | None = None
         self.parameters: list = []
         self.alg_kwargs = alg_kwargs
@@ -189,17 +189,22 @@ class QuantumLauncher(ABC, _FileSavingSupportClass):
         self.res['backend_setup'] = self.backend.setup
         self.res['results'] = results
 
-        self._file_path = self.problem.path + '-' + \
-                         self.backend.path + '-' \
-                         + self.algorithm.path + '-' + str(energy)
-        
-        self._res_path = os.path.join(self.path, self._file_path)
+        self._file_name = self.problem.name + '-' + \
+                          self.backend.path + '-' \
+                          + self.algorithm.path + '-' + str(energy)
+
+        if isinstance(save_to_file, str):
+            self._res_path = save_to_file
+        else:
+            self._res_path = os.path.join(self.path, self.problem.name)
+
+        self._full_path = os.path.join(self._res_path, self._file_name)
         if save_to_file:
             print('\033[93msave_to_file will be removed soon, change into save_pickle\033[0m')
             self._dir = os.path.dirname(self._res_path)
             if not os.path.exists(self._dir):
                 os.makedirs(self._dir)
-            with open(self._res_path + '.pkl', 'wb') as file:
+            with open(self._full_path + '.pkl', 'wb') as file:
                 pickle.dump(results, file)
 
         if save_pickle or save_txt or save_csv or save_json:

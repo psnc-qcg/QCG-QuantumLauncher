@@ -11,14 +11,13 @@ class EC(Problem):
                  instance_name: str | None = None, instance_path: str = None) -> None:
         super().__init__(instance=instance, instance_name=instance_name,
                          instance_path=instance_path)
-        self.name = 'ec'
         self.onehot = onehot
 
     @property
     def setup(self) -> dict:
         return {
-            'onehot':self.onehot,
-            'instance_name':self.instance_name
+            'onehot': self.onehot,
+            'instance_name': self.instance_name
         }
 
     def _get_path(self) -> str:

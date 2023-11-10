@@ -14,16 +14,15 @@ class QATM(Problem):
                  instance_path: str | None = None) -> None:
         super().__init__(instance=instance, instance_name=instance_name,
                          instance_path=instance_path)
-        self.name = 'qatm'
         self.onehot = onehot
 
         self.instance_name = instance_name.split('.')[0]
-    
+
     @property
     def setup(self) -> dict:
         return {
-            'onehot':self.onehot,
-            'instance_name':self.instance_name
+            'onehot': self.onehot,
+            'instance_name': self.instance_name
         }
 
     def _get_path(self) -> str:

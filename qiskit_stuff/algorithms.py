@@ -40,14 +40,14 @@ class QAOA2(QiskitHamiltonianAlgorithm):
         self.p: int = p
         self.parameters = ['p']
         self.optimizer = None
-    
+
     @property
     def setup(self) -> dict:
         return {
-            'aux':self.aux,
-            'p':self.p,
-            'parameters':self.parameters,
-            'arg_kwargs':self.alg_kwargs
+            'aux': self.aux,
+            'p': self.p,
+            'parameters': self.parameters,
+            'arg_kwargs': self.alg_kwargs
         }
 
     def _get_path(self) -> str:
@@ -76,7 +76,7 @@ class QAOA2(QiskitHamiltonianAlgorithm):
                 elif str(ex) == 'Object of type ndarray is not JSON serializable':
                     res_dict = {**res_dict, **json.loads(json.dumps({key: v}, default=repr))}
                 elif str(ex) == 'keys must be str, int, float, bool or None, not ParameterVectorElement':
-                    res_dict = {**res_dict, **json.loads(json.dumps({key: str(v)}))}
+                    res_dict = {**res_dict, **json.loads(json.dumps({key: repr(v)}))}
                 elif str(ex) == 'Object of type OptimizerResult is not JSON serializable':
                     # recursion ftw
                     new_v = self.parse_samplingVQEResult(v, res_path)
@@ -107,7 +107,7 @@ class QAOA2(QiskitHamiltonianAlgorithm):
             cx_count = qaoa.ansatz.decompose(reps=10).count_ops()['cx']
         else:
             cx_count = 0
-        result = {'qaoa_res': qaoa_result,
+        result = {'SamplingVQEResult': qaoa_result,
                   'energy': qaoa_result.eigenvalue,
                   'depth': depth,
                   'cx_count': cx_count,
@@ -120,7 +120,6 @@ class FALQON(QiskitHamiltonianAlgorithm):
 
     def __init__(self, driver_h=None, delta_t=0, beta_0=0, n=1):
         super().__init__()
-        self.name = 'falqon'
         self.driver_h = driver_h
         self.delta_t = delta_t
         self.beta_0 = beta_0
@@ -128,18 +127,18 @@ class FALQON(QiskitHamiltonianAlgorithm):
         self.cost_h = None
         self.n_qubits: int = 0
         self.parameters = ['n', 'delta_t', 'beta_0']
-    
+
     @property
     def setup(self) -> dict:
         return {
-            'driver_h':self.driver_h,
-            'delta_t':self.delta_t,
-            'beta_0':self.beta_0,
-            'n':self.n,
-            'cost_h':self.cost_h,
-            'n_qubits':self.n_qubits,
-            'parameters':self.parameters,
-            'arg_kwargs':self.alg_kwargs
+            'driver_h': self.driver_h,
+            'delta_t': self.delta_t,
+            'beta_0': self.beta_0,
+            'n': self.n,
+            'cost_h': self.cost_h,
+            'n_qubits': self.n_qubits,
+            'parameters': self.parameters,
+            'arg_kwargs': self.alg_kwargs
         }
 
     def _get_path(self) -> str:

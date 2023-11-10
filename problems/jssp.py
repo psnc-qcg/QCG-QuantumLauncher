@@ -13,7 +13,6 @@ class JSSP(Problem):
                  optimization_problem: bool = False) -> None:
         super().__init__(instance=instance, instance_name=instance_name,
                          instance_path=instance_path)
-        self.name = 'jssp'
         self.max_time = max_time
         self.onehot = onehot
         self.optimization_problem = optimization_problem
@@ -29,14 +28,14 @@ class JSSP(Problem):
         opt = 'optimization' if optimization_problem else 'decision'
         self.variant = opt
         self.opt = opt
-    
+
     @property
     def setup(self) -> dict:
         return {
-            'max_time':self.max_time,
-            'onehot':self.onehot,
-            'optimization_problem':self.optimization_problem,
-            'instance_name':self.instance_name
+            'max_time': self.max_time,
+            'onehot': self.onehot,
+            'optimization_problem': self.optimization_problem,
+            'instance_name': self.instance_name
         }
 
     def _get_path(self) -> str:
