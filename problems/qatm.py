@@ -30,8 +30,7 @@ class QATM(Problem):
 
     def read_instance(self, instance_path: str, instance_name: str) -> None:
         self.instance_name = instance_name.split('.', 1)[0]
-        program_directory = os.path.dirname(__file__)
-        cm_path = os.path.join(program_directory, instance_path, 'CM_' + instance_name)
-        aircrafts_path = os.path.join(program_directory, instance_path, 'aircrafts_' + instance_name)
+        cm_path = os.path.join(instance_path, 'CM_' + instance_name)
+        aircrafts_path = os.path.join(instance_path, 'aircrafts_' + instance_name)
 
         self.instance = np.loadtxt(cm_path), pd.read_csv(aircrafts_path, delimiter=' ', header=None)
