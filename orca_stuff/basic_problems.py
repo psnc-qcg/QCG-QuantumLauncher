@@ -95,10 +95,20 @@ class JSSPOrca(JSSP, OrcaStuff):
     lagrange_precedence = 2
     lagrange_share = 5
 
+    def _fix_get_jss_bqm(self, instance, max_time, config,
+                            lagrange_one_hot=0,
+                            lagrange_precedence=0,
+                            lagrange_share=0) -> (dict, list, None):
+        pre_result = get_jss_bqm(instance, max_time, config,
+                            lagrange_one_hot=lagrange_one_hot,
+                            lagrange_precedence=lagrange_precedence,
+                            lagrange_share=lagrange_share)
+        result = (pre_result.linear, pre_result.quadratic, pre_result.offset) # I need to change it into dict somehow
+        return result, list(result[0].keys()), None
 
     def calculate_instance_size(self):
         # Calculate instance size for training
-        _, variables, _ = get_jss_bqm(self.jobs, self.max_time, self.config,
+        _, variables, _ = self._fix_get_jss_bqm(self.instance, self.max_time, self.config,
                                                           lagrange_one_hot=self.lagrange_one_hot,
                                                           lagrange_precedence=self.lagrange_precedence,
                                                           lagrange_share=self.lagrange_share)
@@ -106,12 +116,12 @@ class JSSPOrca(JSSP, OrcaStuff):
 
     def get_len_all_jobs(self):
         result = 0
-        for job in self.jobs.values():
+        for job in self.instance.values():
             result += len(job)
         return result
 
     def one_hot_to_jobs(self, binary_vector):
-        actually_its_qubo, variables, model = get_jss_bqm(self.jobs, self.max_time, self.config,
+        actually_its_qubo, variables, model = self._fix_get_jss_bqm(self.instance, self.max_time, self.config,
                                                           lagrange_one_hot=self.lagrange_one_hot,
                                                           lagrange_precedence=self.lagrange_precedence,
                                                           lagrange_share=self.lagrange_share)
@@ -126,17 +136,15 @@ class JSSPOrca(JSSP, OrcaStuff):
 
     def get_orca_qubo(self):
         # Define the matrix Q used for QUBO
-        self.jobs = []
         self.config = {}
+        self.instance_size = self.calculate_instance_size()
         self.config['parameters'] = {}
         self.config['parameters']['job_shop_scheduler'] = {}
         self.config['parameters']['job_shop_scheduler']['problem_version'] = "optimization"
-        a = get_jss_bqm(self.instance, self.max_time, self.config,
+        actually_its_qubo, variables, model = self._fix_get_jss_bqm(self.instance, self.max_time, self.config,
                             lagrange_one_hot=self.lagrange_one_hot,
                             lagrange_precedence=self.lagrange_precedence,
                             lagrange_share=self.lagrange_share)
-        print(f'\n{a = }\n')
-        actually_its_qubo, variables, model, k = a
         reverse_dict_map = {v: i for i, v in enumerate(variables)}
 
         Q = np.zeros((self.instance_size, self.instance_size))

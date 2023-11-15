@@ -19,7 +19,7 @@ class BinaryBosonic(Algorithm, OrcaStuff):
 
     def run(self, problem: Problem, backend: OrcaBackend):
         qubo_fn_fact, Q = problem.get_orca_qubo()
-        self.bbs = BinaryBosonicSolver(6,
+        self.bbs = BinaryBosonicSolver(len(Q),
                                        qubo_fn_fact(Q)
                                        )
         self.bbs.train(
