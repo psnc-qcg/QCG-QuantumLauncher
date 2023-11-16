@@ -1,41 +1,84 @@
 """ Backend Class for Qiskit Launcher """
-from qiskit_ibm_runtime import Session
+from qiskit.primitives import Estimator as LocalEstimator, BaseEstimator
+from qiskit.primitives import Sampler as LocalSampler, BaseSampler
+from qiskit_algorithms.optimizers import COBYLA, SPSA, SciPyOptimizer
+from qiskit_ibm_runtime import Estimator, Sampler
+from qiskit_ibm_runtime import Session, Options
 
-from qiskit_stuff.primitive_strategy import LocalPrimitiveStrategy, \
-    RemotePrimitiveStrategy, PrimitiveStrategy
-from templates import Backend
+from templates import Backend, QuantumLauncher
 from .qiskit_template import QiskitStuff
 
 
 class QiskitBackend(Backend, QiskitStuff):
     """ local backend """
 
-    def __init__(self, name: str, session: Session = None) -> None:
+    def __init__(self, name: str, session: Session = None, options: Options = None) -> None:
         super().__init__(name)
         self.session = session
-        self._set_primitive_strategy_on_backend_name()
-        self.strategy = None
-            
+        self.options = options
+        self.primitive_strategy = None
+        self.sampler = None
+        self.estimator = None
+        self.optimizer = None
+        self._set_primitives_on_backend_name()
+
     @property
     def setup(self) -> dict:
         return {
-            'name':self.name,
-            'session':self.session
+            'name': self.name,
+            'session': self.session,
+            'metrics': self._gather_metrics()
         }
 
-    def _set_primitive_strategy_on_backend_name(self) -> None:
+    def prepare(self, launcher: QuantumLauncher):
+        self.set_job_tags([launcher.input_path()])
+
+    def _gather_metrics(self) -> None | dict:
+        if self.session is None:
+            return None
+        elif self.name != 'local_simulator':
+            service = self.session.service
+            session_jobs = service.jobs(session_id=self.session.session_id)
+            last_job = session_jobs[0]
+            return last_job.metrics()
+
+    def set_job_tags(self, tags: list):
+        self.sampler.set_options(job_tags=tags)
+        self.estimator.set_options(job_tags=tags)
+        a = 1
+
+    def _set_primitives_on_backend_name(self) -> None:
         if self.name == 'local_simulator':
-            self.primitive_strategy = LocalPrimitiveStrategy()
+            self.estimator = LocalEstimator()
+            self.sampler = LocalSampler()
+            self.optimizer = COBYLA()
         elif self.session is None:
             raise AttributeError('Please instantiate a session if using other backend than local')
         else:
-            self.primitive_strategy = RemotePrimitiveStrategy(self.session)
+            self.estimator = Estimator(session=self.session, options=self.options)
+            self.sampler = Sampler(session=self.session, options=self.options)
+            self.optimizer = SPSA()
 
-    def set_primitive_strategy(self, strategy: PrimitiveStrategy) -> None:
-        """ Set's the primitve strategy for backend """
-        self.strategy = strategy
+    @property
+    def estimator(self) -> BaseEstimator:
+        return self._estimator
 
-    def get_primitive_strategy(self) -> PrimitiveStrategy:
-        """ Returns the backend's primitive strategy """
-        # Is it neccessary ?
-        return self.primitive_strategy
+    @estimator.setter
+    def estimator(self, estimator: BaseEstimator):
+        self._estimator = estimator
+
+    @property
+    def sampler(self) -> BaseSampler:
+        return self._sampler
+
+    @sampler.setter
+    def sampler(self, sampler: BaseSampler):
+        self._sampler = sampler
+
+    @property
+    def optimizer(self) -> SciPyOptimizer:
+        return self._optimizer
+
+    @optimizer.setter
+    def optimizer(self, optimizer: SciPyOptimizer):
+        self._optimizer = optimizer

@@ -9,7 +9,7 @@ class _FileSavingSupportClass:
 
     def fix_json(self, o: object):
         if o.__class__.__name__ == 'SamplingVQEResult':
-            parsed = self.algorithm.parse_samplingVQEResult(o, self._res_path)
+            parsed = self.algorithm.parse_samplingVQEResult(o, self._full_path)
             return parsed
         elif o.__class__.__name__ == 'complex128':
             return repr(o)
