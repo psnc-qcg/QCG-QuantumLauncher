@@ -31,7 +31,7 @@ class _FileSavingSupportClass:
             file.write(results.__str__())
 
     def _save_results_csv(self, results: dict, file_name: str) -> None:
-        print('\033[93mSaving to csv has not been implemented yet\033[0m')
+        print(f'\033[93mSaving to csv has not been implemented yet {results= }{file_name= }\033[0m')
 
     def _save_results_json(self, results: dict, file_name: str) -> None:
         with open(file_name, mode='w', encoding='utf-8') as file:
@@ -166,6 +166,7 @@ class QuantumLauncher(ABC, _FileSavingSupportClass):
 
     def __init__(self, problem: Problem, algorithm: Algorithm, backend: Backend = None,
                  path: str = 'results/') -> None:
+        super().__init__()
         self.problem: Problem = problem
         self.algorithm: Algorithm = algorithm
         self.backend: Backend = backend
@@ -206,13 +207,6 @@ class QuantumLauncher(ABC, _FileSavingSupportClass):
             self._res_path = os.path.join(self.path, self.problem.name)
 
         self._full_path = os.path.join(self._res_path, self._file_name)
-        if save_to_file:
-            print('\033[93msave_to_file will be removed soon, change into save_pickle\033[0m')
-            self._dir = os.path.dirname(self._res_path)
-            if not os.path.exists(self._dir):
-                os.makedirs(self._dir)
-            with open(self._full_path + '.pkl', 'wb') as file:
-                pickle.dump(results, file)
 
         if save_pickle or save_txt or save_csv or save_json:
             self._save_results(save_pickle, save_txt, save_csv, save_json)

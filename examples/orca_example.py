@@ -10,7 +10,7 @@ def main():
     alg = BinaryBosonic()
     backend = OrcaBackend('local')
     launcher = QuantumLauncher(problem, alg, backend)
-    print(launcher.run())
+    print(launcher._run())
 
 
 if __name__ == '__main__':
