@@ -103,7 +103,7 @@ class JSSPOrca(JSSP, OrcaStuff):
                             lagrange_one_hot=lagrange_one_hot,
                             lagrange_precedence=lagrange_precedence,
                             lagrange_share=lagrange_share)
-        result = (pre_result.linear, pre_result.quadratic, pre_result.offset) # I need to change it into dict somehow
+        result = (pre_result.spin.linear, pre_result.spin.quadratic, pre_result.spin.offset) # I need to change it into dict somehow
         return result, list(result[0].keys()), None
 
     def calculate_instance_size(self):
