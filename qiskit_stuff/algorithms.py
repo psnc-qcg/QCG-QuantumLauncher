@@ -1,28 +1,45 @@
 """ file with qiskit algorithms subclasses """
 import json
-from abc import abstractmethod
+from abc import ABC
+from datetime import datetime
 
 import numpy as np
 from qiskit import qpy
 from qiskit.circuit import ParameterVector
 from qiskit.circuit.library import PauliEvolutionGate
 from qiskit.opflow import H
+from qiskit.primitives.base.base_primitive import BasePrimitive
 from qiskit.quantum_info import SparsePauliOp
 from qiskit_algorithms import QAOA
 from qiskit_algorithms.minimum_eigensolvers import SamplingVQEResult
-from qiskit_algorithms.optimizers import SciPyOptimizer
 
 from templates import Problem, Algorithm
 from .backend import QiskitBackend
 from .qiskit_template import QiskitStuff
 
 
-class QiskitHamiltonianAlgorithm(Algorithm, QiskitStuff):
-    """ Abstract class for algorithms using Qiskit Hamiltonian (SparsePauliOp) objects """
+class QiskitOptimizationAlgorithm(Algorithm, QiskitStuff, ABC):
+    """ Abstract class for Qiskit optimization algorithms """
 
-    @abstractmethod
-    def run(self, problem: Problem, backend: QiskitBackend):
-        """ Runs the hamiltonian on current algorithm """
+    def make_tag(self, problem: Problem, backend: QiskitBackend) -> str:
+        tag = problem.path + '-' + \
+              backend.path + '-' + \
+              self.path + '-' + \
+              datetime.today().strftime('%Y-%m-%d')
+        return tag
+
+    def get_processing_times(self, tag: str, primitive: BasePrimitive) -> None | tuple[list, list, int]:
+        timestamps = []
+        usages = []
+        qpu_time = 0
+        if hasattr(primitive, 'session'):
+            jobs = primitive.session.service.jobs(limit=None, job_tags=[tag])
+            for job in jobs:
+                m = job.metrics()
+                timestamps.append(m['timestamps'])
+                usages.append(m['usage'])
+                qpu_time += m['usage']['quantum_seconds']
+        return timestamps, usages, qpu_time
 
 
 def commutator(op_a: SparsePauliOp, op_b: SparsePauliOp) -> SparsePauliOp:
@@ -30,7 +47,7 @@ def commutator(op_a: SparsePauliOp, op_b: SparsePauliOp) -> SparsePauliOp:
     return op_a @ op_b - op_b @ op_a
 
 
-class QAOA2(QiskitHamiltonianAlgorithm):
+class QAOA2(QiskitOptimizationAlgorithm):
     """ Algorithm class with QAOA """
 
     def __init__(self, p: int = 1, aux=None, **alg_kwargs):
@@ -39,7 +56,6 @@ class QAOA2(QiskitHamiltonianAlgorithm):
         self.aux = aux
         self.p: int = p
         self.parameters = ['p']
-        self.optimizer = None
 
     @property
     def setup(self) -> dict:
@@ -52,14 +68,6 @@ class QAOA2(QiskitHamiltonianAlgorithm):
 
     def _get_path(self) -> str:
         return f'{self.name}@{self.p}'
-
-    @property
-    def optimizer(self) -> SciPyOptimizer:
-        return self._optimizer
-
-    @optimizer.setter
-    def optimizer(self, optimizer: SciPyOptimizer) -> None:
-        self._optimizer = optimizer
 
     def parse_samplingVQEResult(self, res: SamplingVQEResult, res_path) -> dict:
         res_dict = {}
@@ -96,26 +104,31 @@ class QAOA2(QiskitHamiltonianAlgorithm):
         def qaoa_callback(evaluation_count, params, mean, std):
             energies.append(mean)
 
-        sampler = backend.get_primitive_strategy().sampler
-        if self.optimizer is None:
-            self.optimizer = backend.get_primitive_strategy().optimizer
+        tag = self.make_tag(problem, backend)
+        sampler = backend.sampler
+        sampler.set_options(job_tags=[tag])
+        optimizer = backend.optimizer
 
-        qaoa = QAOA(sampler, self.optimizer, reps=self.p, callback=qaoa_callback, **self.alg_kwargs)
+        qaoa = QAOA(sampler, optimizer, reps=self.p, callback=qaoa_callback, **self.alg_kwargs)
         qaoa_result = qaoa.compute_minimum_eigenvalue(hamiltonian, self.aux)
         depth = qaoa.ansatz.decompose(reps=10).depth()
         if 'cx' in qaoa.ansatz.decompose(reps=10).count_ops():
             cx_count = qaoa.ansatz.decompose(reps=10).count_ops()['cx']
         else:
             cx_count = 0
-        result = {'SamplingVQEResult': qaoa_result,
-                  'energy': qaoa_result.eigenvalue,
+        timestamps, usages, qpu_time = self.get_processing_times(tag, sampler)
+        result = {'energy': qaoa_result.eigenvalue,
                   'depth': depth,
                   'cx_count': cx_count,
-                  'energies': energies}
+                  'qpu_time': qpu_time,
+                  'energies': energies,
+                  'SamplingVQEResult': qaoa_result,
+                  'usages': usages,
+                  'timestamps': timestamps}
         return result
 
 
-class FALQON(QiskitHamiltonianAlgorithm):
+class FALQON(QiskitOptimizationAlgorithm):
     """ Algorithm class with FALQON """
 
     def __init__(self, driver_h=None, delta_t=0, beta_0=0, n=1):
@@ -158,22 +171,29 @@ class FALQON(QiskitHamiltonianAlgorithm):
         circuit_depths = []
         cxs = []
 
-        estimator = backend.get_primitive_strategy().estimator
-        sampler = backend.get_primitive_strategy().sampler
+        tag = self.make_tag(problem, backend)
+        estimator = backend.estimator
+        sampler = backend.sampler
+        sampler.set_options(job_tags=[tag])
+        estimator.set_options(job_tags=[tag])
 
         best_sample, last_sample = self.falqon_subroutine(estimator,
                                                           sampler, energies, betas, circuit_depths, cxs)
 
+        timestamps, usages, qpu_time = self.get_processing_times(tag, sampler)
         result = {'betas': betas,
                   'energies': energies,
                   'depths': circuit_depths,
                   'cxs': cxs,
-                  'best_sample': best_sample,
-                  'last_sample': last_sample,
                   'n': self.n,
                   'delta_t': self.delta_t,
                   'beta_0': self.beta_0,
-                  'energy': min(energies)}
+                  'energy': min(energies),
+                  'qpu_time': qpu_time,
+                  'best_sample': best_sample,
+                  'last_sample': last_sample,
+                  'usages': usages,
+                  'timestamps': timestamps}
 
         return result
 
