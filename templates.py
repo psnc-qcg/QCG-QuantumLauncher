@@ -205,12 +205,10 @@ set(self.algorithm.SYSTEM_CLASS.__subclasses__()))[0]
         """ Run's and process'es the data """
         results = self._run()
         energy = results['energy']
-        variant = self.problem.variant
-        results['variant'] = variant
-        results['backend_name'] = self.backend.name
 
         self.res['problem_setup'] = self.problem.setup
         self.res['algorithm_setup'] = self.algorithm.setup
+        self.res['algorithm_setup']['variant'] = self.problem.variant
         self.res['backend_setup'] = self.backend.setup
         self.res['results'] = results
 
