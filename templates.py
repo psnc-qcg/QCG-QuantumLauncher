@@ -6,6 +6,11 @@ from abc import ABC, abstractmethod
 
 
 class _FileSavingSupportClass:
+    def __init__(self) -> None:
+        self.algorithm = None
+        self._res_path = None
+        self._full_path = None
+        self.res = None
 
     def fix_json(self, o: object):
         if o.__class__.__name__ == 'SamplingVQEResult':
@@ -59,10 +64,12 @@ class _FileSavingSupportClass:
 class _SupportClass(ABC):
     @property
     def setup(self) -> dict:
+        """ dict with class instance parameter """
         return f'setup for {self.__class__.__name__} has not been implemented yet'
 
     @property
     def path(self) -> str:
+        """ path to file """
         if self._path is not None:
             return self._path
         return self._get_path()
@@ -72,7 +79,7 @@ class _SupportClass(ABC):
         self._path = new_path
 
     @abstractmethod
-    def _get_path():
+    def _get_path(self):
         pass
 
 
