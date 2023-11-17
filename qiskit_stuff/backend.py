@@ -5,7 +5,7 @@ from qiskit_algorithms.optimizers import COBYLA, SPSA, SciPyOptimizer
 from qiskit_ibm_runtime import Estimator, Sampler
 from qiskit_ibm_runtime import Session, Options
 
-from templates import Backend, QuantumLauncher
+from templates import Backend
 from .qiskit_template import QiskitStuff
 
 
@@ -26,26 +26,8 @@ class QiskitBackend(Backend, QiskitStuff):
     def setup(self) -> dict:
         return {
             'name': self.name,
-            'session': self.session,
-            'metrics': self._gather_metrics()
+            'session': self.session
         }
-
-    def prepare(self, launcher: QuantumLauncher):
-        self.set_job_tags([launcher.input_path()])
-
-    def _gather_metrics(self) -> None | dict:
-        if self.session is None:
-            return None
-        elif self.name != 'local_simulator':
-            service = self.session.service
-            session_jobs = service.jobs(session_id=self.session.session_id)
-            last_job = session_jobs[0]
-            return last_job.metrics()
-
-    def set_job_tags(self, tags: list):
-        self.sampler.set_options(job_tags=tags)
-        self.estimator.set_options(job_tags=tags)
-        a = 1
 
     def _set_primitives_on_backend_name(self) -> None:
         if self.name == 'local_simulator':
