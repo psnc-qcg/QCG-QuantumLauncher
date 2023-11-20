@@ -33,4 +33,24 @@ class QATM(Problem):
         cm_path = os.path.join(instance_path, 'CM_' + instance_name)
         aircrafts_path = os.path.join(instance_path, 'aircrafts_' + instance_name)
 
-        self.instance = np.loadtxt(cm_path), pd.read_csv(aircrafts_path, delimiter=' ', header=None)
+        self.instance = {'cm': np.loadtxt(cm_path),
+                         'aircrafts': pd.read_csv(aircrafts_path, delimiter=' ', names=['manouver', 'aircraft'])}
+
+    def analyze_result(self, result: dict):
+        """
+        Analyzes the result in terms of collisions and violations of onehot constraint
+        :param result: dict, where keys are bitstrings and values are probabolities
+        :return: collisions and onehot violations as ndarray
+        """
+        keys = list(result.keys())
+        vectorized_result = (np.fromstring("".join(keys), 'u1') - ord('0')).reshape(len(result), -1)
+
+        cm = self.instance['cm'].copy().astype(int)
+        np.fill_diagonal(cm, 0)
+        collisions = np.einsum('ij,ij->i', vectorized_result @ cm, vectorized_result) / 2
+
+        df = pd.DataFrame(vectorized_result.transpose())
+        df['aircraft'] = self.instance['aircrafts']['aircraft']
+        onehot_violations = (df.groupby(by='aircraft').sum() != 1).sum(axis=0).ravel()
+
+        return collisions, onehot_violations

@@ -136,6 +136,10 @@ class Problem(_SupportClass, ABC):
             res = pickle.load(file)
         return res
 
+    @abstractmethod
+    def analyze_result(self, result):
+        pass
+
 
 class Algorithm(_SupportClass, ABC):
     """ Abstract class for Algorithms"""
@@ -165,7 +169,7 @@ class QuantumLauncher(ABC, _FileSavingSupportClass):
     """ Template for Quantum Launchers """
 
     def __init__(self, problem: Problem, algorithm: Algorithm, backend: Backend = None,
-                 path: str = 'results/', binding_params: dict|None = None) -> None:
+                 path: str = 'results/', binding_params: dict | None = None) -> None:
         super().__init__()
         self.problem: Problem = problem
         self.algorithm: Algorithm = algorithm
@@ -174,7 +178,7 @@ class QuantumLauncher(ABC, _FileSavingSupportClass):
         self.path: str = path
         self.res: dict = {}
         self._res_path: str | None = None
-        self.binding_params: dict|None = binding_params
+        self.binding_params: dict | None = binding_params
 
     def _bind_parameters(self) -> None:
         """ binds parameters """
@@ -188,7 +192,7 @@ does not have parameter {param}, so it cannot be binded\033[0m')
     def _prepare_problem(self):
         """ Chooses a problem and binds parameters """
         problem_class = list(set(self.problem.__class__.__subclasses__()) &
-set(self.algorithm.SYSTEM_CLASS.__subclasses__()))[0]
+                             set(self.algorithm.SYSTEM_CLASS.__subclasses__()))[0]
         self.problem.__class__ = problem_class
         if self.binding_params is not None:
             self._bind_parameters()

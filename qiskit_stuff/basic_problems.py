@@ -57,10 +57,11 @@ class MaxCutQiskit(problems.MaxCut, QiskitStuff):
 
 class QATMQiskit(problems.QATM, QiskitStuff):
     def get_qiskit_hamiltonian(self) -> SparsePauliOp:
-        cm, planes = self.instance
+        cm = self.instance['cm']
+        aircrafts = self.instance['aircrafts']
 
         onehot_hamiltonian = None
-        for plane, manouvers in planes.groupby(by=1):
+        for plane, manouvers in aircrafts.groupby(by='aircraft'):
             if self.onehot == 'exact':
                 h = hampy.Ham_not(hampy.H_one_in_n(manouvers.index.values.tolist(), len(cm)))
             elif self.onehot == 'quadratic':
