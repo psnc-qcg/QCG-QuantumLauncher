@@ -16,8 +16,6 @@ class QATM(Problem):
                          instance_path=instance_path)
         self.onehot = onehot
 
-        self.instance_name = instance_name.split('.')[0]
-
     @property
     def setup(self) -> dict:
         return {
@@ -26,10 +24,9 @@ class QATM(Problem):
         }
 
     def _get_path(self) -> str:
-        return f'{self.name}@{self.instance_name}'
+        return f'{self.name}@{self.instance_name.split(".", 1)[0]}'
 
     def read_instance(self, instance_path: str, instance_name: str) -> None:
-        self.instance_name = instance_name.split('.', 1)[0]
         cm_path = os.path.join(instance_path, 'CM_' + instance_name)
         aircrafts_path = os.path.join(instance_path, 'aircrafts_' + instance_name)
 
