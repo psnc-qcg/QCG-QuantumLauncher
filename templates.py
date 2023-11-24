@@ -136,7 +136,7 @@ class Problem(_SupportClass, ABC):
             res = pickle.load(file)
         return res
 
-    @abstractmethod
+    # @abstractmethod
     def analyze_result(self, result):
         pass
 
@@ -146,7 +146,7 @@ class Algorithm(_SupportClass, ABC):
 
     @abstractmethod
     def __init__(self, **alg_kwargs) -> None:
-        self.name: str = type(self).__name__.lower()
+        self.name: str = self.__class__.__name__.lower()
         self.path: str | None = None
         self.parameters: list = []
         self.alg_kwargs = alg_kwargs
@@ -185,9 +185,11 @@ class QuantumLauncher(ABC, _FileSavingSupportClass):
         for param, value in self.binding_params.items():
             if param in self.problem.__class__.__dict__:
                 self.problem.__dict__[param] = value
+            elif param in self.algorithm.__dict__:
+                self.algorithm.__dict__[param] = value
             else:
-                print(f'\033[93mClass {self.problem.__class__.__name__} \
-does not have parameter {param}, so it cannot be binded\033[0m')
+                print(f'\033[93mClass {self.problem.__class__.__name__}  nor class \
+{self.algorithm.__class__.__name__} does not have parameter {param}, so it cannot be binded\033[0m')
 
     def _prepare_problem(self):
         """ Chooses a problem and binds parameters """

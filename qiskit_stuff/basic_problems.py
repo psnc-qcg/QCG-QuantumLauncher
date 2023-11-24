@@ -31,6 +31,100 @@ class ECQiskit(problems.EC, QiskitStuff):
                 hamiltonian += part
         return hamiltonian.simplify()
 
+    def get_mixer_hamiltonian(self, amount_of_rings = None):
+        instance = self.instance
+        def get_main_set():
+            main_set = []
+            for set_ in instance:
+                for elem in set_:
+                    if elem not in main_set:
+                        main_set.append(elem)
+            return main_set
+
+        def get_constraints():
+            constraints, main_set = [], get_main_set()
+            for element in main_set:
+                set_ = set()
+                for index in range(len(instance)):
+                    if element in instance[index]:
+                        set_.add(index)
+                if len(set_) > 0 and set_ not in constraints:
+                    constraints.append(set_)
+
+            return constraints
+        
+        def ring_ham(ring: set):
+            sum_ = None
+            ring = list(ring)
+            for index in range(len(ring) - 1):
+                sparse_list = []
+                sparse_list.append((("XX", [ring[index], ring[index + 1]], 1)))
+                sparse_list.append((("YY", [ring[index], ring[index + 1]], 1)))
+                sp = SparsePauliOp.from_sparse_list(sparse_list, len(instance))
+                if sum_ == None:
+                    sum_ = sp
+                else:
+                    sum_ += sp
+            sparse_list = []
+            sparse_list.append((("XX", [ring[-1], ring[0]], 1)))
+            sparse_list.append((("YY", [ring[-1], ring[0]], 1)))
+            sp = SparsePauliOp.from_sparse_list(sparse_list, len(instance))
+            sum_ += sp
+            return SparsePauliOp(sum_)
+
+        # creating mixer hamiltonians for all qubits that aren't in rings (in other words applying X gate to them)
+        def x_gate_ham(x_gate: list):
+            sum_ = None
+            for elem in x_gate:
+                sparse_list = []
+                sparse_list.append((("X", [elem], 1)))
+                sp = SparsePauliOp.from_sparse_list(sparse_list, len(instance))
+                if sum_ is None:
+                    sum_ = sp
+                else:
+                    sum_ += sp
+            return SparsePauliOp(sum_)
+
+        # looking for all rings in a data and creating a list with them
+        ring, x_gate, constraints = [], [], get_constraints()
+        
+        ring.append(max(constraints, key=lambda x: len(x)))
+
+        ring_qubits = set.union(*ring)
+
+        for set_ in constraints:
+            if len(set_.intersection(ring_qubits)) == 0:
+                ring.append(set_)
+                ring_qubits.update(set_)
+
+        if amount_of_rings is not None:
+            max_amount_of_rings, user_rings = len(ring), []
+            if amount_of_rings > max_amount_of_rings:
+                raise Exception(f"Too many rings. Maximum amount is {max_amount_of_rings}")
+            elif amount_of_rings == 0:
+                ring_qubits = []
+            else:
+                current_qubits = ring[0]
+                for index in range(amount_of_rings):
+                    user_rings.append(ring[index])
+                    current_qubits = current_qubits.union(ring[index])
+                ring_qubits = current_qubits
+        x_gate.extend(elem for elem in range(len(instance)) if elem not in ring_qubits)
+
+        # connecting all parts of mixer hamiltonian together
+        mix_ham = None
+        for set_ in ring:
+            if mix_ham == None:
+                mix_ham = ring_ham(set_)
+            else:
+                mix_ham += ring_ham(set_)
+        if mix_ham == None:
+            mix_ham = x_gate_ham(x_gate)
+        else:
+            mix_ham += x_gate_ham(x_gate)
+
+        return mix_ham
+
 
 class JSSPQiskit(problems.JSSP, QiskitStuff):
     def get_qiskit_hamiltonian(self, optimization_problem: bool = None) -> SparsePauliOp:

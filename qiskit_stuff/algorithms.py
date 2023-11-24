@@ -50,12 +50,14 @@ def commutator(op_a: SparsePauliOp, op_b: SparsePauliOp) -> SparsePauliOp:
 class QAOA2(QiskitOptimizationAlgorithm):
     """ Algorithm class with QAOA """
 
-    def __init__(self, p: int = 1, aux=None, **alg_kwargs):
+    def __init__(self, p: int = 1, alternating_ansatz:bool=False, aux=None, **alg_kwargs):
         super().__init__(**alg_kwargs)
-        self.name = 'qaoa'
+        self.name: str = 'qaoa'
         self.aux = aux
         self.p: int = p
+        self.alternating_ansatz: bool = alternating_ansatz
         self.parameters = ['p']
+        self.mixer_h: SparsePauliOp | None = None
 
     @property
     def setup(self) -> dict:
@@ -98,7 +100,7 @@ class QAOA2(QiskitOptimizationAlgorithm):
 
     def run(self, problem: Problem, backend: QiskitBackend) -> dict:
         """ Runs the QAOA algorithm """
-        hamiltonian = problem.get_qiskit_hamiltonian()
+        hamiltonian: SparsePauliOp = problem.get_qiskit_hamiltonian()
         energies = []
 
         def qaoa_callback(evaluation_count, params, mean, std):
@@ -109,7 +111,11 @@ class QAOA2(QiskitOptimizationAlgorithm):
         sampler.set_options(job_tags=[tag])
         optimizer = backend.optimizer
 
-        qaoa = QAOA(sampler, optimizer, reps=self.p, callback=qaoa_callback, **self.alg_kwargs)
+        if self.alternating_ansatz and self.mixer_h is None:
+            self.mixer_h = problem.get_mixer_hamiltonian()
+
+        qaoa = QAOA(sampler, optimizer, reps=self.p, callback=qaoa_callback,
+                        mixer=self.mixer_h, **self.alg_kwargs)
         qaoa_result = qaoa.compute_minimum_eigenvalue(hamiltonian, self.aux)
         depth = qaoa.ansatz.decompose(reps=10).depth()
         if 'cx' in qaoa.ansatz.decompose(reps=10).count_ops():
@@ -178,7 +184,7 @@ class FALQON(QiskitOptimizationAlgorithm):
         estimator.set_options(job_tags=[tag])
 
         best_sample, last_sample = self.falqon_subroutine(estimator,
-                                                          sampler, energies, betas, circuit_depths, cxs)
+                            sampler, energies, betas, circuit_depths, cxs)
 
         timestamps, usages, qpu_time = self.get_processing_times(tag, sampler)
         result = {'betas': betas,

@@ -15,7 +15,7 @@ def test_ec():
     try:
         pr = EC('exact')
         pr.set_instance(instance_name='toy', instance=None)
-        qaoa = QAOA2(p=3)
+        qaoa = QAOA2(p=3, alternating_ansatz=True)
         backend = QiskitBackend('local_simulator')
         launcher = QuantumLauncher(pr, qaoa, backend, path=TESTING_DIR)
 
@@ -67,7 +67,7 @@ def test_qatm():
     """ Testing function for QATM """
     try:
         pr = QATM('exact', instance_name='RCP_3.txt')
-        pr.read_instance(instance_name='RCP_3.txt', instance_path='../data/qatm/')
+        pr.read_instance(instance_name='RCP_3.txt', instance_path='data/qatm/')
     except Exception as ex:
         print('\033[91mSomething with QATM problem (most likely lack of data file)\033[0m')
         print(ex)
