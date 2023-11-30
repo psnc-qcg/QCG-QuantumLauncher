@@ -50,4 +50,11 @@ class QATM(Problem):
         df['aircraft'] = self.instance['aircrafts']['aircraft']
         onehot_violations = (df.groupby(by='aircraft').sum() != 1).sum(axis=0).ravel()
 
-        return collisions, onehot_violations
+        df['manouver'] = self.instance['aircrafts']['manouver']
+        no_changes = df[df['aircraft'] == df['manouver']]
+        changes = (len(no_changes) - no_changes.drop(['manouver', 'aircraft'], axis=1).sum()).ravel().astype(int)
+        changes[onehot_violations != 0] = -1
+
+        return {'collisions': collisions,
+                'onehot_violations': onehot_violations,
+                'changes': changes}
