@@ -6,10 +6,10 @@ from qiskit_ibm_runtime import Estimator, Sampler
 from qiskit_ibm_runtime import Session, Options
 
 from templates import Backend
-from .qiskit_template import QiskitStuff
+from .qiskit_template import QiskitRoutine
 
 
-class QiskitBackend(Backend, QiskitStuff):
+class QiskitBackend(Backend, QiskitRoutine):
     """ local backend """
 
     def __init__(self, name: str, session: Session = None, options: Options = None) -> None:

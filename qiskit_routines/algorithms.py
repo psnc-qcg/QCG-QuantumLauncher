@@ -10,15 +10,15 @@ from qiskit.circuit.library import PauliEvolutionGate
 from qiskit.opflow import H
 from qiskit.primitives.base.base_primitive import BasePrimitive
 from qiskit.quantum_info import SparsePauliOp
-from qiskit_algorithms import QAOA
+import qiskit_algorithms
 from qiskit_algorithms.minimum_eigensolvers import SamplingVQEResult
 
 from templates import Problem, Algorithm
 from .backend import QiskitBackend
-from .qiskit_template import QiskitStuff
+from .qiskit_template import QiskitRoutine
 
 
-class QiskitOptimizationAlgorithm(Algorithm, QiskitStuff, ABC):
+class QiskitOptimizationAlgorithm(Algorithm, QiskitRoutine, ABC):
     """ Abstract class for Qiskit optimization algorithms """
 
     def make_tag(self, problem: Problem, backend: QiskitBackend) -> str:
@@ -47,7 +47,7 @@ def commutator(op_a: SparsePauliOp, op_b: SparsePauliOp) -> SparsePauliOp:
     return op_a @ op_b - op_b @ op_a
 
 
-class QAOA2(QiskitOptimizationAlgorithm):
+class QAOA(QiskitOptimizationAlgorithm):
     """ Algorithm class with QAOA """
 
     def __init__(self, p: int = 1, alternating_ansatz:bool=False, aux=None, **alg_kwargs):
@@ -114,7 +114,7 @@ class QAOA2(QiskitOptimizationAlgorithm):
         if self.alternating_ansatz and self.mixer_h is None:
             self.mixer_h = problem.get_mixer_hamiltonian()
 
-        qaoa = QAOA(sampler, optimizer, reps=self.p, callback=qaoa_callback,
+        qaoa = qiskit_algorithms.QAOA(sampler, optimizer, reps=self.p, callback=qaoa_callback,
                         mixer=self.mixer_h, **self.alg_kwargs)
         qaoa_result = qaoa.compute_minimum_eigenvalue(hamiltonian, self.aux)
         depth = qaoa.ansatz.decompose(reps=10).depth()

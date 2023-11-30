@@ -1,7 +1,7 @@
 ''' Example of how Quantum Launcher works'''
 from problems import JSSP
-from qiskit_stuff.algorithms import FALQON
-from qiskit_stuff.backend import QiskitBackend
+from qiskit_routines.algorithms import FALQON
+from qiskit_routines.backend import QiskitBackend
 from templates import QuantumLauncher
 
 

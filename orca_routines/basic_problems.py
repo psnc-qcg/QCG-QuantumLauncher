@@ -3,10 +3,10 @@ import numpy as np
 
 from jssp.pyqubo_scheduler import get_jss_bqm
 from problems import MaxCut, EC, JSSP
-from .orca_templates import OrcaStuff
+from .orca_templates import OrcaRoutine
 
 
-class MaxCutOrca(MaxCut, OrcaStuff):
+class MaxCutOrca(MaxCut, OrcaRoutine):
     def get_qubo_fn(self, Q):
         def qubo_fn(bin_vec):
             return np.dot(bin_vec, np.dot(Q, bin_vec))
@@ -25,7 +25,7 @@ class MaxCutOrca(MaxCut, OrcaStuff):
         return self.get_qubo_fn, Q
 
 
-class ECOrca(EC, OrcaStuff):
+class ECOrca(EC, OrcaRoutine):
     gamma = 1
     delta = 0.05
     def qubo_fn_fact(self, Q):
@@ -89,7 +89,7 @@ class ECOrca(EC, OrcaStuff):
         return self.qubo_fn_fact, Q
 
 
-class JSSPOrca(JSSP, OrcaStuff):
+class JSSPOrca(JSSP, OrcaRoutine):
     gamma = 1
     lagrange_one_hot = 1
     lagrange_precedence = 2
