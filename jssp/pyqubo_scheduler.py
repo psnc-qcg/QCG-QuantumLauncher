@@ -2,7 +2,8 @@ from __future__ import print_function
 
 from bisect import bisect_right
 
-from pyqubo import Binary
+# from pyqubo import Binary
+from .Binary import Binary
 
 from jssp.scheduler import JobShopScheduler, KeyList
 from jssp.scheduler import get_label
@@ -139,7 +140,7 @@ class DWaveScheduler(JobShopScheduler):
         self._add_precedence_constraint(lagrange_precedence)
         self._add_share_machine_constraint(lagrange_share)
         # Get BQM
-        # bqm = dwavebinarycsp.stitch(self.csp, **stitch_kwargs)
+        # bqm = dwaveBinarycsp.stitch(self.csp, **stitch_kwargs)
 
         # Edit BQM to encourage the shortest schedule
         # Overview of this added penalty:
