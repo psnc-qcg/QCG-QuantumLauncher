@@ -194,7 +194,7 @@ class QuantumLauncher(ABC, _FileSavingSupportClass):
     def _prepare_problem(self):
         """ Chooses a problem and binds parameters """
         problem_class = list(set(self.problem.__class__.__subclasses__()) &
-                             set(self.algorithm.SYSTEM_CLASS.__subclasses__()))[0]
+                             set(self.algorithm.ROUTINE_NAME.__subclasses__()))[0]
         self.problem.__class__ = problem_class
         if self.binding_params is not None:
             self._bind_parameters()
