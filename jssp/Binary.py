@@ -128,6 +128,12 @@ class Binary:
     def __rsub__(self, other):
         return Binary(other) - self
 
+    def __neg__(self):
+        data = {}
+        for key, value in self.data.items():
+            data[key] = -value
+        return Binary(data)
+
     def __mul__(self, other):
         data = {}
         if isinstance(other, str):
@@ -213,6 +219,9 @@ class Binary:
             raise TypeError(f'Unsupported type: {type(other)}')
         return Binary(data)
 
+    def __truediv__(self, other):
+        return self * (1 / other)
+
     def calculate(self):
         for key, value in self.data.copy().items():
             if isinstance(key, tuple):
@@ -265,3 +274,5 @@ class Binary:
 
     def to_bqm(self):
         return self
+
+print(-(Binary('a') + 1) / 2)
