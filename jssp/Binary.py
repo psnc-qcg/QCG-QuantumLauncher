@@ -3,15 +3,16 @@ class Binary:
     def __init__(self, value:str):
         if isinstance(value, str):
             self.data = {value: 0.5}
-            self.data['free'] = 0.5
+            self.data['__free__'] = 0.5
         elif isinstance(value, int):
-            self.data = {'free': value}
+            self.data = {'__free__': value}
         elif isinstance(value, dict):
             self.data = value
         elif isinstance(value, Binary):
             self.data = value.data.copy()
         else:
             raise TypeError(f'Unsupported type: {type(value)}')
+        self.variables:list = []
         
     def __str__(self):
         return str(self.data)
@@ -24,15 +25,15 @@ class Binary:
             else:
                 data[other] = 1
         elif isinstance(other, int):
-            if 'free' in data:
-                data['free'] += other
+            if '__free__' in data:
+                data['__free__'] += other
             else:
-                data['free'] = other
+                data['__free__'] = other
         elif isinstance(other, float):
-            if 'free' in data:
-                data['free'] += other
+            if '__free__' in data:
+                data['__free__'] += other
             else:
-                data['free'] = other
+                data['__free__'] = other
         elif isinstance(other, dict):
             for key, value in other.items():
                 if key in data:
@@ -57,15 +58,15 @@ class Binary:
             else:
                 data[other] = 1
         elif isinstance(other, int):
-            if 'free' in data:
-                data['free'] += other
+            if '__free__' in data:
+                data['__free__'] += other
             else:
-                data['free'] = other
+                data['__free__'] = other
         elif isinstance(other, float):
-            if 'free' in data:
-                data['free'] += other
+            if '__free__' in data:
+                data['__free__'] += other
             else:
-                data['free'] = other
+                data['__free__'] = other
         elif isinstance(other, dict):
             for key, value in other.items():
                 if key in data:
@@ -92,19 +93,19 @@ class Binary:
             else:
                 data[other] = -1
         elif isinstance(other, int):
-            if 'free' in data:
-                data['free'] -= other
-                if data['free'] == 0:
-                    del data['free']
+            if '__free__' in data:
+                data['__free__'] -= other
+                if data['__free__'] == 0:
+                    del data['__free__']
             else:
-                data['free'] = -other
+                data['__free__'] = -other
         elif isinstance(other, float):
-            if 'free' in data:
-                data['free'] -= other
-                if data['free'] == 0:
-                    del data['free']
+            if '__free__' in data:
+                data['__free__'] -= other
+                if data['__free__'] == 0:
+                    del data['__free__']
             else:
-                data['free'] = -other
+                data['__free__'] = -other
         elif isinstance(other, dict):
             for key, value in other.items():
                 if key in data:
@@ -139,10 +140,10 @@ class Binary:
         if isinstance(other, str):
             for key, value in self.data.items():
                 if key == other:
-                    if 'free' in data:
-                        data['free'] += value
+                    if '__free__' in data:
+                        data['__free__'] += value
                     else:
-                        data['free'] = value
+                        data['__free__'] = value
                 else:
                     data[key, other] = value
         elif isinstance(other, int):
@@ -159,10 +160,10 @@ class Binary:
             for key, value in self.data.items():
                 for key2, value2 in other.data.items():
                     if key == key2:
-                        if 'free' in data:
-                            data['free'] += value * value2
+                        if '__free__' in data:
+                            data['__free__'] += value * value2
                         else:
-                            data['free'] = value * value2
+                            data['__free__'] = value * value2
                     else:
                         data[key, key2] = value * value2
         else:
@@ -174,10 +175,10 @@ class Binary:
         if isinstance(other, str):
             for key, value in self.data.items():
                 if key == other:
-                    if 'free' in data:
-                        data['free'] += value
+                    if '__free__' in data:
+                        data['__free__'] += value
                     else:
-                        data['free'] = value
+                        data['__free__'] = value
                 else:
                     data[key, other] = value
         elif isinstance(other, int):
@@ -194,10 +195,10 @@ class Binary:
             for key, value in self.data.items():
                 for key2, value2 in other.data.items():
                     if key == key2:
-                        if 'free' in data:
-                            data['free'] += value * value2
+                        if '__free__' in data:
+                            data['__free__'] += value * value2
                         else:
-                            data['free'] = value * value2
+                            data['__free__'] = value * value2
                     else:
                         data[key, key2] = value * value2
         else:
@@ -209,7 +210,7 @@ class Binary:
         new_data = {}
         if isinstance(other, int) and other >= 0:
             if other == 0:
-                return Binary({'free': 1})
+                return Binary({'__free__': 1})
             elif other == 1:
                 return Binary(data)
             elif other == 2:
@@ -223,24 +224,25 @@ class Binary:
         return self * (1 / other)
 
     def calculate(self):
+
         for key, value in self.data.copy().items():
             if isinstance(key, tuple):
-                if key[0] == 'free':
+                if key[0] == '__free__':
                     if key[1] in self.data:
                         self.data[key[1]] += value
                     else:
                         self.data[key[1]] = value
                     del self.data[key]
-                elif key[1] == 'free':
+                elif key[1] == '__free__':
                     if key[0] in self.data:
                         self.data[key[0]] += value
                     else:
                         self.data[key[0]] = value
                     del self.data[key]
         energy = 0
-        if 'free' in self.data:
-            energy = self.data['free']
-            del self.data['free']
+        if '__free__' in self.data:
+            energy = self.data['__free__']
+            del self.data['__free__']
 
         linear_dict = {}
         quadratic_dict = {}
@@ -260,7 +262,7 @@ class Binary:
             if key[0] > key[1]:
                 quadratic_dict[(key[1], key[0])] = value
                 del quadratic_dict[key]
-        
+        self.variables = list(linear_dict.keys())
         class spin:
             linear = linear_dict
             quadratic = quadratic_dict
@@ -274,5 +276,3 @@ class Binary:
 
     def to_bqm(self):
         return self
-
-print(-(Binary('a') + 1) / 2)
