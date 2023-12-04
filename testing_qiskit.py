@@ -2,7 +2,7 @@
 try:
     from problems import EC, JSSP, MaxCut, QATM
     from templates import QuantumLauncher
-    from qiskit_routines import *
+    from qiskit_routines import QAOA, QiskitBackend, FALQON
 except Exception as ex:
     print('\033[91mImport Error\033[0m')
     print(ex)
@@ -48,12 +48,10 @@ def test_jssp():
 def test_maxcut():
     """ Testing function for Max Cut """
     try:
-        pr = MaxCut()
-        pr.set_instance(instance_name='default')
-        qaoa = QAOA(p=3)
+        pr = MaxCut(instance_name='default')
+        qaoa = QAOA()
         backend = QiskitBackend('local_simulator')
         launcher = QuantumLauncher(pr, qaoa, backend, path=TESTING_DIR)
-
         inform = launcher.process(save_pickle=True)
         if inform is None:
             raise ValueError('The Output is empty')

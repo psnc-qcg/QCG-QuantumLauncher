@@ -6,6 +6,25 @@ from abc import ABC, abstractmethod
 
 
 class _FileSavingSupportClass:
+    """
+    A helper class for saving results to different file formats.
+    Class created to avoid huge chunk of code in QuantumLauncher.
+
+    Attributes:
+        algorithm: The algorithm object.
+        _res_path: The path to the results directory.
+        _full_path: The full path to the results file.
+        res: The results to be saved.
+
+    Methods:
+        fix_json: Fixes the JSON representation of an object.
+        _save_results_pickle: Saves the results as a pickle file.
+        _save_results_txt: Saves the results as a text file.
+        _save_results_csv: Saves the results as a CSV file.
+        _save_results_json: Saves the results as a JSON file.
+        _save_results: Saves the results to specified file formats.
+    """
+
     def __init__(self) -> None:
         self.algorithm = None
         self._res_path = None
@@ -62,14 +81,16 @@ class _FileSavingSupportClass:
 
 
 class _SupportClass(ABC):
+    """Abstract base class for methods necessary for other classes in this module."""
+
     @property
     def setup(self) -> dict:
-        """ dict with class instance parameter """
+        """Returns a dictionary with class instance parameters."""
         return f'setup for {self.__class__.__name__} has not been implemented yet'
 
     @property
     def path(self) -> str:
-        """ path to file """
+        """Returns the path to the file."""
         if self._path is not None:
             return self._path
         return self._get_path()
@@ -80,11 +101,22 @@ class _SupportClass(ABC):
 
     @abstractmethod
     def _get_path(self):
-        pass
+        """Returns common path to the file."""
 
 
 class Backend(_SupportClass, ABC):
-    """ Abstract class for backends """
+    """
+    Abstract class representing a backend for quantum computing.
+
+    Attributes:
+        name (str): The name of the backend.
+        path (str | None): The path to the backend (optional).
+        parameters (list): A list of parameters for the backend (optional).
+
+    Methods:
+        _get_path(): Returns the path to the backend.
+
+    """
 
     @abstractmethod
     def __init__(self, name: str, parameters: list = None) -> None:
@@ -97,11 +129,33 @@ class Backend(_SupportClass, ABC):
 
 
 class Problem(_SupportClass, ABC):
-    """ Abstract class for Problems """
+    """
+    Abstract class for Problems.
 
+    Attributes:
+        variant (str): The variant of the problem, default one: "Optimization".
+        path (str | None): The path to the problem.
+        name (str): The name of the problem.
+        instance_name (str): The name of the instance.
+        instance (any): An instance of the problem.
+    
+    Abstract Methods:
+        _get_path(): Returns the common path.
+
+    """
     @abstractmethod
-    def __init__(self, instance: any = None,
-                 instance_name: str | None = None, instance_path: str | None = None) -> None:
+    def __init__(self, instance: any = None, instance_name: str | None = None, instance_path: str | None = None) -> None:
+        """
+        Initializes a Problem instance.
+
+        Args:
+            instance (any): An instance of the problem.
+            instance_name (str | None): The name of the instance.
+            instance_path (str | None): The path to the instance file.
+
+        Returns:
+            None
+        """
         self.variant: str = 'Optimization'
         self.path: str | None = None
         self.name = type(self).__name__.lower()
@@ -113,37 +167,85 @@ class Problem(_SupportClass, ABC):
             self.set_instance(instance=instance, instance_name=instance_name)
 
     def set_instance(self, instance: any, instance_name: str | None = None) -> None:
-        """ Sets an instance of problem """
+        """
+        Sets an instance of the problem.
+
+        Args:
+            instance (any): An instance of the problem.
+            instance_name (str | None): The name of the instance.
+
+        Returns:
+            None
+        """
         if instance_name is not None:
             self.instance_name = instance_name
         self.instance = instance
 
     def read_instance(self, instance_path: str) -> None:
-        """ Reads an instance of problem from file """
+        """
+        Reads an instance of the problem from a file.
+
+        Args:
+            instance_path (str): The path to the instance file.
+
+        Returns:
+            None
+        """
         self.instance_name = instance_path.rsplit('/', 1)[1].split('.', 1)[0]
         with open(instance_path, 'rb') as file:
             self.instance = pickle.load(file)
 
     @abstractmethod
     def _get_path(self) -> str:
-        """ return's common path """
+        """
+        Returns the common path.
+
+        Returns:
+            str: The common path.
+        """
         return f'{self.name}/{self.instance_name}'
 
     def read_result(self, exp, log_path):
-        """ pickling files """
+        """
+        Reads a result from a file.
+
+        Args:
+            exp: The experiment.
+            log_path: The path to the log file.
+
+        Returns:
+            The result.
+        """
         exp += exp
         with open(log_path, 'rb') as file:
             res = pickle.load(file)
         return res
 
-    # @abstractmethod
     def analyze_result(self, result):
-        pass
+        """
+        Analyzes the result.
+
+        Args:
+            result: The result.
+
+        """
 
 
 class Algorithm(_SupportClass, ABC):
-    """ Abstract class for Algorithms"""
+    """
+    Abstract class for Algorithms.
 
+    Attributes:
+        name (str): The name of the algorithm, derived from the class name in lowercase.
+        path (str | None): The path to the algorithm, if applicable.
+        parameters (list): A list of parameters for the algorithm.
+        alg_kwargs (dict): Additional keyword arguments for the algorithm.
+
+    Abstract methods:
+        __init__(self, **alg_kwargs): Initializes the Algorithm object.
+        _get_path(self) -> str: Returns the common path for the algorithm.
+        run(self, problem: Problem, backend: Backend): Runs the algorithm on a specific problem using a backend.
+    """
     @abstractmethod
     def __init__(self, **alg_kwargs) -> None:
         self.name: str = self.__class__.__name__.lower()
@@ -153,20 +255,65 @@ class Algorithm(_SupportClass, ABC):
 
     @abstractmethod
     def _get_path(self) -> str:
-        """ return's common path """
+        """Returns the common path for the algorithm."""
 
     def parse_result_to_json(self, o: object) -> dict:
-        """ Parses results so that it can be saved as a json file """
+        """Parses results so that they can be saved as a JSON file.
+
+        Args:
+            o (object): The result object to be parsed.
+
+        Returns:
+            dict: The parsed result as a dictionary.
+        """
         print('Algorithm does not have the parse_result_to_json method implemented')
         return dict(o)
 
     @abstractmethod
     def run(self, problem: Problem, backend: Backend):
-        """ Runs an algorithm on a specific problem using a backend """
+        """Runs the algorithm on a specific problem using a backend.
+
+        Args:
+            problem (Problem): The problem to be solved.
+            backend (Backend): The backend to be used for execution.
+        """
 
 
 class QuantumLauncher(ABC, _FileSavingSupportClass):
-    """ Template for Quantum Launchers """
+    """
+    Quantum Launcher class.
+
+    Quantum launcher is used to run quantum algorithms on specific problem instances and backends.
+    It provides methods for binding parameters, preparing the problem, running the algorithm, and processing the results.
+
+    Attributes:
+        problem (Problem): The problem instance to be solved.
+        algorithm (Algorithm): The quantum algorithm to be executed.
+        backend (Backend, optional): The backend to be used for execution. Defaults to None.
+        path (str): The path to save the results. Defaults to 'results/'.
+        binding_params (dict or None): The parameters to be bound to the problem and algorithm. Defaults to None.
+
+    Methods:
+        _bind_parameters: Binds the specified parameters to the problem and algorithm.
+        _prepare_problem: Chooses a problem and binds parameters.
+        _run: Runs the algorithm on the problem.
+        process: Runs the algorithm, processes the results, and saves them if specified.
+
+
+        Example of usage:
+            from templates import QuantumLauncher
+            from problems import MaxCut
+            from qiskit_routines import QAOA, QiskitBackend
+
+            problem = MaxCut(instance_name='default')
+            algorithm = QAOA()
+            backend = QiskitBackend('local_simulator')
+
+            launcher = QuantumLauncher(problem, algorithm, backend)
+            result = launcher.process(save_pickle=True)
+            print(result)
+
+    """
 
     def __init__(self, problem: Problem, algorithm: Algorithm, backend: Backend = None,
                  path: str = 'results/', binding_params: dict | None = None) -> None:
@@ -180,19 +327,23 @@ class QuantumLauncher(ABC, _FileSavingSupportClass):
         self._res_path: str | None = None
         self.binding_params: dict | None = binding_params
 
-    def _bind_parameters(self) -> None:
-        """ binds parameters """
+    def _bind_parameters(self):
+        """
+        Binds parameters to the problem and algorithm.
+        """
         for param, value in self.binding_params.items():
             if param in self.problem.__class__.__dict__:
                 self.problem.__dict__[param] = value
             elif param in self.algorithm.__dict__:
                 self.algorithm.__dict__[param] = value
             else:
-                print(f'\033[93mClass {self.problem.__class__.__name__}  nor class \
-{self.algorithm.__class__.__name__} does not have parameter {param}, so it cannot be binded\033[0m')
+                print(f'\033[93mClass {self.problem.__class__.__name__} nor class \
+{self.algorithm.__class__.__name__} does not have parameter {param}, so it cannot be bound\033[0m')
 
     def _prepare_problem(self):
-        """ Chooses a problem and binds parameters """
+        """
+        Chooses a problem and binds parameters.
+        """
         problem_class = list(set(self.problem.__class__.__subclasses__()) &
                              set(self.algorithm.ROUTINE_CLASS.__subclasses__()))[0]
         self.problem.__class__ = problem_class
@@ -200,7 +351,12 @@ class QuantumLauncher(ABC, _FileSavingSupportClass):
             self._bind_parameters()
 
     def _run(self) -> dict:
-        """ Run's algorithm """
+        """
+        Runs the algorithm on the problem.
+
+        Returns:
+            dict: The results of the algorithm execution.
+        """
         self._prepare_problem()
 
         return self.algorithm.run(self.problem, self.backend)
@@ -208,7 +364,23 @@ class QuantumLauncher(ABC, _FileSavingSupportClass):
     def process(self, save_to_file: bool = False,
                 save_pickle: str | bool = False, save_txt: str | bool = False,
                 save_csv: str | bool = False, save_json: str | bool = False) -> dict:
-        """ Run's and process'es the data """
+        """
+        Runs the algorithm, processes the data, and saves the results if specified.
+
+        Args:
+            save_to_file (bool): Flag indicating whether to save the results to a file. Defaults to False.
+            save_pickle (str or bool): Flag indicating whether to save the results as a pickle file.
+                If a string is provided, it represents the path to save the pickle file. Defaults to False.
+            save_txt (str or bool): Flag indicating whether to save the results as a text file.
+                If a string is provided, it represents the path to save the text file. Defaults to False.
+            save_csv (str or bool): Flag indicating whether to save the results as a CSV file.
+                If a string is provided, it represents the path to save the CSV file. Defaults to False.
+            save_json (str or bool): Flag indicating whether to save the results as a JSON file.
+                If a string is provided, it represents the path to save the JSON file. Defaults to False.
+
+        Returns:
+            dict: The processed results.
+        """
         results = self._run()
         energy = results['energy']
 

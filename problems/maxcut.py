@@ -1,11 +1,26 @@
-""" Max Cut Problem """
+"""  This module contains the MaxCut class."""
 import networkx as nx
 
 from templates import Problem
 
 
 class MaxCut(Problem):
-    """ MacCut for Orca """
+    """ 
+    Class for MaxCut Problem.
+
+    This class represents MaxCut Problem which is a combinatorial optimization problem that involves partitioning the
+    vertices of a graph into two sets such that the number of edges between the two sets is maximized. The class contains
+    an instance of the problem, so it can be passed into Quantum Launcher.
+
+    Attributes:
+        instance (nx.Graph): The graph instance representing the problem.
+        instance_name (str): The name of the instance.
+        instance_path (str): The path to the instance.
+
+    Methods:
+        set_instance: Sets the instance of the problem.
+        read_instance: Reads the instance from a file.
+    """
 
     def __init__(self, instance: nx.Graph | None = None, instance_name: str | None = None,
                  instance_path: str | None = None) -> None:

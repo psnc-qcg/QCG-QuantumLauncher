@@ -1,11 +1,28 @@
-""" Exact Cover Problem """
+"""  This module contains the EC class."""
 import ast
 
 from templates import Problem
 
 
 class EC(Problem):
-    """ Class for exact cover problem """
+    """
+    Class for exact cover problem.
+
+    The exact cover problem is a combinatorial optimization problem that involves finding a subset of a given set
+    of elements such that the subset covers all elements and the number of elements in the subset is minimized.
+    The class contains an instance of the problem, so it can be passed into Quantum Launcher.
+
+    Attributes:
+        onehot (str): The one-hot encoding used for the problem.
+        instance (any): The instance of the problem.
+        instance_name (str | None): The name of the instance.
+        instance_path (str): The path to the instance file.
+
+    Methods:
+        set_instance: Sets the instance of the problem.
+        read_instance: Reads the instance from a file.
+
+    """
 
     def __init__(self, onehot: str, instance: any = None,
                  instance_name: str | None = None, instance_path: str = None) -> None:

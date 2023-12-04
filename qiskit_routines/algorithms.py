@@ -1,4 +1,4 @@
-""" file with qiskit algorithms subclasses """
+""" Algorithms for Qiskit routines """
 import json
 from abc import ABC
 from datetime import datetime
@@ -48,7 +48,23 @@ def commutator(op_a: SparsePauliOp, op_b: SparsePauliOp) -> SparsePauliOp:
 
 
 class QAOA(QiskitOptimizationAlgorithm):
-    """ Algorithm class with QAOA """
+    """Algorithm class with QAOA.
+
+    Args:
+        p (int): The number of QAOA steps. Defaults to 1.
+        alternating_ansatz (bool): Whether to use an alternating ansatz. Defaults to False. If True, it's recommended to provide a mixer_h to alg_kwargs.
+        aux: Auxiliary input for the QAOA algorithm.
+        **alg_kwargs: Additional keyword arguments for the base class.
+
+    Attributes:
+        name (str): The name of the algorithm.
+        aux: Auxiliary input for the QAOA algorithm.
+        p (int): The number of QAOA steps.
+        alternating_ansatz (bool): Whether to use an alternating ansatz.
+        parameters (list): List of parameters for the algorithm.
+        mixer_h (SparsePauliOp | None): The mixer Hamiltonian.
+
+    """
 
     def __init__(self, p: int = 1, alternating_ansatz:bool=False, aux=None, **alg_kwargs):
         super().__init__(**alg_kwargs)
@@ -135,8 +151,27 @@ class QAOA(QiskitOptimizationAlgorithm):
 
 
 class FALQON(QiskitOptimizationAlgorithm):
-    """ Algorithm class with FALQON """
+    """ 
+    Algorithm class with FALQON.
 
+    Args:
+        driver_h (Optional[Operator]): The driver Hamiltonian for the problem.
+        delta_t (float): The time step for the evolution operators.
+        beta_0 (float): The initial value of beta.
+        n (int): The number of iterations to run the algorithm.
+        **alg_kwargs: Additional keyword arguments for the base class.
+
+    Attributes:
+        driver_h (Optional[Operator]): The driver Hamiltonian for the problem.
+        delta_t (float): The time step for the evolution operators.
+        beta_0 (float): The initial value of beta.
+        n (int): The number of iterations to run the algorithm.
+        cost_h (Optional[Operator]): The cost Hamiltonian for the problem.
+        n_qubits (int): The number of qubits in the problem.
+        parameters (List[str]): The list of algorithm parameters.
+
+    """
+    
     def __init__(self, driver_h=None, delta_t=0, beta_0=0, n=1):
         super().__init__()
         self.driver_h = driver_h
@@ -164,6 +199,7 @@ class FALQON(QiskitOptimizationAlgorithm):
         return f'{self.name}@{self.n}@{self.delta_t}@{self.beta_0}'
 
     def run(self, problem: Problem, backend: QiskitBackend):
+        """ Runs the FALQON algorithm """
         # TODO implement aux operator
         hamiltonian = problem.get_qiskit_hamiltonian()
         self.cost_h = hamiltonian
@@ -183,7 +219,7 @@ class FALQON(QiskitOptimizationAlgorithm):
         sampler.set_options(job_tags=[tag])
         estimator.set_options(job_tags=[tag])
 
-        best_sample, last_sample = self.falqon_subroutine(estimator,
+        best_sample, last_sample = self._falqon_subroutine(estimator,
                             sampler, energies, betas, circuit_depths, cxs)
 
         timestamps, usages, qpu_time = self.get_processing_times(tag, sampler)
@@ -203,7 +239,7 @@ class FALQON(QiskitOptimizationAlgorithm):
 
         return result
 
-    def build_ansatz(self, betas):
+    def _build_ansatz(self, betas):
         """ building ansatz circuit """
         circ = (H ^ self.cost_h.num_qubits).to_circuit()
         params = ParameterVector("beta", length=len(betas))
@@ -212,28 +248,28 @@ class FALQON(QiskitOptimizationAlgorithm):
             circ.append(PauliEvolutionGate(self.driver_h, time=self.delta_t * param), circ.qubits)
         return circ
 
-    def falqon_subroutine(self, estimator,
+    def _falqon_subroutine(self, estimator,
                           sampler, energies, betas, circuit_depths, cxs):
         """ subroutine for falqon """
         for i in range(self.n):
-            betas, energy, depth, cx_count = self.run_falqon(betas, estimator)
+            betas, energy, depth, cx_count = self._run_falqon(betas, estimator)
             print(i, energy)
             energies.append(energy)
             circuit_depths.append(depth)
             cxs.append(cx_count)
         argmin = np.argmin(np.asarray(energies))
-        best_sample = self.sample_at(betas[:argmin], sampler)
-        last_sample = self.sample_at(betas, sampler)
+        best_sample = self._sample_at(betas[:argmin], sampler)
+        last_sample = self._sample_at(betas, sampler)
         return best_sample, last_sample
 
-    def run_falqon(self, betas, estimator):
+    def _run_falqon(self, betas, estimator):
         """ Method to run FALQON algorithm """
-        ansatz = self.build_ansatz(betas)
+        ansatz = self._build_ansatz(betas)
         comm_h = complex(0, 1) * commutator(self.driver_h, self.cost_h)
         beta = -1 * estimator.run(ansatz, comm_h, betas).result().values[0]
         betas.append(beta)
 
-        ansatz = self.build_ansatz(betas)
+        ansatz = self._build_ansatz(betas)
         energy = estimator.run(ansatz, self.cost_h, betas).result().values[0]
 
         depth = ansatz.decompose(reps=10).depth()
@@ -244,9 +280,9 @@ class FALQON(QiskitOptimizationAlgorithm):
 
         return betas, energy, depth, cx_count
 
-    def sample_at(self, betas, sampler):
+    def _sample_at(self, betas, sampler):
         """ Not sure yet """
-        ansatz = self.build_ansatz(betas)
+        ansatz = self._build_ansatz(betas)
         ansatz.measure_all()
         res = sampler.run(ansatz, betas).result()
         return res

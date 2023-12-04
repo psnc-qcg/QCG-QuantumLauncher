@@ -1,7 +1,7 @@
 """ Backend Class for Qiskit Launcher """
 from qiskit.primitives import Estimator as LocalEstimator, BaseEstimator
 from qiskit.primitives import Sampler as LocalSampler, BaseSampler
-from qiskit_algorithms.optimizers import COBYLA, SPSA, SciPyOptimizer
+from qiskit_algorithms.optimizers import COBYLA, SPSA, SciPyOptimizer, Optimizer
 from qiskit_ibm_runtime import Estimator, Sampler
 from qiskit_ibm_runtime import Session, Options
 
@@ -10,16 +10,34 @@ from .qiskit_template import QiskitRoutine
 
 
 class QiskitBackend(Backend, QiskitRoutine):
-    """ local backend """
+    """ 
+    A class representing a local backend for Qiskit routines.
 
+    This class extends the `Backend` and `QiskitRoutine` classes and provides functionality for a local backend.
+    It allows for setting up a session, options, and various primitives such as estimators, samplers, and optimizers.
+
+    Attributes:
+        name (str): The name of the backend.
+        session (Session): The session associated with the backend.
+        options (Options): The options for the backend.
+        primitive_strategy: The strategy for selecting primitives based on the backend name.
+        sampler (BaseSampler): The sampler used for sampling.
+        estimator (BaseEstimator): The estimator used for estimation.
+        optimizer (Optimizer): The optimizer used for optimization.
+
+    Methods:
+        setup() -> dict: Returns a dictionary with the setup information of the backend.
+        _set_primitives_on_backend_name() -> None: Sets the appropriate primitives based on the backend name.
+    """
+    
     def __init__(self, name: str, session: Session = None, options: Options = None) -> None:
         super().__init__(name)
         self.session = session
         self.options = options
         self.primitive_strategy = None
         self.sampler = None
-        self.estimator = None
-        self.optimizer = None
+        self.estimator: BaseEstimator = None
+        self.optimizer: Optimizer = None
         self._set_primitives_on_backend_name()
 
     @property
