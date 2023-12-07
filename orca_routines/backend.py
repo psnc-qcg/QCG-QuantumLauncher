@@ -1,9 +1,9 @@
 """ Backend class for Orca """
 from templates import Backend
-from .orca_templates import OrcaStuff
+from .orca_templates import OrcaRoutine
 
 
-class OrcaBackend(Backend, OrcaStuff):
+class OrcaBackend(Backend, OrcaRoutine):
     """ local backend """
 
     def __init__(self, name: str) -> None:

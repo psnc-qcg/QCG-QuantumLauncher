@@ -2,7 +2,7 @@
 try:
     from problems import EC, JSSP, MaxCut, QATM
     from templates import QuantumLauncher
-    from qiskit_stuff import *
+    from qiskit_routines import QAOA, QiskitBackend, FALQON
 except Exception as ex:
     print('\033[91mImport Error\033[0m')
     print(ex)
@@ -15,7 +15,7 @@ def test_ec():
     try:
         pr = EC('exact')
         pr.set_instance(instance_name='toy', instance=None)
-        qaoa = QAOA2(p=3, alternating_ansatz=True)
+        qaoa = QAOA(p=3, alternating_ansatz=True)
         backend = QiskitBackend('local_simulator')
         launcher = QuantumLauncher(pr, qaoa, backend, path=TESTING_DIR)
 
@@ -32,7 +32,7 @@ def test_jssp():
     """ Testing function for Job Shop Shedueling Problem """
     try:
         pr = JSSP(3, 'exact', instance_name='toy', optimization_problem=True)
-        qaoa = QAOA2(p=3)
+        qaoa = QAOA(p=3)
         backend = QiskitBackend('local_simulator')
         launcher = QuantumLauncher(pr, qaoa, backend, path=TESTING_DIR)
 
@@ -48,12 +48,10 @@ def test_jssp():
 def test_maxcut():
     """ Testing function for Max Cut """
     try:
-        pr = MaxCut()
-        pr.set_instance(instance_name='default')
-        qaoa = QAOA2(p=3)
+        pr = MaxCut(instance_name='default')
+        qaoa = QAOA()
         backend = QiskitBackend('local_simulator')
         launcher = QuantumLauncher(pr, qaoa, backend, path=TESTING_DIR)
-
         inform = launcher.process(save_pickle=True)
         if inform is None:
             raise ValueError('The Output is empty')
@@ -72,7 +70,7 @@ def test_qatm():
         print('\033[91mSomething with QATM problem (most likely lack of data file)\033[0m')
         print(ex)
     try:
-        qaoa = QAOA2(p=3)
+        qaoa = QAOA(p=3)
         backend = QiskitBackend('local_simulator')
         launcher = QuantumLauncher(pr, qaoa, backend, path=TESTING_DIR)
 

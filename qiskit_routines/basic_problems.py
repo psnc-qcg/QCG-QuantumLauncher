@@ -4,10 +4,10 @@ import numpy as np
 from qiskit.quantum_info import SparsePauliOp
 
 import problems
-from .qiskit_template import QiskitStuff
+from .qiskit_template import QiskitRoutine
 
 
-class ECQiskit(problems.EC, QiskitStuff):
+class ECQiskit(problems.EC, QiskitRoutine):
     def get_qiskit_hamiltonian(self) -> SparsePauliOp:
         """ generating hamiltonian"""
         elements = set().union(*self.instance)
@@ -127,7 +127,7 @@ class ECQiskit(problems.EC, QiskitStuff):
         return mix_ham
 
 
-class JSSPQiskit(problems.JSSP, QiskitStuff):
+class JSSPQiskit(problems.JSSP, QiskitRoutine):
     def get_qiskit_hamiltonian(self, optimization_problem: bool = None) -> SparsePauliOp:
         if optimization_problem is None:
             optimization_problem = self.optimization_problem
@@ -138,7 +138,7 @@ class JSSPQiskit(problems.JSSP, QiskitStuff):
             return self.h_d
 
 
-class MaxCutQiskit(problems.MaxCut, QiskitStuff):
+class MaxCutQiskit(problems.MaxCut, QiskitRoutine):
     def get_qiskit_hamiltonian(self):
         ham = None
         n = self.instance.number_of_nodes()
@@ -150,7 +150,7 @@ class MaxCutQiskit(problems.MaxCut, QiskitStuff):
         return ham.simplify()
 
 
-class QATMQiskit(problems.QATM, QiskitStuff):
+class QATMQiskit(problems.QATM, QiskitRoutine):
     def get_qiskit_hamiltonian(self) -> SparsePauliOp:
         cm = self.instance['cm']
         aircrafts = self.instance['aircrafts']

@@ -1,5 +1,5 @@
 """ Quantum Launcher for Orca """
-from orca_stuff import *
+from orca_routines import *
 from problems import MaxCut
 from templates import QuantumLauncher
 

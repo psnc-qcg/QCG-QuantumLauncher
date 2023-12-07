@@ -1,4 +1,4 @@
-""" Job Shop Sheduling Problem """
+"""  Module for Job Shop Scheduling Problem (JSSP)."""
 from collections import defaultdict
 
 from jssp.qiskit_scheduler import get_jss_hamiltonian
@@ -6,8 +6,26 @@ from templates import Problem
 
 
 class JSSP(Problem):
-    """ Ckass for Job Shop Shedueling Problem """
+    """
+    Class for Job Shop Scheduling Problem.
 
+    This class represents Job Shop Scheduling Problem (JSSP) which is a combinatorial optimization problem that involves 
+    scheduling a set of jobs on a set of machines. Each job consists of a sequence of operations that must be performed 
+    on different machines. The objective is to find a schedule that minimizes the makespan, i.e., the total time required
+    to complete all jobs. The class contains an instance of the problem, so it can be passed into Quantum Launcher.
+
+
+    Attributes:
+        max_time (int): The maximum time for the scheduling problem.
+        onehot (str): The one-hot encoding method to be used.
+        optimization_problem (bool): Flag indicating whether the problem is an optimization problem or a decision problem.
+        results (dict): Dictionary to store the results of the problem instance.
+
+    Methods:
+        set_instance: Sets the problem instance manually.
+        read_instance: Reads the problem instance from a file.
+
+    """
     def __init__(self, max_time: int, onehot: str, instance: any = None,
                  instance_name: str | None = None, instance_path: str | None = None,
                  optimization_problem: bool = False) -> None:
@@ -25,9 +43,8 @@ class JSSP(Problem):
                         'onehot': onehot,
                         'H_pos_by_label': self.h_pos_by_label,
                         'H_label_by_pos': self.h_label_by_pos}
-        opt = 'optimization' if optimization_problem else 'decision'
-        self.variant = opt
-        self.opt = opt
+
+        self.variant = 'optimization' if optimization_problem else 'decision'
 
     @property
     def setup(self) -> dict:
@@ -39,7 +56,7 @@ class JSSP(Problem):
         }
 
     def _get_path(self) -> str:
-        return f'{self.name}@{self.instance_name}@{self.max_time}@{self.opt}@{self.onehot}'
+        return f'{self.name}@{self.instance_name}@{self.max_time}@{"optimization" if self.optimization_problem else "decision"}@{self.onehot}'
 
     def set_instance(self, instance: any, instance_name: str | None = None):
         super().set_instance(instance, instance_name)
@@ -51,7 +68,12 @@ class JSSP(Problem):
                                      "lasagna": [("oven", 2)]}
 
     def read_instance(self, instance_path: str):
-        """ Sth """
+        """Reads the problem instance from a file.
+
+        Args:
+            instance_path (str): The path to the file containing the problem instance.
+
+        """
         job_dict = defaultdict(list)
         with open(instance_path, 'r', encoding='utf-8') as file_:
             file_.readline()
