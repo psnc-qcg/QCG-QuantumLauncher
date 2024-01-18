@@ -49,8 +49,8 @@ class QiskitBackend(Backend, QiskitRoutine):
 
     def _set_primitives_on_backend_name(self) -> None:
         if self.name == 'local_simulator':
-            self.estimator = LocalEstimator()
-            self.sampler = LocalSampler()
+            self.estimator = LocalEstimator(options=self.options)
+            self.sampler = LocalSampler(options=self.options)
             self.optimizer = COBYLA()
         elif self.session is None:
             raise AttributeError('Please instantiate a session if using other backend than local')
