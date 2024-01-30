@@ -4,7 +4,7 @@ from abc import ABC
 from datetime import datetime
 
 import numpy as np
-from qiskit import qpy
+from qiskit import qpy, QuantumCircuit
 from qiskit.circuit import ParameterVector
 from qiskit.circuit.library import PauliEvolutionGate
 from qiskit.opflow import H
@@ -63,6 +63,7 @@ class QAOA(QiskitOptimizationAlgorithm):
         alternating_ansatz (bool): Whether to use an alternating ansatz.
         parameters (list): List of parameters for the algorithm.
         mixer_h (SparsePauliOp | None): The mixer Hamiltonian.
+        mixer_h (QuantumCircuit | None): The initial state of the circuit.
 
     """
 
@@ -74,6 +75,7 @@ class QAOA(QiskitOptimizationAlgorithm):
         self.alternating_ansatz: bool = alternating_ansatz
         self.parameters = ['p']
         self.mixer_h: SparsePauliOp | None = None
+        self.initial_state: QuantumCircuit | None = None
 
     @property
     def setup(self) -> dict:
@@ -127,11 +129,14 @@ class QAOA(QiskitOptimizationAlgorithm):
         sampler.set_options(job_tags=[tag])
         optimizer = backend.optimizer
 
-        if self.alternating_ansatz and self.mixer_h is None:
-            self.mixer_h = problem.get_mixer_hamiltonian()
+        if self.alternating_ansatz:
+            if self.mixer_h is None:
+                self.mixer_h = problem.get_mixer_hamiltonian()
+            if self.initial_state is None:
+                self.initial_state = problem.get_QAOAAnsatz_initial_state()
 
         qaoa = qiskit_algorithms.QAOA(sampler, optimizer, reps=self.p, callback=qaoa_callback,
-                        mixer=self.mixer_h, **self.alg_kwargs)
+                        mixer=self.mixer_h, initial_state=self.initial_state, **self.alg_kwargs)
         qaoa_result = qaoa.compute_minimum_eigenvalue(hamiltonian, self.aux)
         depth = qaoa.ansatz.decompose(reps=10).depth()
         if 'cx' in qaoa.ansatz.decompose(reps=10).count_ops():

@@ -2,10 +2,31 @@
 import hampy
 import numpy as np
 from qiskit.quantum_info import SparsePauliOp
+from qiskit import QuantumCircuit
 
 import problems
 from .qiskit_template import QiskitRoutine
 
+
+
+def ring_ham(ring: set, n):
+    total = None
+    ring = list(ring)
+    for index in range(len(ring) - 1):
+        sparse_list = []
+        sparse_list.append((("XX", [ring[index], ring[index + 1]], 1)))
+        sparse_list.append((("YY", [ring[index], ring[index + 1]], 1)))
+        sp = SparsePauliOp.from_sparse_list(sparse_list, n)
+        if total is None:
+            total = sp
+        else:
+            total += sp
+    sparse_list = []
+    sparse_list.append((("XX", [ring[-1], ring[0]], 1)))
+    sparse_list.append((("YY", [ring[-1], ring[0]], 1)))
+    sp = SparsePauliOp.from_sparse_list(sparse_list, n)
+    total += sp
+    return SparsePauliOp(total)
 
 class ECQiskit(problems.EC, QiskitRoutine):
     def get_qiskit_hamiltonian(self) -> SparsePauliOp:
@@ -53,25 +74,6 @@ class ECQiskit(problems.EC, QiskitRoutine):
 
             return constraints
 
-        def ring_ham(ring: set):
-            total = None
-            ring = list(ring)
-            for index in range(len(ring) - 1):
-                sparse_list = []
-                sparse_list.append((("XX", [ring[index], ring[index + 1]], 1)))
-                sparse_list.append((("YY", [ring[index], ring[index + 1]], 1)))
-                sp = SparsePauliOp.from_sparse_list(sparse_list, len(self.instance))
-                if total is None:
-                    total = sp
-                else:
-                    total += sp
-            sparse_list = []
-            sparse_list.append((("XX", [ring[-1], ring[0]], 1)))
-            sparse_list.append((("YY", [ring[-1], ring[0]], 1)))
-            sp = SparsePauliOp.from_sparse_list(sparse_list, len(self.instance))
-            total += sp
-            return SparsePauliOp(total)
-
         # creating mixer hamiltonians for all qubits that aren't in rings (in other words applying X gate to them)
         def x_gate_ham(x_gate: list):
             total = None
@@ -115,9 +117,9 @@ class ECQiskit(problems.EC, QiskitRoutine):
         mix_ham = None
         for set_ in ring:
             if mix_ham is None:
-                mix_ham = ring_ham(set_)
+                mix_ham = ring_ham(set_, len(self.instance))
             else:
-                mix_ham += ring_ham(set_)
+                mix_ham += ring_ham(set_, len(self.instance))
 
         if mix_ham is None:
             mix_ham = x_gate_ham(x_gate)
@@ -128,11 +130,8 @@ class ECQiskit(problems.EC, QiskitRoutine):
 
 
 class JSSPQiskit(problems.JSSP, QiskitRoutine):
-    def get_qiskit_hamiltonian(self, optimization_problem: bool = None) -> SparsePauliOp:
-        if optimization_problem is None:
-            optimization_problem = self.optimization_problem
-
-        if optimization_problem:
+    def get_qiskit_hamiltonian(self) -> SparsePauliOp:
+        if self.optimization_problem:
             return self.h_o
         else:
             return self.h_d
@@ -175,4 +174,38 @@ class QATMQiskit(problems.QATM, QiskitRoutine):
                 conflict_hamiltonian = hampy.H_and([p1, p2], len(cm))
 
         hamiltonian = onehot_hamiltonian + conflict_hamiltonian
+
+        if self.optimization_problem:
+            goal_hamiltonian = None
+            for i, (maneuver, ac) in self.instance['aircrafts'].iterrows():
+                if maneuver != ac:
+                    h = hampy.H_x(i, len(aircrafts))
+                    if goal_hamiltonian is None:
+                        goal_hamiltonian = h
+                    else:
+                        goal_hamiltonian += h
+            goal_hamiltonian /= sum(sum(cm))
+            hamiltonian += goal_hamiltonian
+
         return hamiltonian.simplify()
+
+    def get_mixer_hamiltonian(self) -> SparsePauliOp:
+        cm = self.instance['cm']
+        aircrafts = self.instance['aircrafts']
+
+        mixer_hamiltonian = None
+        for plane, manouvers in aircrafts.groupby(by='aircraft'):
+            h = ring_ham(manouvers.index.values.tolist(), len(cm))
+            if mixer_hamiltonian is None:
+                mixer_hamiltonian = h
+            else:
+                mixer_hamiltonian += h
+        return mixer_hamiltonian
+
+    def get_QAOAAnsatz_initial_state(self) -> QuantumCircuit:
+        aircrafts = self.instance['aircrafts']
+        qc = QuantumCircuit(len(aircrafts))
+        for plane, manouvers in aircrafts.groupby(by='aircraft'):
+            qc.x(manouvers.index.values.tolist()[0])
+        return qc
+

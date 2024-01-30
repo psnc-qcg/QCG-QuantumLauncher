@@ -29,10 +29,12 @@ class QATM(Problem):
     """
 
     def __init__(self, onehot: str, instance: any = None, instance_name: str | None = None,
-                 instance_path: str | None = None) -> None:
+                 instance_path: str | None = None,
+                 optimization_problem: bool = False) -> None:
         super().__init__(instance=instance, instance_name=instance_name,
                          instance_path=instance_path)
         self.onehot = onehot
+        self.optimization_problem = optimization_problem
 
     @property
     def setup(self) -> dict:
