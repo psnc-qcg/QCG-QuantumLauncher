@@ -10,7 +10,7 @@ from qiskit.circuit.library import PauliEvolutionGate
 from qiskit.opflow import H
 from qiskit.primitives.base.base_primitive import BasePrimitive
 from qiskit.quantum_info import SparsePauliOp
-import qiskit_algorithms
+from qiskit_algorithms.minimum_eigensolvers import QAOA as QiskitQAOA
 from qiskit_algorithms.minimum_eigensolvers import SamplingVQEResult
 
 from templates import Problem, Algorithm
@@ -135,7 +135,7 @@ class QAOA(QiskitOptimizationAlgorithm):
             if self.initial_state is None:
                 self.initial_state = problem.get_QAOAAnsatz_initial_state()
 
-        qaoa = qiskit_algorithms.QAOA(sampler, optimizer, reps=self.p, callback=qaoa_callback,
+        qaoa = QiskitQAOA(sampler, optimizer, reps=self.p, callback=qaoa_callback,
                         mixer=self.mixer_h, initial_state=self.initial_state, **self.alg_kwargs)
         qaoa_result = qaoa.compute_minimum_eigenvalue(hamiltonian, self.aux)
         depth = qaoa.ansatz.decompose(reps=10).depth()
