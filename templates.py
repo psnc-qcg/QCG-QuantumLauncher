@@ -161,10 +161,10 @@ class Problem(_SupportClass, ABC):
         self.name = type(self).__name__.lower()
         self.instance_name: str = 'unnamed' if instance_name is None else instance_name
         self.instance: any = None
-        if instance_path is not None:
-            self.read_instance(instance_path)
-        else:
+        if instance_path is None:
             self.set_instance(instance=instance, instance_name=instance_name)
+        else:
+            self.read_instance(instance_path)
 
     def set_instance(self, instance: any, instance_name: str | None = None) -> None:
         """

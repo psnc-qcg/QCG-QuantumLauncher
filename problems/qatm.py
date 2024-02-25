@@ -46,7 +46,9 @@ class QATM(Problem):
     def _get_path(self) -> str:
         return f'{self.name}@{self.instance_name.split(".", 1)[0]}'
 
-    def read_instance(self, instance_path: str, instance_name: str) -> None:
+    def read_instance(self, instance_path: str, instance_name: str|None=None) -> None:
+        if instance_name is None:
+            instance_name = self.instance_name
         cm_path = os.path.join(instance_path, 'CM_' + instance_name)
         aircrafts_path = os.path.join(instance_path, 'aircrafts_' + instance_name)
 
