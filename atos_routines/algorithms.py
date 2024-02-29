@@ -1,7 +1,7 @@
 """ file with orca algorithms subclasses """
 
 from qat.plugins import ScipyMinimizePlugin
-from qat.qpus import get_default_qpu
+from qat.qpus import get_default_qpu, CLinalg
 from qat.vsolve.ansatz import AnsatzFactory
 
 from templates import Problem, Algorithm
@@ -23,8 +23,8 @@ class QAOA(Algorithm, AtosRoutine):
         return f'{self.name}@{self.p}'
 
     def run(self, problem: Problem, backend: AtosBackend) -> dict:
-
         """ Runs the QAOA algorithm """
+
         observable = problem.get_atos_hamiltonian()
 
         circuit = AnsatzFactory.qaoa_circuit(observable, self.p, strategy='default')
@@ -36,9 +36,17 @@ class QAOA(Algorithm, AtosRoutine):
                                     options={"maxiter": 200}) | qpu
         optimization_result = stack.submit(job)
         sjob = job(**eval(optimization_result.meta_data["parameter_map"]))
-        sjob = sjob.circuit.to_job(nbshots=1024)
-        sample_result = stack.submit(sjob)
+        sjob = sjob.circuit.to_job(nbshots=4096)
+        sample_result = CLinalg().submit(sjob)
 
-        dict_results = {"optimization_result": optimization_result, "sample_result": sample_result}
+
+        from qiskit_algorithms.minimum_eigensolvers.diagonal_estimator import _evaluate_sparsepauli
+        cheating = {
+            sample.state.state: (sample.probability, _evaluate_sparsepauli(sample.state.state, problem.get_qiskit_hamiltonian()))
+            for sample in sample_result.raw_data
+        }
+
+        dict_results = {"optimization_result": optimization_result, "sample_result": sample_result,
+                        "cheating": cheating}
 
         return dict_results

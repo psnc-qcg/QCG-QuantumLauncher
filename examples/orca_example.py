@@ -7,7 +7,7 @@ from templates import QuantumLauncher
 def main():
     """ main """
     problem = MaxCut(instance_name='default')
-    alg = BinaryBosonic()
+    alg = BBS()
     backend = OrcaBackend('local')
     launcher = QuantumLauncher(problem, alg, backend)
     print(launcher._run())

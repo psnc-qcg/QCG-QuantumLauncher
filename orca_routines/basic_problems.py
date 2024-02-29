@@ -1,6 +1,6 @@
 """ Basic problems for Orca """
 import numpy as np
-
+from typing import Tuple
 from jssp.pyqubo_scheduler import get_jss_bqm
 from problems import MaxCut, EC, JSSP
 from .orca_templates import OrcaRoutine
@@ -79,7 +79,6 @@ class ECOrca(EC, OrcaRoutine):
         Q = np.zeros((len(self.instance), len(self.instance)))
         self.Jrr_dict, self.hr_dict = self.calculate_jrr_hr()
         for i in self.Jrr_dict:
-            # print(i)
             Q[i[0]][i[1]] = self.Jrr_dict[i]
             Q[i[1]][i[0]] = Q[i[0]][i[1]]
 
@@ -98,7 +97,7 @@ class JSSPOrca(JSSP, OrcaRoutine):
     def _fix_get_jss_bqm(self, instance, max_time, config,
                             lagrange_one_hot=0,
                             lagrange_precedence=0,
-                            lagrange_share=0) -> (dict, list, None):
+                            lagrange_share=0) -> Tuple[dict, list, None]:
         pre_result = get_jss_bqm(instance, max_time, config,
                             lagrange_one_hot=lagrange_one_hot,
                             lagrange_precedence=lagrange_precedence,
@@ -148,7 +147,6 @@ class JSSPOrca(JSSP, OrcaRoutine):
         reverse_dict_map = {v: i for i, v in enumerate(variables)}
 
         Q = np.zeros((self.instance_size, self.instance_size))
-        print(actually_its_qubo[2])
 
         for (label_i, label_j), value in actually_its_qubo[1].items():
             i = reverse_dict_map[label_i]
@@ -159,5 +157,4 @@ class JSSPOrca(JSSP, OrcaRoutine):
         for label_i, value in actually_its_qubo[0].items():
             i = reverse_dict_map[label_i]
             Q[i, i] += value
-        print(Q)
         return self.qubo_fn_fact, Q / max(np.max(Q), -np.min(Q))

@@ -130,17 +130,24 @@ class Backend(_SupportClass, ABC):
 
 class Problem(_SupportClass, ABC):
     """
-    Abstract class for Problems.
+    Abstract class for defining Problems.
 
     Attributes:
-        variant (str): The variant of the problem, default one: "Optimization".
+        variant (str): The variant of the problem. The default variant is "Optimization".
         path (str | None): The path to the problem.
         name (str): The name of the problem.
         instance_name (str): The name of the instance.
         instance (any): An instance of the problem.
-    
-    Abstract Methods:
-        _get_path(): Returns the common path.
+
+    Methods:
+        set_instance(self, instance: any, instance_name: str | None = None) -> None:
+            Sets the instance of the problem.
+        read_instance(self, instance_path: str) -> None:
+            Reads the instance of the problem from a file.
+        read_result(self, exp, log_path) -> any:
+            Reads a result from a file.
+        analyze_result(self, result) -> None:
+            Analyzes the result.
 
     """
     @abstractmethod
@@ -342,7 +349,7 @@ class QuantumLauncher(ABC, _FileSavingSupportClass):
 
     def _prepare_problem(self):
         """
-        Chooses a problem and binds parameters.
+        Chooses a problem for current hardware taken from the algorithm and binds parameters.
         """
         problem_class = list(set(self.problem.__class__.__subclasses__()) &
                              set(self.algorithm.ROUTINE_CLASS.__subclasses__()))[0]
@@ -352,7 +359,7 @@ class QuantumLauncher(ABC, _FileSavingSupportClass):
 
     def _run(self) -> dict:
         """
-        Runs the algorithm on the problem.
+        Prepares the problem, and runs the algorithm on the problem.
 
         Returns:
             dict: The results of the algorithm execution.
