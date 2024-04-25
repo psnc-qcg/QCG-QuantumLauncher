@@ -1,7 +1,6 @@
 from qat.core import Observable, Term
 from qiskit.quantum_info import SparsePauliOp
-from typing import Iterable, Dict, Tuple
-from collections import defaultdict
+from typing import Iterable, Dict, Tuple, Set
 
 
 def ham_from_qiskit_to_atos(q_h: SparsePauliOp) -> Observable:
@@ -51,18 +50,18 @@ def _qubo_matrix_into_hamiltonian(qubo: Iterable[Iterable[int]], offset: float =
             if val != 0:
                 hamiltonian += SparsePauliOp(
                     _create_string([ind_c, ind_r]), val)
-    return hamiltonian
+    return hamiltonian.simplify()
 
 
 def _qubo_dict_into_hamiltonian(qubo: Dict[Tuple[str, str], float], offset: float = 0) -> SparsePauliOp:
-
-    labels: Dict[str, int] = defaultdict(
-        lambda: max(labels.values(), default=-1) + 1)
+    label_set: Set[str] = set()
     for (arg1, arg2) in sorted(qubo.keys()):
-        if arg1 not in labels:
-            labels[arg1]
-        if arg2 not in labels:
-            labels[arg2]
+        if arg1 not in label_set:
+            label_set.add(arg1)
+        if arg2 not in label_set:
+            label_set.add(arg2)
+
+    labels = {label: i for i, label in enumerate(sorted(label_set))}
 
     N: int = len(labels)
 
@@ -80,4 +79,4 @@ def _qubo_dict_into_hamiltonian(qubo: Dict[Tuple[str, str], float], offset: floa
     for (arg1, arg2), coeff in qubo.items():
         hamiltonian += SparsePauliOp(_create_string(
             [labels[arg1], labels[arg2]]), coeff)
-    return hamiltonian
+    return hamiltonian.simplify()
