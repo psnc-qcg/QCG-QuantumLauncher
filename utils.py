@@ -12,7 +12,8 @@ def ham_from_qiskit_to_atos(q_h: SparsePauliOp) -> Observable:
 
 
 def qubo_into_hamiltonian(qubo: Iterable[Iterable[int]], bias: float = 0) -> SparsePauliOp:
-    """_summary_
+    """
+    Convert a QUBO matrix into a quadratic Hamiltonian in the form of a SparsePauliOp.
 
     Args:
         qubo (Iterable[Iterable[int]]): Quadratic Unconstrained Binary Optimization Matrix.
@@ -22,6 +23,7 @@ def qubo_into_hamiltonian(qubo: Iterable[Iterable[int]], bias: float = 0) -> Spa
         SparsePauliOp: The quadratic Hamiltonian in the form of a SparsePauliOp.
     """
     N = len(qubo)
+    assert all(len(row) == N for row in qubo), "QUBO matrix must be square"
 
     def _create_string(z_index: int | list[int] | None) -> str:
         if z_index is None:
