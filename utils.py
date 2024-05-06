@@ -1,6 +1,6 @@
 from qat.core import Observable, Term
 from qiskit.quantum_info import SparsePauliOp
-from typing import Iterable, Dict, Tuple, Set
+from typing import Iterable, Dict, Tuple, Set, List
 
 
 def ham_from_qiskit_to_atos(q_h: SparsePauliOp) -> Observable:
@@ -34,22 +34,19 @@ def _qubo_matrix_into_hamiltonian(qubo: Iterable[Iterable[int]], offset: float =
     N = len(qubo)
     assert all(len(row) == N for row in qubo), "QUBO matrix must be square"
 
-    def _create_string(z_index: int | list[int] | None) -> str:
-        if z_index is None:
-            return 'I' * N
-
-        if isinstance(z_index, int):
-            z_index = [z_index]
-
-        string = ''.join('I' if i not in z_index else 'Z' for i in range(N))
-        return string
-
-    hamiltonian = SparsePauliOp(_create_string(None), offset)
+    sparse_list: List[Tuple[str, List, float]] = []
+    constant: float = 0
     for ind_r, row in enumerate(qubo):
-        for ind_c, val in enumerate(row[:ind_r + 1]):
+        constant -= val/2
+        sparse_list.append(('Z', [ind_r], -val / 2))
+        for ind_c, val in enumerate(row[ind_r + 1:], ind_r + 1):
             if val != 0:
-                hamiltonian += SparsePauliOp(
-                    _create_string([ind_c, ind_r]), val)
+                constant += val / 4
+                sparse_list.append(('Z', [ind_r], -val / 4))
+                sparse_list.append(('Z', [ind_c], -val / 4))
+                sparse_list.append(('ZZ', [ind_r, ind_c], val / 4))
+    hamiltonian: SparsePauliOp = SparsePauliOp.from_sparse_list(sparse_list, N)
+    hamiltonian += SparsePauliOp.from_sparse_list(('I', [0], constant), N)
     return hamiltonian.simplify()
 
 
@@ -65,18 +62,19 @@ def _qubo_dict_into_hamiltonian(qubo: Dict[Tuple[str, str], float], offset: floa
 
     N: int = len(labels)
 
-    def _create_string(z_index: int | list[int] | None) -> str:
-        if z_index is None:
-            return 'I' * N
-
-        if isinstance(z_index, int):
-            z_index = [z_index]
-
-        string = ''.join('I' if i not in z_index else 'Z' for i in range(N))
-        return string
-
-    hamiltonian: SparsePauliOp = SparsePauliOp(_create_string(None), offset)
+    sparse_list: List[Tuple[str, List, float]] = []
+    constant: float = 0
     for (arg1, arg2), coeff in qubo.items():
-        hamiltonian += SparsePauliOp(_create_string(
-            [labels[arg1], labels[arg2]]), coeff)
+        if arg1 == arg2:
+            constant += coeff / 2
+            sparse_list.append(('Z', [labels[arg1]], -coeff / 2))
+        else:
+            constant += coeff / 4
+            sparse_list.append(('ZZ', [labels[arg1], labels[arg2]], coeff / 4))
+            sparse_list.append(('Z', [labels[arg1]], -coeff / 4))
+            sparse_list.append(('Z', [labels[arg2]], -coeff / 4))
+
+    hamiltonian: SparsePauliOp = SparsePauliOp.from_sparse_list(sparse_list, N)
+    hamiltonian += SparsePauliOp.from_sparse_list([('I', [0], constant)], N)
+
     return hamiltonian.simplify()
