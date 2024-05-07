@@ -37,7 +37,7 @@ def _qubo_matrix_into_hamiltonian(qubo: Iterable[Iterable[int]], offset: float =
     sparse_list: List[Tuple[str, List, float]] = []
     constant: float = 0
     for ind_r, row in enumerate(qubo):
-        constant -= val/2
+        constant += val/2
         sparse_list.append(('Z', [ind_r], -val / 2))
         for ind_c, val in enumerate(row[ind_r + 1:], ind_r + 1):
             if val != 0:
