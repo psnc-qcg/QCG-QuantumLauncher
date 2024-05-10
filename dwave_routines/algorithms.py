@@ -1,17 +1,19 @@
 import numpy as np
 import ast
-from templates import Algorithm
+from templates import Algorithm, Problem
 from .dwave_templates import DwaveRoutine
 from pyqubo import Spin
 from dimod.binary.binary_quadratic_model import BinaryQuadraticModel
+from dimod import Sampler
 
 
 class DwaveSolver(Algorithm, DwaveRoutine):
     def __init__(self, **alg_kwargs) -> None:
         super().__init__(**alg_kwargs)
 
-    def run(self, problem: DwaveRoutine, backend: DwaveRoutine, **kwargs):
-        self._sampler = backend.sampler
+    def run(self, problem: Problem, backend: DwaveRoutine, **kwargs):
+        self._sampler: Sampler = backend.sampler
+        self.label: str = f'{problem.name}_{problem.instance_name}'
         if 'get_bqm' in problem.__dict__:
             bqm: BinaryQuadraticModel = problem.get_bqm()
         else:
@@ -23,7 +25,7 @@ class DwaveSolver(Algorithm, DwaveRoutine):
         return super()._get_path()
 
     def _solve_bqm(self, bqm, **kwargs):
-        return self._sampler.sample(bqm, **kwargs)
+        return self._sampler.sample(bqm, label=self.label, **kwargs)
 
 
 class QUBOMatrix:
