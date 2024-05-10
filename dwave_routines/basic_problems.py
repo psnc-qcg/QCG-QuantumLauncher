@@ -11,7 +11,7 @@ from qiskit.quantum_info import SparsePauliOp
 
 
 class QiskitToDwave:
-    def get_dwave_qubo(self):
+    def get_qubo(self):
         return self._hamiltonian_to_qubo(self.get_qiskit_hamiltonian())
 
     def _hamiltonian_to_qubo(self, values: SparsePauliOp):

@@ -2,28 +2,28 @@ import numpy as np
 import ast
 from templates import Algorithm
 from .dwave_templates import DwaveRoutine
-from .backend import DwaveBackend
-import collections
 from pyqubo import Spin
-from tabu import TabuSampler
+from dimod.binary.binary_quadratic_model import BinaryQuadraticModel
 
 
 class DwaveSolver(Algorithm, DwaveRoutine):
     def __init__(self, **alg_kwargs) -> None:
         super().__init__(**alg_kwargs)
 
-    def run(self, problem):
-        pass
+    def run(self, problem: DwaveRoutine, backend: DwaveRoutine, **kwargs):
+        self._sampler = backend.sampler
+        if 'get_bqm' in problem.__dict__:
+            bqm: BinaryQuadraticModel = problem.get_bqm()
+        else:
+            qubo, offset = problem.get_qubo()
+            bqm, _ = QUBOMatrix(qubo, offset).qubo_matrix_into_bqm()
+        return self._solve_bqm(bqm, **kwargs)
 
     def _get_path(self) -> str:
         return super()._get_path()
 
-    def solve_dwave(self, qubo, offset, num_reads=1000):
-        qubo_matrix = QUBOMatrixDwave(qubo, offset)
-        bqm, model = qubo_matrix.Qubo_matrix_into_bqm()
-        best_sample = qubo_matrix.solve(bqm, model, num_reads=num_reads)
-
-        return dict(collections.OrderedDict(sorted(best_sample.sample.items())))
+    def _solve_bqm(self, bqm, **kwargs):
+        return self._sampler.sample(bqm, **kwargs)
 
 
 class QUBOMatrix:
@@ -40,20 +40,20 @@ class QUBOMatrix:
                 )
 
         self.symetric = True
-        self.check_if_symetric()
+        self._check_if_symetric()
 
-    def check_if_symetric(self):
+    def _check_if_symetric(self):
         """
         Function to check if matrix is symetric
         """
         self.symetric = (self.qubo_matrix.transpose()
                          == self.qubo_matrix).all()
         if not self.symetric:
-            self.qubo_matrix = self.remove_lower_triangle(self.qubo_matrix)
+            self.qubo_matrix = self._remove_lower_triangle(self.qubo_matrix)
             print("Matrix is not symetric, only upper triangle will be used\n")
             print("New QUBO matrix:\n", self.qubo_matrix)
 
-    def remove_lower_triangle(self, matrix):
+    def _remove_lower_triangle(self, matrix):
         """
         Function to remove lower triangle from matrix
         """
@@ -63,7 +63,7 @@ class QUBOMatrix:
                     matrix[i][j] = 0
         return matrix
 
-    def get_values_and_qubits(self, matrix):
+    def _get_values_and_qubits(self, matrix):
         """
         Function to get values and qubits from matrix in form of dictionary
         where keys are indexes of qubits and values are values of matrix
@@ -78,23 +78,8 @@ class QUBOMatrix:
         }
         return result, len(matrix)
 
-
-class QUBOMatrixDwave(QUBOMatrix):
-
-    def Qubo_matrix_into_bqm(self):
-        """
-        Function to convert matrix into BQM object
-        Steps:
-        1. Get values and qubits from matrix
-        2. Create Spin variables
-        3. Create hamiltonian object
-        4. Add values to hamiltonian object
-        5. Compile hamiltonian object to model
-        6. Transform model to BQM object
-        7. Add offset to BQM object
-        8. Return BQM object
-        """
-        values_and_qubits, number_of_qubits = self.get_values_and_qubits(
+    def qubo_matrix_into_bqm(self):
+        values_and_qubits, number_of_qubits = self._get_values_and_qubits(
             self.qubo_matrix
         )
         qubits = [Spin(f"x{i}") for i in range(number_of_qubits)]
@@ -108,16 +93,3 @@ class QUBOMatrixDwave(QUBOMatrix):
         bqm = model.to_bqm()
         bqm.offset += self.offset
         return bqm, model
-
-    def solve(self, bqm, model, num_reads=100):
-        """
-        Function to solve BQM object
-        """
-        # sampler = neal.SimulatedAnnealingSampler()
-        # sampleset = sampler.sample(bqm, num_reads=100)
-        sampler = TabuSampler()
-        sampleset = sampler.sample(
-            bqm, num_reads=num_reads, return_embedding=True)
-        decoded_samples = model.decode_sampleset(sampleset)
-        best_sample = min(decoded_samples, key=lambda x: x.energy)
-        return best_sample
