@@ -35,7 +35,7 @@ def _qubo_matrix_into_hamiltonian(qubo: Iterable[Iterable[int]], offset: float =
     assert all(len(row) == N for row in qubo), "QUBO matrix must be square"
 
     sparse_list: List[Tuple[str, List, float]] = []
-    constant: float = 0
+    constant: float = offset
     for ind_r, row in enumerate(qubo):
         constant += val/2
         sparse_list.append(('Z', [ind_r], -val / 2))
@@ -63,7 +63,7 @@ def _qubo_dict_into_hamiltonian(qubo: Dict[Tuple[str, str], float], offset: floa
     N: int = len(labels)
 
     sparse_list: List[Tuple[str, List, float]] = []
-    constant: float = 0
+    constant: float = offset
     for (arg1, arg2), coeff in qubo.items():
         if arg1 == arg2:
             constant += coeff / 2
@@ -74,7 +74,7 @@ def _qubo_dict_into_hamiltonian(qubo: Dict[Tuple[str, str], float], offset: floa
             sparse_list.append(('Z', [labels[arg1]], -coeff / 4))
             sparse_list.append(('Z', [labels[arg2]], -coeff / 4))
 
-    hamiltonian: SparsePauliOp = SparsePauliOp.from_sparse_list(sparse_list, N)
+    hamiltonian = SparsePauliOp.from_sparse_list(sparse_list, N)
     hamiltonian += SparsePauliOp.from_sparse_list([('I', [0], constant)], N)
 
     return hamiltonian.simplify()
