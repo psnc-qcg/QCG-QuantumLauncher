@@ -7,7 +7,7 @@ import numpy as np
 from qiskit import qpy, QuantumCircuit
 from qiskit.circuit import ParameterVector
 from qiskit.circuit.library import PauliEvolutionGate
-from qiskit.opflow import H
+# from qiskit.opflow import H
 from qiskit.primitives.base.base_primitive import BasePrimitive
 from qiskit.quantum_info import SparsePauliOp
 from qiskit_algorithms.minimum_eigensolvers import QAOA as QiskitQAOA
@@ -23,9 +23,9 @@ class QiskitOptimizationAlgorithm(Algorithm, QiskitRoutine, ABC):
 
     def make_tag(self, problem: Problem, backend: QiskitBackend) -> str:
         tag = problem.path + '-' + \
-              backend.path + '-' + \
-              self.path + '-' + \
-              datetime.today().strftime('%Y-%m-%d')
+            backend.path + '-' + \
+            self.path + '-' + \
+            datetime.today().strftime('%Y-%m-%d')
         return tag
 
     def get_processing_times(self, tag: str, primitive: BasePrimitive) -> None | tuple[list, list, int]:
@@ -67,7 +67,7 @@ class QAOA(QiskitOptimizationAlgorithm):
 
     """
 
-    def __init__(self, p: int = 1, alternating_ansatz:bool=False, aux=None, **alg_kwargs):
+    def __init__(self, p: int = 1, alternating_ansatz: bool = False, aux=None, **alg_kwargs):
         super().__init__(**alg_kwargs)
         self.name: str = 'qaoa'
         self.aux = aux
@@ -100,15 +100,19 @@ class QAOA(QiskitOptimizationAlgorithm):
                 res_dict = {**res_dict, **json.loads(json.dumps({key: v}))}
             except TypeError as ex:
                 if str(ex) == 'Object of type complex128 is not JSON serializable':
-                    res_dict = {**res_dict, **json.loads(json.dumps({key: v}, default=repr))}
+                    res_dict = {**res_dict, **
+                                json.loads(json.dumps({key: v}, default=repr))}
                 elif str(ex) == 'Object of type ndarray is not JSON serializable':
-                    res_dict = {**res_dict, **json.loads(json.dumps({key: v}, default=repr))}
+                    res_dict = {**res_dict, **
+                                json.loads(json.dumps({key: v}, default=repr))}
                 elif str(ex) == 'keys must be str, int, float, bool or None, not ParameterVectorElement':
-                    res_dict = {**res_dict, **json.loads(json.dumps({key: repr(v)}))}
+                    res_dict = {**res_dict, **
+                                json.loads(json.dumps({key: repr(v)}))}
                 elif str(ex) == 'Object of type OptimizerResult is not JSON serializable':
                     # recursion ftw
                     new_v = self.parse_samplingVQEResult(v, res_path)
-                    res_dict = {**res_dict, **json.loads(json.dumps({key: new_v}))}
+                    res_dict = {**res_dict, **
+                                json.loads(json.dumps({key: new_v}))}
                 elif str(ex) == 'Object of type QuantumCircuit is not JSON serializable':
                     path = res_path + '.qpy'
                     with open(path, 'wb') as f:
@@ -136,7 +140,7 @@ class QAOA(QiskitOptimizationAlgorithm):
                 self.initial_state = problem.get_QAOAAnsatz_initial_state()
 
         qaoa = QiskitQAOA(sampler, optimizer, reps=self.p, callback=qaoa_callback,
-                        mixer=self.mixer_h, initial_state=self.initial_state, **self.alg_kwargs)
+                          mixer=self.mixer_h, initial_state=self.initial_state, **self.alg_kwargs)
         qaoa_result = qaoa.compute_minimum_eigenvalue(hamiltonian, self.aux)
         depth = qaoa.ansatz.decompose(reps=10).depth()
         if 'cx' in qaoa.ansatz.decompose(reps=10).count_ops():
@@ -176,7 +180,7 @@ class FALQON(QiskitOptimizationAlgorithm):
         parameters (List[str]): The list of algorithm parameters.
 
     """
-    
+
     def __init__(self, driver_h=None, delta_t=0, beta_0=0, n=1):
         super().__init__()
         self.driver_h = driver_h
@@ -186,6 +190,7 @@ class FALQON(QiskitOptimizationAlgorithm):
         self.cost_h = None
         self.n_qubits: int = 0
         self.parameters = ['n', 'delta_t', 'beta_0']
+        raise NotImplementedError('FALQON is not implemented yet')
 
     @property
     def setup(self) -> dict:
@@ -225,7 +230,7 @@ class FALQON(QiskitOptimizationAlgorithm):
         estimator.set_options(job_tags=[tag])
 
         best_sample, last_sample = self._falqon_subroutine(estimator,
-                            sampler, energies, betas, circuit_depths, cxs)
+                                                           sampler, energies, betas, circuit_depths, cxs)
 
         timestamps, usages, qpu_time = self.get_processing_times(tag, sampler)
         result = {'betas': betas,
@@ -246,15 +251,18 @@ class FALQON(QiskitOptimizationAlgorithm):
 
     def _build_ansatz(self, betas):
         """ building ansatz circuit """
+        H = None  # TODO: implement H
         circ = (H ^ self.cost_h.num_qubits).to_circuit()
         params = ParameterVector("beta", length=len(betas))
         for param in params:
-            circ.append(PauliEvolutionGate(self.cost_h, time=self.delta_t), circ.qubits)
-            circ.append(PauliEvolutionGate(self.driver_h, time=self.delta_t * param), circ.qubits)
+            circ.append(PauliEvolutionGate(
+                self.cost_h, time=self.delta_t), circ.qubits)
+            circ.append(PauliEvolutionGate(self.driver_h,
+                        time=self.delta_t * param), circ.qubits)
         return circ
 
     def _falqon_subroutine(self, estimator,
-                          sampler, energies, betas, circuit_depths, cxs):
+                           sampler, energies, betas, circuit_depths, cxs):
         """ subroutine for falqon """
         for i in range(self.n):
             betas, energy, depth, cx_count = self._run_falqon(betas, estimator)
