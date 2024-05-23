@@ -30,7 +30,8 @@ class BBS(Algorithm, OrcaRoutine):
         Run the BBS algorithm.
     """
 
-    def __init__(self, learning_rate:float=1e-1, updates:int=80, tbi_loops:str='single-loop', print_frequency:int=20) -> None:
+    def __init__(self, learning_rate: float = 1e-1, updates: int = 80, tbi_loops: str = 'single-loop', print_frequency: int = 20,
+                 gradient_mode: str = 'spsa', n_samples: int = 20, input_state: list[int] | None = None) -> None:
         """
         Initialize the BBS algorithm.
 
@@ -39,6 +40,9 @@ class BBS(Algorithm, OrcaRoutine):
         - updates (int): The number of updates to perform during training. Default is 80.
         - tbi_loops (str): The type of TBI loops to use. Default is 'single-loop'.
         - print_frequency (int): The frequency at which to print updates. Default is 20.
+        - gradient_mode (str, optional): 'spsa' or 'paramshift'. Type of method used to compute the gradient of the
+                                   quantum parameters.
+        - n_samples (int, optional): number of samples used to estimate expectation values
         """
         super().__init__()
         self.bbs = None
@@ -47,6 +51,9 @@ class BBS(Algorithm, OrcaRoutine):
         self.tbi_loops = tbi_loops
         self.print_frequency = print_frequency
         self.logger = Logger(log_dir=None)
+        self.gradient_mode = gradient_mode
+        self.n_samples = n_samples
+        self.input_state = input_state
 
     def _get_path(self) -> str:
         """
@@ -68,17 +75,25 @@ class BBS(Algorithm, OrcaRoutine):
         Returns:
         - Solution: The solution obtained from running the BBS algorithm.
         """
+        params = {"tbi_type": self.tbi_loops}
+        if backend is not None:
+            params.update(backend.get_args())
         qubo_fn_fact, Q = problem.get_orca_qubo()
+        if self.input_state is None:
+            self.input_state = [not i % 2 for i in range(len(Q))]
         self.bbs = BinaryBosonicSolver(
-            len(Q),
-            qubo_fn_fact(Q),
-            tbi_params={"tbi_type": self.tbi_loops}
+            pb_dim=len(Q),
+            objective=Q,
+            gradient_mode=self.gradient_mode,
+            tbi_params=params,
+            n_samples=self.n_samples,
+            input_state=self.input_state
         )
         self.bbs.train(
             learning_rate=self.learning_rate,
             updates=self.updates,
-            print_frequency=self.print_frequency,
+            log_frequency=self.print_frequency,
             logger=self.logger
         )
 
-        return self.bbs.return_solution()
+        return self.bbs.config_min_encountered
