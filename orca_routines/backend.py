@@ -8,3 +8,16 @@ class OrcaBackend(Backend, OrcaRoutine):
 
     def __init__(self, name: str) -> None:
         super().__init__(name)
+
+    def get_args():
+        return {}
+
+
+class PCSSOrcaBackend(Backend, OrcaRoutine):
+    """ Orca QPU backend """
+
+    def __init__(self, name: str) -> None:
+        super().__init__(name)
+
+    def get_args():
+        return {"tbi_type": "PT-1", "ip_address": "169.254.109.10"}
