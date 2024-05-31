@@ -81,6 +81,9 @@ class QATM(Problem):
         changes = (len(no_changes) - no_changes.drop(['manouver', 'aircraft'], axis=1).sum()).ravel().astype(int)
         changes[onehot_violations != 0] = -1
 
+        at_least_one = (df.loc[:, df.columns != 'manouver'].groupby('aircraft').sum() > 0).all().ravel().astype(int)
+
         return {'collisions': collisions,
                 'onehot_violations': onehot_violations,
-                'changes': changes}
+                'changes': changes,
+                'at_least_one': at_least_one}

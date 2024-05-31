@@ -160,6 +160,8 @@ class QATMQiskit(problems.QATM, QiskitRoutine):
                 h = hampy.Ham_not(hampy.H_one_in_n(manouvers.index.values.tolist(), len(cm)))
             elif self.onehot == 'quadratic':
                 h = hampy.quadratic_onehot(manouvers.index.values.tolist(), len(cm))
+            elif self.onehot == 'xor':
+                h = hampy.Ham_not(hampy.H_xor(manouvers.index.values.tolist(), len(cm)))
             if onehot_hamiltonian is not None:
                 onehot_hamiltonian += h
             else:

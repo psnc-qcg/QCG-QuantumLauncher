@@ -1,6 +1,8 @@
 """ Backend Class for Qiskit Launcher """
 from qiskit.primitives import Estimator as LocalEstimator, BaseEstimator
 from qiskit.primitives import Sampler as LocalSampler, BaseSampler
+from qiskit.primitives import BackendSampler, BackendEstimator
+from qiskit.providers import BackendV1, BackendV2
 from qiskit_algorithms.optimizers import COBYLA, SPSA, SciPyOptimizer, Optimizer
 from qiskit_ibm_runtime import Estimator, Sampler
 from qiskit_ibm_runtime import Session, Options
@@ -30,10 +32,11 @@ class QiskitBackend(Backend, QiskitRoutine):
         _set_primitives_on_backend_name() -> None: Sets the appropriate primitives based on the backend name.
     """
     
-    def __init__(self, name: str, session: Session = None, options: Options = None) -> None:
+    def __init__(self, name: str, session: Session = None, options: Options = None, backendv1v2: BackendV1 | BackendV2 = None) -> None:
         super().__init__(name)
         self.session = session
         self.options = options
+        self.backendv1v2 = backendv1v2
         self.primitive_strategy = None
         self.sampler = None
         self.estimator: BaseEstimator = None
@@ -51,6 +54,10 @@ class QiskitBackend(Backend, QiskitRoutine):
         if self.name == 'local_simulator':
             self.estimator = LocalEstimator(options=self.options)
             self.sampler = LocalSampler(options=self.options)
+            self.optimizer = COBYLA()
+        elif self.name == 'backendv1v2_simulator':
+            self.estimator = BackendEstimator(backend=self.backendv1v2)
+            self.sampler = BackendSampler(backend=self.backendv1v2)
             self.optimizer = COBYLA()
         elif self.session is None:
             raise AttributeError('Please instantiate a session if using other backend than local')
