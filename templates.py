@@ -38,7 +38,8 @@ class _FileSavingSupportClass:
         elif o.__class__.__name__ == 'complex128':
             return repr(o)
         else:
-            print(f'Name of object {o.__class__} not known, returning None as a json encodable')
+            print(
+                f'Name of object {o.__class__} not known, returning None as a json encodable')
             return None
 
     def _save_results_pickle(self, results: dict, file_name: str) -> None:
@@ -50,7 +51,8 @@ class _FileSavingSupportClass:
             file.write(results.__str__())
 
     def _save_results_csv(self, results: dict, file_name: str) -> None:
-        print(f'\033[93mSaving to csv has not been implemented yet {results= }{file_name= }\033[0m')
+        print(
+            f'\033[93mSaving to csv has not been implemented yet {results= }{file_name= }\033[0m')
 
     def _save_results_json(self, results: dict, file_name: str) -> None:
         with open(file_name, mode='w', encoding='utf-8') as file:
@@ -198,7 +200,9 @@ class Problem(_SupportClass, ABC):
         Returns:
             None
         """
-        self.instance_name = instance_path.rsplit('/', 1)[1].split('.', 1)[0]
+        if self.instance_name is None:
+            self.instance_name = instance_path.rsplit(
+                '/', 1)[1].split('.', 1)[0]
         with open(instance_path, 'rb') as file:
             self.instance = pickle.load(file)
 
@@ -398,8 +402,8 @@ class QuantumLauncher(ABC, _FileSavingSupportClass):
         self.res['results'] = results
 
         self._file_name = self.problem.path + '-' + \
-                          self.backend.path + '-' \
-                          + self.algorithm.path + '-' + str(energy)
+            self.backend.path + '-' \
+            + self.algorithm.path + '-' + str(energy)
 
         if isinstance(save_to_file, str):
             self._res_path = save_to_file
