@@ -4,11 +4,13 @@ from templates import Algorithm, Problem
 from .dwave_templates import DwaveRoutine
 from pyqubo import Spin
 from dimod.binary.binary_quadratic_model import BinaryQuadraticModel
-from dimod import Sampler
+import dwave.inspector
+from dimod import Sampler, SampleSet
 
 
 class DwaveSolver(Algorithm, DwaveRoutine):
-    def __init__(self, **alg_kwargs) -> None:
+    def __init__(self, chain_strength, **alg_kwargs) -> None:
+        self.chain_strength = chain_strength
         super().__init__(**alg_kwargs)
 
     def run(self, problem: Problem, backend: DwaveRoutine, **kwargs):
@@ -25,7 +27,9 @@ class DwaveSolver(Algorithm, DwaveRoutine):
         return super()._get_path()
 
     def _solve_bqm(self, bqm, **kwargs):
-        return self._sampler.sample(bqm, label=self.label, **kwargs)
+        res = self._sampler.sample(
+            bqm, num_reads=1000, label=self.label, chain_strength=self.chain_strength, **kwargs)
+        return res
 
 
 class QUBOMatrix:
@@ -52,8 +56,6 @@ class QUBOMatrix:
                          == self.qubo_matrix).all()
         if not self.symetric:
             self.qubo_matrix = self._remove_lower_triangle(self.qubo_matrix)
-            print("Matrix is not symetric, only upper triangle will be used\n")
-            print("New QUBO matrix:\n", self.qubo_matrix)
 
     def _remove_lower_triangle(self, matrix):
         """
