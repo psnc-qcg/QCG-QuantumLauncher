@@ -45,3 +45,18 @@ class MaxCut(Problem):
 
     def _get_path(self) -> str:
         return f'{self.name}@{self.instance_name}'
+
+    def visualize(self):
+        import matplotlib.pyplot as plt
+        pos = nx.spring_layout(self.instance)
+        plt.figure(figsize=(8, 6))
+
+        nx.draw(self.instance, pos, with_labels=True, node_color='skyblue',
+                node_size=500, edge_color='gray', font_size=10, font_weight='bold')
+        plt.title("Max-Cut Problem Instance Visualization")
+        plt.show()
+
+    @staticmethod
+    def generate_maxcut_instance(num_vertices, edge_probability):
+        G = nx.gnp_random_graph(num_vertices, edge_probability)
+        return G
