@@ -1,3 +1,3 @@
 from .algorithms import DwaveSolver
-from .backend import TabuSampler, DwaveBackend, SimulatedAnnealingBackend
+from .backend import TabuBackend, DwaveBackend, SimulatedAnnealingBackend
 from .basic_problems import *
