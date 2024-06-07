@@ -303,6 +303,7 @@ class QuantumLauncher(ABC, _FileSavingSupportClass):
         backend (Backend, optional): The backend to be used for execution. Defaults to None.
         path (str): The path to save the results. Defaults to 'results/'.
         binding_params (dict or None): The parameters to be bound to the problem and algorithm. Defaults to None.
+        encoding_type (type): The encoding type to be used changing the class of the problem. Defaults to None.
 
     Methods:
         _bind_parameters: Binds the specified parameters to the problem and algorithm.
@@ -327,7 +328,7 @@ class QuantumLauncher(ABC, _FileSavingSupportClass):
     """
 
     def __init__(self, problem: Problem, algorithm: Algorithm, backend: Backend = None,
-                 path: str = 'results/', binding_params: dict | None = None) -> None:
+                 path: str = 'results/', binding_params: dict | None = None, encoding_type: type = None) -> None:
         super().__init__()
         self.problem: Problem = problem
         self.algorithm: Algorithm = algorithm
@@ -337,6 +338,7 @@ class QuantumLauncher(ABC, _FileSavingSupportClass):
         self.res: dict = {}
         self._res_path: str | None = None
         self.binding_params: dict | None = binding_params
+        self.encoding_type: callable = encoding_type  # TODO variable to be renamed
 
     def _bind_parameters(self):
         """
@@ -355,9 +357,15 @@ class QuantumLauncher(ABC, _FileSavingSupportClass):
         """
         Chooses a problem for current hardware taken from the algorithm and binds parameters.
         """
-        problem_class = list(set(self.problem.__class__.__subclasses__()) &
-                             set(self.algorithm.ROUTINE_CLASS.__subclasses__()))[0]
-        self.problem.__class__ = problem_class
+        def _find_default_problem_class():
+            for subclass in self.problem.__class__.__subclasses__():
+                if self.backend.ROUTINE_CLASS in subclass.__bases__:
+                    return subclass
+            return self.problem.__class__
+        if self.encoding_type is None:
+            self.problem.__class__ = _find_default_problem_class()
+        else:
+            self.problem.__class__ = self.encoding_type
         if self.binding_params is not None:
             self._bind_parameters()
 
