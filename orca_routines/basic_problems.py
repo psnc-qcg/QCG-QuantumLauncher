@@ -1,5 +1,8 @@
 """ Basic problems for Orca """
+from qiskit_routines.basic_problems import QATMQiskit
 import numpy as np
+from qiskit_optimization.converters import QuadraticProgramToQubo
+from qiskit_optimization.translators import from_ising
 from typing import Tuple
 from jssp.pyqubo_scheduler import get_jss_bqm
 from problems import MaxCut, EC, JSSP, Problem
@@ -164,3 +167,12 @@ class JSSPOrca(JSSP, OrcaRoutine):
             i = reverse_dict_map[label_i]
             Q[i, i] += value
         return self.qubo_fn_fact, Q / max(np.max(Q), -np.min(Q))
+
+
+class QATMOrca(OrcaRoutine, QATMQiskit):
+    def get_orca_qubo(self):
+        hamiltonian = self.get_qiskit_hamiltonian()
+        qp = from_ising(hamiltonian)
+        conv = QuadraticProgramToQubo()
+        qubo = conv.convert(qp).objective
+        return None, qubo.quadratic.to_array()
