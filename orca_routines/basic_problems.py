@@ -2,7 +2,7 @@
 import numpy as np
 from typing import Tuple
 from jssp.pyqubo_scheduler import get_jss_bqm
-from problems import MaxCut, EC, JSSP
+from problems import MaxCut, EC, JSSP, Problem
 from .orca_templates import OrcaRoutine
 
 
@@ -13,6 +13,7 @@ class MaxCutOrca(MaxCut, OrcaRoutine):
 
         return qubo_fn
 
+    @Problem.output
     def get_orca_qubo(self):
         """ Returns Qubo function """
         Q = np.zeros((6, 6))
@@ -28,6 +29,7 @@ class MaxCutOrca(MaxCut, OrcaRoutine):
 class ECOrca(EC, OrcaRoutine):
     gamma = 1
     delta = 0.05
+
     def qubo_fn_fact(self, Q):
         def qubo_fn(bin_vec):
             return np.dot(bin_vec, np.dot(Q, bin_vec)) + self.gamma * (self.num_elements - np.sum(np.array(self.len_routes) * np.array(bin_vec)))**2 - self.delta * np.sum(bin_vec)
@@ -73,6 +75,7 @@ class ECOrca(EC, OrcaRoutine):
         # Calculate instance size for training
         return len(self.instance)
 
+    @Problem.output
     def get_orca_qubo(self):
         self.num_elements = self.calculate_num_elements()
         self.len_routes = self.calculate_lengths_tab()
@@ -95,22 +98,23 @@ class JSSPOrca(JSSP, OrcaRoutine):
     lagrange_share = 5
 
     def _fix_get_jss_bqm(self, instance, max_time, config,
-                            lagrange_one_hot=0,
-                            lagrange_precedence=0,
-                            lagrange_share=0) -> Tuple[dict, list, None]:
+                         lagrange_one_hot=0,
+                         lagrange_precedence=0,
+                         lagrange_share=0) -> Tuple[dict, list, None]:
         pre_result = get_jss_bqm(instance, max_time, config,
-                            lagrange_one_hot=lagrange_one_hot,
-                            lagrange_precedence=lagrange_precedence,
-                            lagrange_share=lagrange_share)
-        result = (pre_result.spin.linear, pre_result.spin.quadratic, pre_result.spin.offset) # I need to change it into dict somehow
+                                 lagrange_one_hot=lagrange_one_hot,
+                                 lagrange_precedence=lagrange_precedence,
+                                 lagrange_share=lagrange_share)
+        result = (pre_result.spin.linear, pre_result.spin.quadratic,
+                  pre_result.spin.offset)  # I need to change it into dict somehow
         return result, list(result[0].keys()), None
 
     def calculate_instance_size(self):
         # Calculate instance size for training
         _, variables, _ = self._fix_get_jss_bqm(self.instance, self.max_time, self.config,
-                                                          lagrange_one_hot=self.lagrange_one_hot,
-                                                          lagrange_precedence=self.lagrange_precedence,
-                                                          lagrange_share=self.lagrange_share)
+                                                lagrange_one_hot=self.lagrange_one_hot,
+                                                lagrange_precedence=self.lagrange_precedence,
+                                                lagrange_share=self.lagrange_share)
         return len(variables)
 
     def get_len_all_jobs(self):
@@ -121,10 +125,11 @@ class JSSPOrca(JSSP, OrcaRoutine):
 
     def one_hot_to_jobs(self, binary_vector):
         actually_its_qubo, variables, model = self._fix_get_jss_bqm(self.instance, self.max_time, self.config,
-                                                          lagrange_one_hot=self.lagrange_one_hot,
-                                                          lagrange_precedence=self.lagrange_precedence,
-                                                          lagrange_share=self.lagrange_share)
-        result = [variables[i] for i in range(len(variables)) if binary_vector[i] == 1]
+                                                                    lagrange_one_hot=self.lagrange_one_hot,
+                                                                    lagrange_precedence=self.lagrange_precedence,
+                                                                    lagrange_share=self.lagrange_share)
+        result = [variables[i]
+                  for i in range(len(variables)) if binary_vector[i] == 1]
         return result
 
     def qubo_fn_fact(self, Q):
@@ -133,6 +138,7 @@ class JSSPOrca(JSSP, OrcaRoutine):
             return np.dot(bin_vec, np.dot(Q, bin_vec)) + self.gamma * (np.sum(bin_vec) - self.get_len_all_jobs()) ** 2
         return qubo_fn
 
+    @Problem.output
     def get_orca_qubo(self):
         # Define the matrix Q used for QUBO
         self.config = {}
@@ -141,9 +147,9 @@ class JSSPOrca(JSSP, OrcaRoutine):
         self.config['parameters']['job_shop_scheduler'] = {}
         self.config['parameters']['job_shop_scheduler']['problem_version'] = "optimization"
         actually_its_qubo, variables, model = self._fix_get_jss_bqm(self.instance, self.max_time, self.config,
-                            lagrange_one_hot=self.lagrange_one_hot,
-                            lagrange_precedence=self.lagrange_precedence,
-                            lagrange_share=self.lagrange_share)
+                                                                    lagrange_one_hot=self.lagrange_one_hot,
+                                                                    lagrange_precedence=self.lagrange_precedence,
+                                                                    lagrange_share=self.lagrange_share)
         reverse_dict_map = {v: i for i, v in enumerate(variables)}
 
         Q = np.zeros((self.instance_size, self.instance_size))

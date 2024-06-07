@@ -3,10 +3,8 @@ import hampy
 import numpy as np
 from qiskit.quantum_info import SparsePauliOp
 from qiskit import QuantumCircuit
-
 import problems
 from .qiskit_template import QiskitRoutine
-
 
 
 def ring_ham(ring: set, n):
@@ -28,7 +26,9 @@ def ring_ham(ring: set, n):
     total += sp
     return SparsePauliOp(total)
 
+
 class ECQiskit(problems.EC, QiskitRoutine):
+    @problems.Problem.output
     def get_qiskit_hamiltonian(self) -> SparsePauliOp:
         """ generating hamiltonian"""
         elements = set().union(*self.instance)
@@ -42,7 +42,8 @@ class ECQiskit(problems.EC, QiskitRoutine):
         hamiltonian = None
         for ohs in onehots:
             if self.onehot == 'exact':
-                part = hampy.Ham_not(hampy.H_one_in_n(list(ohs), size=len(self.instance)))
+                part = hampy.Ham_not(hampy.H_one_in_n(
+                    list(ohs), size=len(self.instance)))
             elif self.onehot == 'quadratic':
                 part = hampy.quadratic_onehot(list(ohs), len(self.instance))
 
@@ -52,7 +53,7 @@ class ECQiskit(problems.EC, QiskitRoutine):
                 hamiltonian += part
         return hamiltonian.simplify()
 
-    def get_mixer_hamiltonian(self, amount_of_rings = None):
+    def get_mixer_hamiltonian(self, amount_of_rings=None):
         """ generates mixer hamiltonian """
         def get_main_set():
             main_set = []
@@ -80,7 +81,8 @@ class ECQiskit(problems.EC, QiskitRoutine):
             for elem in x_gate:
                 sparse_list = []
                 sparse_list.append((("X", [elem], 1)))
-                sp = SparsePauliOp.from_sparse_list(sparse_list, len(self.instance))
+                sp = SparsePauliOp.from_sparse_list(
+                    sparse_list, len(self.instance))
                 if total is None:
                     total = sp
                 else:
@@ -89,7 +91,7 @@ class ECQiskit(problems.EC, QiskitRoutine):
 
         # looking for all rings in a data and creating a list with them
         ring, x_gate, constraints = [], [], get_constraints()
-        
+
         ring.append(max(constraints, key=len))
 
         ring_qubits = set.union(*ring)
@@ -102,7 +104,8 @@ class ECQiskit(problems.EC, QiskitRoutine):
         if amount_of_rings is not None:
             max_amount_of_rings, user_rings = len(ring), []
             if amount_of_rings > max_amount_of_rings:
-                raise ValueError(f"Too many rings. Maximum amount is {max_amount_of_rings}")
+                raise ValueError(
+                    f"Too many rings. Maximum amount is {max_amount_of_rings}")
             elif amount_of_rings == 0:
                 ring_qubits = []
             else:
@@ -111,7 +114,8 @@ class ECQiskit(problems.EC, QiskitRoutine):
                     user_rings.append(ring[index])
                     current_qubits = current_qubits.union(ring[index])
                 ring_qubits = current_qubits
-        x_gate.extend(id for id, _ in enumerate(self.instance) if id not in ring_qubits)
+        x_gate.extend(id for id, _ in enumerate(
+            self.instance) if id not in ring_qubits)
 
         # connecting all parts of mixer hamiltonian together
         mix_ham = None
@@ -130,6 +134,7 @@ class ECQiskit(problems.EC, QiskitRoutine):
 
 
 class JSSPQiskit(problems.JSSP, QiskitRoutine):
+    @problems.Problem.output
     def get_qiskit_hamiltonian(self) -> SparsePauliOp:
         if self.optimization_problem:
             return self.h_o
@@ -138,6 +143,7 @@ class JSSPQiskit(problems.JSSP, QiskitRoutine):
 
 
 class MaxCutQiskit(problems.MaxCut, QiskitRoutine):
+    @problems.Problem.output
     def get_qiskit_hamiltonian(self):
         ham = None
         n = self.instance.number_of_nodes()
@@ -150,6 +156,7 @@ class MaxCutQiskit(problems.MaxCut, QiskitRoutine):
 
 
 class QATMQiskit(problems.QATM, QiskitRoutine):
+    @problems.Problem.output
     def get_qiskit_hamiltonian(self) -> SparsePauliOp:
         cm = self.instance['cm']
         aircrafts = self.instance['aircrafts']
@@ -157,11 +164,14 @@ class QATMQiskit(problems.QATM, QiskitRoutine):
         onehot_hamiltonian = None
         for plane, manouvers in aircrafts.groupby(by='aircraft'):
             if self.onehot == 'exact':
-                h = hampy.Ham_not(hampy.H_one_in_n(manouvers.index.values.tolist(), len(cm)))
+                h = hampy.Ham_not(hampy.H_one_in_n(
+                    manouvers.index.values.tolist(), len(cm)))
             elif self.onehot == 'quadratic':
-                h = hampy.quadratic_onehot(manouvers.index.values.tolist(), len(cm))
+                h = hampy.quadratic_onehot(
+                    manouvers.index.values.tolist(), len(cm))
             elif self.onehot == 'xor':
-                h = hampy.Ham_not(hampy.H_xor(manouvers.index.values.tolist(), len(cm)))
+                h = hampy.Ham_not(hampy.H_xor(
+                    manouvers.index.values.tolist(), len(cm)))
             if onehot_hamiltonian is not None:
                 onehot_hamiltonian += h
             else:
@@ -210,4 +220,3 @@ class QATMQiskit(problems.QATM, QiskitRoutine):
         for plane, manouvers in aircrafts.groupby(by='aircraft'):
             qc.x(manouvers.index.values.tolist()[0])
         return qc
-

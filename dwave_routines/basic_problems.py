@@ -1,5 +1,5 @@
 import numpy as np
-from problems import EC, JSSP, MaxCut, QATM
+from problems import EC, JSSP, MaxCut, QATM, Problem
 from qiskit_routines.basic_problems import (
     ECQiskit,
     JSSPQiskit,
@@ -13,6 +13,7 @@ from qiskit_optimization.translators import from_ising
 
 
 class QiskitToDwave:
+    @Problem.output
     def get_qubo(self):
         return self._hamiltonian_to_qubo(self.get_qiskit_hamiltonian())
 

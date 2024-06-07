@@ -3,6 +3,7 @@ import json
 import os
 import pickle
 from abc import ABC, abstractmethod
+from functools import wraps
 
 
 class _FileSavingSupportClass:
@@ -241,6 +242,23 @@ class Problem(_SupportClass, ABC):
 
         """
 
+    def output(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            if wrapper.__solved:
+                return wrapper.__solved
+            wrapper.__solved = func(*args, **kwargs)
+            return wrapper.__solved
+        wrapper._is_output = True
+        wrapper.__solved = False
+        return wrapper
+
+    def prepare_methods(self):
+        for attr_name in dir(self):
+            attr = getattr(self, attr_name)
+            if callable(attr) and hasattr(attr, '_is_output'):
+                attr()
+
 
 class Algorithm(_SupportClass, ABC):
     """
@@ -368,6 +386,7 @@ class QuantumLauncher(ABC, _FileSavingSupportClass):
             self.problem.__class__ = self.encoding_type
         if self.binding_params is not None:
             self._bind_parameters()
+        self.problem.prepare_methods()
 
     def _run(self) -> dict:
         """
