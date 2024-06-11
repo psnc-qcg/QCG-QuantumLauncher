@@ -6,8 +6,7 @@ TESTING_DIR = 'testing'
 
 def test_ec():
     """ Testing function for Exact Cover """
-    pr = EC('exact')
-    pr.set_instance(instance_name='toy', instance=None)
+    pr = EC('exact', instance_name='toy')
     bbs = BBS()
     backend = OrcaBackend('local_simulator')
     launcher = QuantumLauncher(pr, bbs, backend, path=TESTING_DIR)

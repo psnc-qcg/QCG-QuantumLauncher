@@ -6,8 +6,7 @@ TESTING_DIR = 'testing'
 
 def test_ec():
     """ Testing function for Exact Cover """
-    pr = EC('quadratic')
-    pr.set_instance(instance_name='toy', instance=None)
+    pr = EC('quadratic', instance_name='toy')
     solver = DwaveSolver(1)
     backend = SimulatedAnnealingBackend()
     launcher = QuantumLauncher(pr, solver, backend, path=TESTING_DIR)

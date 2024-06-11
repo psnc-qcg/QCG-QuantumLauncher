@@ -6,8 +6,7 @@ TESTING_DIR = 'testing'
 
 def test_ec():
     """ Testing function for Exact Cover """
-    pr = EC('exact')
-    pr.set_instance(instance_name='toy', instance=None)
+    pr = EC('exact', instance_name='toy')
     qaoa = QAOA(p=3)
     backend = QiskitBackend('local_simulator')
     launcher = QuantumLauncher(pr, qaoa, backend, path=TESTING_DIR)
