@@ -1,1 +1,1 @@
-from .aql import asyncQuantumLauncher
+from .aql import asyncQuantumLauncher, AQLManager
