@@ -1,5 +1,5 @@
 """ file with orca algorithms subclasses """
-
+from typing import List
 from ptseries.algorithms.binary_solvers import BinaryBosonicSolver
 from ptseries.common.logger import Logger
 
@@ -97,3 +97,6 @@ class BBS(Algorithm, OrcaRoutine):
         )
 
         return self.bbs.config_min_encountered
+
+    def get_bitstring(self, result: List[float]) -> str:
+        return ''.join(map(str, map(int, result)))

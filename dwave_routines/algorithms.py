@@ -31,6 +31,9 @@ class DwaveSolver(Algorithm, DwaveRoutine):
             bqm, num_reads=1000, label=self.label, chain_strength=self.chain_strength, **kwargs)
         return res
 
+    def get_bitstring(self, result: SampleSet) -> str:
+        return ''.join(map(str, result.samples()[0].values()))
+
 
 class QUBOMatrix:
     def __init__(self, qubo_matrix, offset):

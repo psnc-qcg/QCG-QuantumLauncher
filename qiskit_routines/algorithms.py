@@ -158,6 +158,9 @@ class QAOA(QiskitOptimizationAlgorithm):
                   'timestamps': timestamps}
         return result
 
+    def get_bitstring(self, result) -> str:
+        return result['SamplingVQEResult'].best_measurement['bitstring']
+
 
 class FALQON(QiskitOptimizationAlgorithm):
     """ 
