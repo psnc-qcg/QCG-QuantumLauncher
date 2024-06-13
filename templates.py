@@ -306,6 +306,14 @@ class Algorithm(_SupportClass, ABC):
             problem (Problem): The problem to be solved.
             backend (Backend): The backend to be used for execution.
         """
+    @abstractmethod
+    def get_bitstring(self, result) -> str:
+        """Returns the bitstring representation of the result.
+
+        Args:
+            result: The result to be converted to a bitstring.
+        """
+        pass
 
 
 class QuantumLauncher(ABC, _FileSavingSupportClass):

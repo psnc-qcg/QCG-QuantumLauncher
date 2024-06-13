@@ -8,7 +8,7 @@ from templates import QuantumLauncher
 def main():
     """ main """
     problem = MaxCut(instance_name='default')
-    alg = DwaveSolver()
+    alg = DwaveSolver(1)
     backend = SimulatedAnnealingBackend('local')
     launcher = QuantumLauncher(problem, alg, backend)
     res: SampleSet = launcher._run()
