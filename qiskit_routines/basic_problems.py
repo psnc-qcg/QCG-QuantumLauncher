@@ -220,3 +220,9 @@ class QATMQiskit(problems.QATM, QiskitRoutine):
         for plane, manouvers in aircrafts.groupby(by='aircraft'):
             qc.x(manouvers.index.values.tolist()[0])
         return qc
+
+
+class RawQiskit(problems.Raw, QiskitRoutine):
+    @problems.Problem.output
+    def get_qiskit_hamiltonian(self) -> SparsePauliOp:
+        return self.instance

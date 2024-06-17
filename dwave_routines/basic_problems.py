@@ -1,5 +1,5 @@
 import numpy as np
-from problems import EC, JSSP, MaxCut, QATM, Problem
+from problems import EC, JSSP, MaxCut, QATM, Raw, Problem
 from qiskit_routines.basic_problems import (
     ECQiskit,
     JSSPQiskit,
@@ -38,3 +38,9 @@ class MaxCutDwave(MaxCutQiskit, MaxCut, QiskitToDwave, DwaveRoutine):
 
 class QATMDwave(QATMQiskit, QATM, QiskitToDwave, DwaveRoutine):
     pass
+
+
+class RawDwave(Raw, DwaveRoutine):
+    @Problem.output
+    def get_qubo(self):
+        return self.instance

@@ -5,7 +5,7 @@ from qiskit_optimization.converters import QuadraticProgramToQubo
 from qiskit_optimization.translators import from_ising
 from typing import Tuple
 from jssp.pyqubo_scheduler import get_jss_bqm
-from problems import MaxCut, EC, JSSP, Problem
+from problems import MaxCut, EC, JSSP, Problem, Raw
 from .orca_templates import OrcaRoutine
 
 
@@ -170,9 +170,16 @@ class JSSPOrca(JSSP, OrcaRoutine):
 
 
 class QATMOrca(OrcaRoutine, QATMQiskit):
+    @Problem.output
     def get_orca_qubo(self):
         hamiltonian = self.get_qiskit_hamiltonian()
         qp = from_ising(hamiltonian)
         conv = QuadraticProgramToQubo()
         qubo = conv.convert(qp).objective
         return None, qubo.quadratic.to_array()
+
+
+class RawOrca(Raw, OrcaRoutine):
+    @Problem.output
+    def get_orca_qubo(self):
+        return self.instance
