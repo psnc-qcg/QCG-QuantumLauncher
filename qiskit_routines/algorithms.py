@@ -13,7 +13,7 @@ from qiskit.quantum_info import SparsePauliOp
 from qiskit_algorithms.minimum_eigensolvers import QAOA as QiskitQAOA
 from qiskit_algorithms.minimum_eigensolvers import SamplingVQEResult
 
-from templates import Problem, Algorithm
+from base import Problem, Algorithm
 from .backend import QiskitBackend
 from .qiskit_template import QiskitRoutine
 

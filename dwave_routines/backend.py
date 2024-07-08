@@ -1,4 +1,4 @@
-from templates import Backend
+from base import Backend
 from .dwave_templates import DwaveRoutine
 from tabu import TabuSampler
 from dwave.system import DWaveSampler, EmbeddingComposite

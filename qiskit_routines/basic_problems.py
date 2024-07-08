@@ -1,4 +1,5 @@
 # from .launcher import QiskitProblem
+from base import formatter
 import hampy
 import numpy as np
 from qiskit.quantum_info import SparsePauliOp
@@ -133,26 +134,24 @@ class ECQiskit(problems.EC, QiskitRoutine):
         return mix_ham
 
 
-class JSSPQiskit(problems.JSSP, QiskitRoutine):
-    @problems.Problem.output
-    def get_qiskit_hamiltonian(self) -> SparsePauliOp:
-        if self.optimization_problem:
-            return self.h_o
+@formatter(problems.JSSP, 'hamiltonian')
+def get_qiskit_hamiltonian(self) -> SparsePauliOp:
+    if self.optimization_problem:
+        return self.h_o
+    else:
+        return self.h_d
+
+
+@formatter(problems.MaxCut, 'hamiltonian')
+def get_qiskit_hamiltonian(self):
+    ham = None
+    n = self.instance.number_of_nodes()
+    for edge in self.instance.edges():
+        if ham is None:
+            ham = hampy.Ham_not(hampy.H_one_in_n(edge, n))
         else:
-            return self.h_d
-
-
-class MaxCutQiskit(problems.MaxCut, QiskitRoutine):
-    @problems.Problem.output
-    def get_qiskit_hamiltonian(self):
-        ham = None
-        n = self.instance.number_of_nodes()
-        for edge in self.instance.edges():
-            if ham is None:
-                ham = hampy.Ham_not(hampy.H_one_in_n(edge, n))
-            else:
-                ham += hampy.Ham_not(hampy.H_one_in_n(edge, n))
-        return ham.simplify()
+            ham += hampy.Ham_not(hampy.H_one_in_n(edge, n))
+    return ham.simplify()
 
 
 class QATMQiskit(problems.QATM, QiskitRoutine):
@@ -222,7 +221,6 @@ class QATMQiskit(problems.QATM, QiskitRoutine):
         return qc
 
 
-class RawQiskit(problems.Raw, QiskitRoutine):
-    @problems.Problem.output
-    def get_qiskit_hamiltonian(self) -> SparsePauliOp:
-        return self.instance
+@formatter(problems.Raw, 'hamiltonian')
+def get_qiskit_hamiltonian(self) -> SparsePauliOp:
+    return self.instance

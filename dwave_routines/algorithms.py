@@ -1,6 +1,6 @@
 import numpy as np
 import ast
-from templates import Algorithm, Problem
+from base import Algorithm, Problem
 from .dwave_templates import DwaveRoutine
 from pyqubo import Spin
 from dimod.binary.binary_quadratic_model import BinaryQuadraticModel

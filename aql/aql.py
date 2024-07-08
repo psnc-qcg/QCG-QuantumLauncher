@@ -1,6 +1,6 @@
 from typing import Tuple
 import asyncio
-from templates import QuantumLauncher, Backend, Algorithm, Problem
+from base import QuantumLauncher, Backend, Algorithm, Problem
 from typing import List
 import random
 

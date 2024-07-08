@@ -1,5 +1,5 @@
 """ This module contains the Raw class."""
-from templates import Problem
+from base import Problem
 
 
 class Raw(Problem):

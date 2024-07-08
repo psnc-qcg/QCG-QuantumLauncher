@@ -7,7 +7,7 @@ from qiskit_algorithms.optimizers import COBYLA, SPSA, SciPyOptimizer, Optimizer
 from qiskit_ibm_runtime import Estimator, Sampler
 from qiskit_ibm_runtime import Session, Options
 
-from templates import Backend
+from base import Backend
 from .qiskit_template import QiskitRoutine
 
 
@@ -31,7 +31,7 @@ class QiskitBackend(Backend, QiskitRoutine):
         setup() -> dict: Returns a dictionary with the setup information of the backend.
         _set_primitives_on_backend_name() -> None: Sets the appropriate primitives based on the backend name.
     """
-    
+
     def __init__(self, name: str, session: Session = None, options: Options = None, backendv1v2: BackendV1 | BackendV2 = None) -> None:
         super().__init__(name)
         self.session = session
@@ -60,9 +60,11 @@ class QiskitBackend(Backend, QiskitRoutine):
             self.sampler = BackendSampler(backend=self.backendv1v2)
             self.optimizer = COBYLA()
         elif self.session is None:
-            raise AttributeError('Please instantiate a session if using other backend than local')
+            raise AttributeError(
+                'Please instantiate a session if using other backend than local')
         else:
-            self.estimator = Estimator(session=self.session, options=self.options)
+            self.estimator = Estimator(
+                session=self.session, options=self.options)
             self.sampler = Sampler(session=self.session, options=self.options)
             self.optimizer = SPSA()
 

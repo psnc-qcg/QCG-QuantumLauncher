@@ -1,5 +1,5 @@
 """ Backend class for Atos """
-from templates import Backend
+from base import Backend
 from .atos_templates import AtosRoutine
 
 

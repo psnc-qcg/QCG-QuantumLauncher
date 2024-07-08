@@ -1,4 +1,4 @@
-from templates import QuantumLauncher
+from base import QuantumLauncher
 from dwave_routines import DwaveSolver, SimulatedAnnealingBackend
 from problems import EC, JSSP, MaxCut, QATM, Raw
 import numpy as np

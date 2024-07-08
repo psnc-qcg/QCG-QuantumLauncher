@@ -3,7 +3,7 @@ from typing import List
 from ptseries.algorithms.binary_solvers import BinaryBosonicSolver
 from ptseries.common.logger import Logger
 
-from templates import Problem, Algorithm
+from base import Problem, Algorithm
 from .backend import OrcaBackend
 from .orca_templates import OrcaRoutine
 

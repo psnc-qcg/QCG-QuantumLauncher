@@ -4,7 +4,7 @@ from qat.plugins import ScipyMinimizePlugin
 from qat.qpus import get_default_qpu, CLinalg
 from qat.vsolve.ansatz import AnsatzFactory
 
-from templates import Problem, Algorithm
+from base import Problem, Algorithm
 from .atos_templates import AtosRoutine
 from .backend import AtosBackend
 
@@ -27,7 +27,8 @@ class QAOA(Algorithm, AtosRoutine):
 
         observable = problem.get_atos_hamiltonian()
 
-        circuit = AnsatzFactory.qaoa_circuit(observable, self.p, strategy='default')
+        circuit = AnsatzFactory.qaoa_circuit(
+            observable, self.p, strategy='default')
 
         job = circuit.to_job(observable=observable)
         qpu = get_default_qpu()
@@ -39,10 +40,10 @@ class QAOA(Algorithm, AtosRoutine):
         sjob = sjob.circuit.to_job(nbshots=4096)
         sample_result = CLinalg().submit(sjob)
 
-
         from qiskit_algorithms.minimum_eigensolvers.diagonal_estimator import _evaluate_sparsepauli
         cheating = {
-            sample.state.state: (sample.probability, _evaluate_sparsepauli(sample.state.state, problem.get_qiskit_hamiltonian()))
+            sample.state.state: (sample.probability, _evaluate_sparsepauli(
+                sample.state.state, problem.get_qiskit_hamiltonian()))
             for sample in sample_result.raw_data
         }
 

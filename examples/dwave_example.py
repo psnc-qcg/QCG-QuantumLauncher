@@ -2,7 +2,7 @@
 from dwave_routines import *
 from dimod import SampleSet
 from problems import MaxCut
-from templates import QuantumLauncher
+from base import QuantumLauncher
 
 
 def main():

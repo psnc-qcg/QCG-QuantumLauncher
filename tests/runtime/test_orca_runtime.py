@@ -1,4 +1,4 @@
-from templates import QuantumLauncher
+from base import QuantumLauncher
 from orca_routines import BBS, OrcaBackend
 from problems import EC, JSSP, MaxCut, QATM, Raw
 import numpy as np

@@ -1,7 +1,7 @@
 """  This module contains the EC class."""
 import ast
 
-from templates import Problem
+from base import Problem
 
 
 class EC(Problem):

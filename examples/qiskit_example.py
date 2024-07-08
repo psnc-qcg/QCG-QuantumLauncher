@@ -2,7 +2,7 @@
 from problems import JSSP
 from qiskit_routines.algorithms import FALQON
 from qiskit_routines.backend import QiskitBackend
-from templates import QuantumLauncher
+from base import QuantumLauncher
 
 
 def main():

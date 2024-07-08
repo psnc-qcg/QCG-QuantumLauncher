@@ -1,7 +1,7 @@
 """  This module contains the MaxCut class."""
 import networkx as nx
 
-from templates import Problem
+from base import Problem
 
 
 class MaxCut(Problem):

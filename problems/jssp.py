@@ -2,7 +2,7 @@
 from collections import defaultdict
 
 from jssp.qiskit_scheduler import get_jss_hamiltonian
-from templates import Problem
+from base import Problem
 
 
 class JSSP(Problem):
@@ -26,6 +26,7 @@ class JSSP(Problem):
         read_instance: Reads the problem instance from a file.
 
     """
+
     def __init__(self, max_time: int, onehot: str, instance: any = None,
                  instance_name: str | None = None, instance_path: str | None = None,
                  optimization_problem: bool = False) -> None:

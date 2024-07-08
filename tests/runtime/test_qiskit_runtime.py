@@ -1,4 +1,4 @@
-from templates import QuantumLauncher
+from base import QuantumLauncher
 from qiskit_routines import QAOA, QiskitBackend, FALQON
 from problems import EC, JSSP, MaxCut, QATM, Raw
 from qiskit.quantum_info import SparsePauliOp
