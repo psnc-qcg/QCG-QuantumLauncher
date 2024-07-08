@@ -6,10 +6,9 @@ from qiskit_optimization.translators import from_ising
 from typing import Tuple
 from jssp.pyqubo_scheduler import get_jss_bqm
 from problems import MaxCut, EC, JSSP, Problem, Raw
-from .orca_templates import OrcaRoutine
 
 
-class MaxCutOrca(MaxCut, OrcaRoutine):
+class MaxCutOrca(MaxCut):
     def get_qubo_fn(self, Q):
         def qubo_fn(bin_vec):
             return np.dot(bin_vec, np.dot(Q, bin_vec))
@@ -29,7 +28,7 @@ class MaxCutOrca(MaxCut, OrcaRoutine):
         return self.get_qubo_fn, Q
 
 
-class ECOrca(EC, OrcaRoutine):
+class ECOrca(EC):
     gamma = 1
     delta = 0.05
 
@@ -94,7 +93,7 @@ class ECOrca(EC, OrcaRoutine):
         return self.qubo_fn_fact, Q
 
 
-class JSSPOrca(JSSP, OrcaRoutine):
+class JSSPOrca(JSSP):
     gamma = 1
     lagrange_one_hot = 1
     lagrange_precedence = 2
@@ -169,7 +168,7 @@ class JSSPOrca(JSSP, OrcaRoutine):
         return self.qubo_fn_fact, Q / max(np.max(Q), -np.min(Q))
 
 
-class QATMOrca(OrcaRoutine, QATMQiskit):
+class QATMOrca(QATMQiskit):
     @Problem.output
     def get_orca_qubo(self):
         hamiltonian = self.get_qiskit_hamiltonian()
@@ -179,7 +178,7 @@ class QATMOrca(OrcaRoutine, QATMQiskit):
         return None, qubo.quadratic.to_array()
 
 
-class RawOrca(Raw, OrcaRoutine):
+class RawOrca(Raw):
     @Problem.output
     def get_orca_qubo(self):
         return self.instance

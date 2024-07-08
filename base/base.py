@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 from functools import wraps
 import pickle
+from typing import Callable
 
 
 class _SupportClass(ABC):
@@ -219,13 +220,14 @@ class Algorithm(_SupportClass, ABC):
         return dict(o)
 
     @abstractmethod
-    def run(self, problem: Problem, backend: Backend):
+    def run(self, problem: Problem, backend: Backend, formatter: Callable = None):
         """Runs the algorithm on a specific problem using a backend.
 
         Args:
             problem (Problem): The problem to be solved.
             backend (Backend): The backend to be used for execution.
         """
+
     @abstractmethod
     def get_bitstring(self, result) -> str:
         """Returns the bitstring representation of the result.

@@ -1,46 +1,20 @@
 import numpy as np
-from problems import EC, JSSP, MaxCut, QATM, Raw, Problem
-from qiskit_routines.basic_problems import (
-    ECQiskit,
-    JSSPQiskit,
-    MaxCutQiskit,
-    QATMQiskit,
-)
 from .dwave_templates import DwaveRoutine
 from qiskit.quantum_info import SparsePauliOp
 from qiskit_optimization.converters import QuadraticProgramToQubo
 from qiskit_optimization.translators import from_ising
+from base import adapter
+from typing import Tuple
 
 
-class QiskitToDwave:
-    @Problem.output
-    def get_qubo(self):
-        return self._hamiltonian_to_qubo(self.get_qiskit_hamiltonian())
-
-    def _hamiltonian_to_qubo(self, hamiltonian: SparsePauliOp) -> tuple[np.ndarray, float]:
-        qp = from_ising(hamiltonian)
-        conv = QuadraticProgramToQubo()
-        qubo = conv.convert(qp).objective
-        return qubo.quadratic.to_array(), qubo.constant
-
-
-class ECDwave(ECQiskit, EC, QiskitToDwave, DwaveRoutine):
+@adapter('qubo', 'bqm')
+def qubo_to_bqm(qubo) -> dict:
     pass
 
 
-class JSSPDwave(JSSPQiskit, JSSP, QiskitToDwave, DwaveRoutine):
-    pass
-
-
-class MaxCutDwave(MaxCutQiskit, MaxCut, QiskitToDwave, DwaveRoutine):
-    pass
-
-
-class QATMDwave(QATMQiskit, QATM, QiskitToDwave, DwaveRoutine):
-    pass
-
-
-class RawDwave(Raw, DwaveRoutine):
-    @Problem.output
-    def get_qubo(self):
-        return self.instance
+@adapter('hamiltonian', 'qubo')
+def hamiltonian_to_qubo(hamiltonian) -> Tuple[np.ndarray, float]:
+    qp = from_ising(hamiltonian)
+    conv = QuadraticProgramToQubo()
+    qubo = conv.convert(qp).objective
+    return qubo.quadratic.to_array(), qubo.constant

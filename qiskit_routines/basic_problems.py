@@ -5,7 +5,6 @@ import numpy as np
 from qiskit.quantum_info import SparsePauliOp
 from qiskit import QuantumCircuit
 import problems
-from .qiskit_template import QiskitRoutine
 
 
 def ring_ham(ring: set, n):
@@ -28,7 +27,7 @@ def ring_ham(ring: set, n):
     return SparsePauliOp(total)
 
 
-class ECQiskit(problems.EC, QiskitRoutine):
+class ECQiskit(problems.EC):
     @problems.Problem.output
     def get_qiskit_hamiltonian(self) -> SparsePauliOp:
         """ generating hamiltonian"""
@@ -154,7 +153,7 @@ def get_qiskit_hamiltonian(self):
     return ham.simplify()
 
 
-class QATMQiskit(problems.QATM, QiskitRoutine):
+class QATMQiskit(problems.QATM):
     @problems.Problem.output
     def get_qiskit_hamiltonian(self) -> SparsePauliOp:
         cm = self.instance['cm']

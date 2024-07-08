@@ -8,10 +8,9 @@ from qiskit_ibm_runtime import Estimator, Sampler
 from qiskit_ibm_runtime import Session, Options
 
 from base import Backend
-from .qiskit_template import QiskitRoutine
 
 
-class QiskitBackend(Backend, QiskitRoutine):
+class QiskitBackend(Backend):
     """ 
     A class representing a local backend for Qiskit routines.
 

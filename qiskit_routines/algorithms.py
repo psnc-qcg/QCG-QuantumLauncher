@@ -15,10 +15,9 @@ from qiskit_algorithms.minimum_eigensolvers import SamplingVQEResult
 
 from base import Problem, Algorithm
 from .backend import QiskitBackend
-from .qiskit_template import QiskitRoutine
 
 
-class QiskitOptimizationAlgorithm(Algorithm, QiskitRoutine, ABC):
+class QiskitOptimizationAlgorithm(Algorithm):
     """ Abstract class for Qiskit optimization algorithms """
 
     def make_tag(self, problem: Problem, backend: QiskitBackend) -> str:

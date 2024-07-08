@@ -2,8 +2,6 @@
 import json
 import os
 import pickle
-from abc import ABC, abstractmethod
-from functools import wraps
 from .adapter_structure import get_formatter
 from .base import Problem, Algorithm, Backend
 
@@ -85,7 +83,7 @@ class _FileSavingSupportClass:
             self._save_results_json(self.res, path_json)
 
 
-class QuantumLauncher(ABC, _FileSavingSupportClass):
+class QuantumLauncher(_FileSavingSupportClass):
     """
     Quantum Launcher class.
 
@@ -152,9 +150,6 @@ class QuantumLauncher(ABC, _FileSavingSupportClass):
         """
         Chooses a problem for current hardware taken from the algorithm and binds parameters.
         """
-        #
-        formatter = get_formatter(self.problem)
-        #
         if self.binding_params is not None:
             self._bind_parameters()
         self.problem.prepare_methods()
@@ -167,8 +162,9 @@ class QuantumLauncher(ABC, _FileSavingSupportClass):
             dict: The results of the algorithm execution.
         """
         self._prepare_problem()
+        formatter = get_formatter(self.problem)
 
-        return self.algorithm.run(self.problem, self.backend)
+        return self.algorithm.run(self.problem, self.backend, formatter=formatter)
 
     def process(self, save_to_file: bool = False,
                 save_pickle: str | bool = False, save_txt: str | bool = False,

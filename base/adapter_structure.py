@@ -1,5 +1,5 @@
 from collections import defaultdict
-from base.templates import Problem, Algorithm
+from .base import Problem
 from typing import Dict, Tuple, Callable
 
 __QL_TRANSLATIONS: Dict[type, Tuple[type, Callable]] = {}
