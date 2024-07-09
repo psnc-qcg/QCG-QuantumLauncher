@@ -1,8 +1,8 @@
 """  Module for Job Shop Scheduling Problem (JSSP)."""
 from collections import defaultdict
 
-from jssp.qiskit_scheduler import get_jss_hamiltonian
-from base import Problem
+from quantum_launcher.jssp.qiskit_scheduler import get_jss_hamiltonian
+from quantum_launcher.base import Problem
 
 
 class JSSP(Problem):

@@ -13,7 +13,7 @@ from qiskit.quantum_info import SparsePauliOp
 from qiskit_algorithms.minimum_eigensolvers import QAOA as QiskitQAOA
 from qiskit_algorithms.minimum_eigensolvers import SamplingVQEResult
 
-from base import Problem, Algorithm
+from quantum_launcher.base import Problem, Algorithm
 from .backend import QiskitBackend
 from typing import Callable
 

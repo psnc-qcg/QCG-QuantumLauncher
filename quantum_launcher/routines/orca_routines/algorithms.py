@@ -3,7 +3,7 @@ from typing import List
 from ptseries.algorithms.binary_solvers import BinaryBosonicSolver
 from ptseries.common.logger import Logger
 
-from base import Problem, Algorithm
+from quantum_launcher.base import Problem, Algorithm
 from .backend import OrcaBackend
 from typing import Callable
 import numpy as np

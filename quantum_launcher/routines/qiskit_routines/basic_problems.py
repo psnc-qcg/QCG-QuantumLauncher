@@ -1,10 +1,10 @@
 # from .launcher import QiskitProblem
-from base import formatter
+from quantum_launcher.base import formatter
 import hampy
 import numpy as np
 from qiskit.quantum_info import SparsePauliOp
 from qiskit import QuantumCircuit
-import problems
+import quantum_launcher.problems as problems
 
 
 def ring_ham(ring: set, n):

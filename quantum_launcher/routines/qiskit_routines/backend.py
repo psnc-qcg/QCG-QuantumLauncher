@@ -7,7 +7,7 @@ from qiskit_algorithms.optimizers import COBYLA, SPSA, SciPyOptimizer, Optimizer
 from qiskit_ibm_runtime import Estimator, Sampler
 from qiskit_ibm_runtime import Session, Options
 
-from base import Backend
+from quantum_launcher.base import Backend
 
 
 class QiskitBackend(Backend):

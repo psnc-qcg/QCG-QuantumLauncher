@@ -1,5 +1,5 @@
 """ This module contains the Raw class."""
-from base import Problem
+from quantum_launcher.base import Problem
 
 
 class Raw(Problem):

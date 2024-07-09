@@ -1,4 +1,4 @@
-from base import Backend
+from quantum_launcher.base import Backend
 from tabu import TabuSampler
 from dwave.system import DWaveSampler, EmbeddingComposite
 from dwave.samplers import SimulatedAnnealingSampler

@@ -5,8 +5,7 @@ from bisect import bisect_right
 # from pyqubo import Binary
 from .Binary import Binary
 
-from jssp.scheduler import JobShopScheduler, KeyList
-from jssp.scheduler import get_label
+from .scheduler import JobShopScheduler, KeyList, get_label
 
 
 def get_jss_bqm(job_dict, max_time, disable_till=None, disable_since=None, disabled_variables=None, lagrange_one_hot=3,
@@ -135,7 +134,8 @@ class DWaveScheduler(JobShopScheduler):
         """Returns a BQM to the Job Shop Scheduling problem.  """
 
         # Apply constraints to self.csp
-        self._remove_absurd_times(disable_till, disable_since, disabled_variables)
+        self._remove_absurd_times(
+            disable_till, disable_since, disabled_variables)
         self._add_one_start_constraint(lagrange_one_hot)
         self._add_precedence_constraint(lagrange_precedence)
         self._add_share_machine_constraint(lagrange_share)

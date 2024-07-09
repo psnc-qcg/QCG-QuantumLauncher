@@ -1,7 +1,7 @@
 """  This module contains the EC class."""
 import ast
 
-from base import Problem
+from quantum_launcher.base import Problem
 
 
 class EC(Problem):

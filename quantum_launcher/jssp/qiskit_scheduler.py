@@ -4,8 +4,7 @@ from bisect import bisect_right
 
 import hampy
 
-from jssp.scheduler import JobShopScheduler, KeyList
-from jssp.scheduler import get_label
+from .scheduler import JobShopScheduler, KeyList, get_label
 
 
 def get_jss_hamiltonian(job_dict, max_time, onehot):
@@ -49,7 +48,8 @@ class QiskitScheduler(JobShopScheduler):
                     if next_label in self.absurd_times:
                         continue
                     var2 = self.H_pos_by_label[next_label]
-                    self.H += hampy.H_x(var1, self.n).compose(hampy.H_x(var2, self.n))
+                    self.H += hampy.H_x(var1,
+                                        self.n).compose(hampy.H_x(var2, self.n))
 
     def _add_share_machine_constraint(self, lagrange_share=1):
         sorted_tasks = sorted(self.tasks, key=lambda x: x.machine)
@@ -84,7 +84,8 @@ class QiskitScheduler(JobShopScheduler):
                                 continue
                             var2 = self.H_pos_by_label[this_label]
 
-                            self.H += hampy.H_x(var1, self.n).compose(hampy.H_x(var2, self.n))
+                            self.H += hampy.H_x(var1,
+                                                self.n).compose(hampy.H_x(var2, self.n))
 
     def _build_variable_dict(self):
         for task in self.tasks:

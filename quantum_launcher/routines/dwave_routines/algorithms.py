@@ -1,4 +1,4 @@
-from base import Algorithm, Problem, Backend
+from quantum_launcher.base import Algorithm, Problem, Backend
 from dimod.binary.binary_quadratic_model import BinaryQuadraticModel
 from dimod import Sampler, SampleSet
 

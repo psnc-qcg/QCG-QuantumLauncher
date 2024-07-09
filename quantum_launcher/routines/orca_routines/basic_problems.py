@@ -4,8 +4,8 @@ from qiskit_optimization.converters import QuadraticProgramToQubo
 from qiskit_optimization.translators import from_ising
 from typing import Tuple
 from jssp.pyqubo_scheduler import get_jss_bqm
-from problems import MaxCut, EC, JSSP, Raw
-from base import formatter, adapter
+from quantum_launcher.problems import MaxCut, EC, JSSP, Raw
+from quantum_launcher.base import formatter, adapter
 
 
 @adapter('qubo', 'qubo_fn')

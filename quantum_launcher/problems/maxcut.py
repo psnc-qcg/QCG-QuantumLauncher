@@ -1,7 +1,7 @@
 """  This module contains the MaxCut class."""
 import networkx as nx
 
-from base import Problem
+from quantum_launcher.base import Problem
 
 
 class MaxCut(Problem):

@@ -4,7 +4,7 @@ import os
 import numpy as np
 import pandas as pd
 
-from base import Problem
+from quantum_launcher.base import Problem
 
 
 class QATM(Problem):
