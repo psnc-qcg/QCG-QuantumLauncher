@@ -1,38 +1,26 @@
 import numpy as np
+from qiskit.quantum_info import SparsePauliOp
+from qiskit_optimization.converters import QuadraticProgramToQubo
+from qiskit_optimization.translators import from_ising
+from base import adapter
+from typing import Tuple
 import ast
-from base import Algorithm, Problem
-from .dwave_templates import DwaveRoutine
 from pyqubo import Spin
-from dimod.binary.binary_quadratic_model import BinaryQuadraticModel
-import dwave.inspector
-from dimod import Sampler, SampleSet
 
 
-class DwaveSolver(Algorithm, DwaveRoutine):
-    def __init__(self, chain_strength, **alg_kwargs) -> None:
-        self.chain_strength = chain_strength
-        super().__init__(**alg_kwargs)
+@adapter('qubo', 'bqm')
+def qubo_to_bqm(qubo_with_offset) -> dict:
+    qubo, offset = qubo_with_offset
+    bqm, _ = QUBOMatrix(qubo, offset).qubo_matrix_into_bqm()
+    return bqm
 
-    def run(self, problem: Problem, backend: DwaveRoutine, **kwargs):
-        self._sampler: Sampler = backend.sampler
-        self.label: str = f'{problem.name}_{problem.instance_name}'
-        if 'get_bqm' in problem.__dict__:
-            bqm: BinaryQuadraticModel = problem.get_bqm()
-        else:
-            qubo, offset = problem.get_qubo()
-            bqm, _ = QUBOMatrix(qubo, offset).qubo_matrix_into_bqm()
-        return self._solve_bqm(bqm, **kwargs)
 
-    def _get_path(self) -> str:
-        return super()._get_path()
-
-    def _solve_bqm(self, bqm, **kwargs):
-        res = self._sampler.sample(
-            bqm, num_reads=1000, label=self.label, chain_strength=self.chain_strength, **kwargs)
-        return res
-
-    def get_bitstring(self, result: SampleSet) -> str:
-        return ''.join(map(str, result.samples()[0].values()))
+@adapter('hamiltonian', 'qubo')
+def hamiltonian_to_qubo(hamiltonian) -> Tuple[np.ndarray, float]:
+    qp = from_ising(hamiltonian)
+    conv = QuadraticProgramToQubo()
+    qubo = conv.convert(qp).objective
+    return qubo.quadratic.to_array(), qubo.constant
 
 
 class QUBOMatrix:

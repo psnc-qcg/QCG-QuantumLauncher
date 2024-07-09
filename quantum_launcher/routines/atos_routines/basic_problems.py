@@ -2,7 +2,7 @@
 
 from problems import EC, JSSP, MaxCut, QATM, Raw, Problem
 from qiskit_routines.basic_problems import ECQiskit, JSSPQiskit, MaxCutQiskit, QATMQiskit
-from utils import ham_from_qiskit_to_atos
+from quantum_launcher.utils import ham_from_qiskit_to_atos
 from .atos_templates import AtosRoutine
 
 
