@@ -1,41 +1,46 @@
 """ Basic problems for Orca """
-from qiskit_routines.basic_problems import QATMQiskit
 import numpy as np
 from qiskit_optimization.converters import QuadraticProgramToQubo
 from qiskit_optimization.translators import from_ising
 from typing import Tuple
 from jssp.pyqubo_scheduler import get_jss_bqm
-from problems import MaxCut, EC, JSSP, Problem, Raw
+from problems import MaxCut, EC, JSSP, Raw
+from base import formatter, adapter
 
 
-class MaxCutOrca(MaxCut):
-    def get_qubo_fn(self, Q):
-        def qubo_fn(bin_vec):
-            return np.dot(bin_vec, np.dot(Q, bin_vec))
-
-        return qubo_fn
-
-    @Problem.output
-    def get_orca_qubo(self):
-        """ Returns Qubo function """
-        Q = np.zeros((6, 6))
-        for (i, j) in self.instance.edges:
-            Q[i, i] += -1
-            Q[j, j] += -1
-            Q[i, j] += 1
-            Q[j, i] += 1
-
-        return self.get_qubo_fn, Q
+@adapter('qubo', 'qubo_fn')
+def get_qubo_fn(qubo):
+    # TODO check
+    def qubo_fn(bin_vec):
+        return np.dot(bin_vec, np.dot(qubo, bin_vec))
+    return qubo_fn
 
 
-class ECOrca(EC):
+@adapter('hamiltonian', 'qubo')
+def get_orca_qubo(self):
+    hamiltonian = self.get_qiskit_hamiltonian()
+    qp = from_ising(hamiltonian)
+    conv = QuadraticProgramToQubo()
+    qubo = conv.convert(qp).objective
+    return None, qubo.quadratic.to_array()
+
+
+@formatter(MaxCut, 'qubo')
+def get_orca_qubo(problem: MaxCut):
+    """ Returns Qubo function """
+    Q = np.zeros((6, 6))
+    for (i, j) in problem.instance.edges:
+        Q[i, i] += -1
+        Q[j, j] += -1
+        Q[i, j] += 1
+        Q[j, i] += 1
+
+    return problem.get_qubo_fn, Q
+
+
+class ECOrca:
     gamma = 1
     delta = 0.05
-
-    def qubo_fn_fact(self, Q):
-        def qubo_fn(bin_vec):
-            return np.dot(bin_vec, np.dot(Q, bin_vec)) + self.gamma * (self.num_elements - np.sum(np.array(self.len_routes) * np.array(bin_vec)))**2 - self.delta * np.sum(bin_vec)
-        return qubo_fn
 
     def Jrr(self, route1, route2):
         s = len(set(route1).intersection(set(route2)))
@@ -77,11 +82,13 @@ class ECOrca(EC):
         # Calculate instance size for training
         return len(self.instance)
 
-    @Problem.output
-    def get_orca_qubo(self):
+
+@formatter(EC, 'qubo')
+class EC_QUBO(ECOrca):
+    def __call__(self, problem: EC):
         self.num_elements = self.calculate_num_elements()
         self.len_routes = self.calculate_lengths_tab()
-        Q = np.zeros((len(self.instance), len(self.instance)))
+        Q = np.zeros((len(problem.instance), len(problem.instance)))
         self.Jrr_dict, self.hr_dict = self.calculate_jrr_hr()
         for i in self.Jrr_dict:
             Q[i[0]][i[1]] = self.Jrr_dict[i]
@@ -90,10 +97,19 @@ class ECOrca(EC):
         for i in self.hr_dict:
             Q[i][i] = -self.hr_dict[i]
 
-        return self.qubo_fn_fact, Q
+        return Q
 
 
-class JSSPOrca(JSSP):
+@formatter(EC, 'qubo_fn')
+class EC_FN(ECOrca):
+    # TODO fix and check
+    def __call__(self, Q):
+        def qubo_fn(bin_vec):
+            return np.dot(bin_vec, np.dot(Q, bin_vec)) + self.gamma * (self.num_elements - np.sum(np.array(self.len_routes) * np.array(bin_vec)))**2 - self.delta * np.sum(bin_vec)
+        return qubo_fn
+
+
+class JSSPOrca:
     gamma = 1
     lagrange_one_hot = 1
     lagrange_precedence = 2
@@ -134,21 +150,17 @@ class JSSPOrca(JSSP):
                   for i in range(len(variables)) if binary_vector[i] == 1]
         return result
 
-    def qubo_fn_fact(self, Q):
-        # define the QUBO cost function
-        def qubo_fn(bin_vec):
-            return np.dot(bin_vec, np.dot(Q, bin_vec)) + self.gamma * (np.sum(bin_vec) - self.get_len_all_jobs()) ** 2
-        return qubo_fn
 
-    @Problem.output
-    def get_orca_qubo(self):
+@formatter(JSSP, 'qubo')
+class JSSP_QUBO(JSSPOrca):
+    def __call__(self, problem: JSSP):
         # Define the matrix Q used for QUBO
         self.config = {}
         self.instance_size = self.calculate_instance_size()
         self.config['parameters'] = {}
         self.config['parameters']['job_shop_scheduler'] = {}
         self.config['parameters']['job_shop_scheduler']['problem_version'] = "optimization"
-        actually_its_qubo, variables, model = self._fix_get_jss_bqm(self.instance, self.max_time, self.config,
+        actually_its_qubo, variables, model = self._fix_get_jss_bqm(problem.instance, problem.max_time, self.config,
                                                                     lagrange_one_hot=self.lagrange_one_hot,
                                                                     lagrange_precedence=self.lagrange_precedence,
                                                                     lagrange_share=self.lagrange_share)
@@ -165,20 +177,18 @@ class JSSPOrca(JSSP):
         for label_i, value in actually_its_qubo[0].items():
             i = reverse_dict_map[label_i]
             Q[i, i] += value
-        return self.qubo_fn_fact, Q / max(np.max(Q), -np.min(Q))
+        return Q / max(np.max(Q), -np.min(Q))
 
 
-class QATMOrca(QATMQiskit):
-    @Problem.output
-    def get_orca_qubo(self):
-        hamiltonian = self.get_qiskit_hamiltonian()
-        qp = from_ising(hamiltonian)
-        conv = QuadraticProgramToQubo()
-        qubo = conv.convert(qp).objective
-        return None, qubo.quadratic.to_array()
+@formatter(JSSP, 'qubo_fn')
+class JSSP_FN(JSSPOrca):
+    def qubo_fn_fact(self, Q):
+        # TODO fix and check
+        def qubo_fn(bin_vec):
+            return np.dot(bin_vec, np.dot(Q, bin_vec)) + self.gamma * (np.sum(bin_vec) - self.get_len_all_jobs()) ** 2
+        return qubo_fn
 
 
-class RawOrca(Raw):
-    @Problem.output
-    def get_orca_qubo(self):
-        return self.instance
+@formatter(Raw, 'qubo')
+def get_orca_qubo(problem: Raw):
+    return problem.instance
