@@ -1,18 +1,16 @@
 """ Quantum Launcher for Orca """
-from dwave_routines import *
-from dimod import SampleSet
-from problems import MaxCut
-from base import QuantumLauncher
+from quantum_launcher import *
+from quantum_launcher.routines.dwave_routines import SimulatedAnnealingBackend, DwaveSolver
 
 
 def main():
     """ main """
-    problem = MaxCut(instance_name='default')
+    problem = problems.MaxCut(instance_name='default')
     alg = DwaveSolver(1)
     backend = SimulatedAnnealingBackend('local')
     launcher = QuantumLauncher(problem, alg, backend)
-    res: SampleSet = launcher._run()
-    print(''.join(map(str, res.samples()[0].values())))
+    res = launcher._run()
+    print(alg.get_bitstring(res))
 
 
 if __name__ == '__main__':

@@ -1,12 +1,11 @@
 """ Quantum Launcher for Orca """
-from orca_routines import *
-from problems import MaxCut
-from base import QuantumLauncher
+from quantum_launcher import *
+from quantum_launcher.routines.orca_routines import OrcaBackend, BBS
 
 
 def main():
     """ main """
-    problem = MaxCut(instance_name='default')
+    problem = problems.MaxCut(instance_name='default')
     alg = BBS()
     backend = OrcaBackend('local')
     launcher = QuantumLauncher(problem, alg, backend)

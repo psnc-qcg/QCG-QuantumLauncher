@@ -1,4 +1,5 @@
 ''' Quantum Launcher for Atos '''
+# Atos is not longer supported by quantum launcher
 import atos_routines
 from problems import EC
 from base import QuantumLauncher
