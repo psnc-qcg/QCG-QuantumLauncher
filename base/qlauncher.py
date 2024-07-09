@@ -162,7 +162,8 @@ class QuantumLauncher(_FileSavingSupportClass):
             dict: The results of the algorithm execution.
         """
         self._prepare_problem()
-        formatter = get_formatter(self.problem)
+        formatter = get_formatter(
+            self.problem._problem_id, self.algorithm._algorithm_format)
 
         return self.algorithm.run(self.problem, self.backend, formatter=formatter)
 

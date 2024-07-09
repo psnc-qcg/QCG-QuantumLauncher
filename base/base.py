@@ -74,6 +74,9 @@ class Problem(_SupportClass, ABC):
             Analyzes the result.
 
     """
+
+    _problem_id = None
+
     @abstractmethod
     def __init__(self, instance: any = None, instance_name: str | None = None, instance_path: str | None = None) -> None:
         """
@@ -96,6 +99,11 @@ class Problem(_SupportClass, ABC):
             self.set_instance(instance=instance, instance_name=instance_name)
         else:
             self.read_instance(instance_path)
+
+    def __init_subclass__(cls) -> None:
+        if Problem not in cls.__bases__:
+            return
+        cls._problem_id = cls
 
     def set_instance(self, instance: any, instance_name: str | None = None) -> None:
         """
@@ -196,6 +204,8 @@ class Algorithm(_SupportClass, ABC):
         _get_path(self) -> str: Returns the common path for the algorithm.
         run(self, problem: Problem, backend: Backend): Runs the algorithm on a specific problem using a backend.
     """
+    _algorithm_format: str | None = None
+
     @abstractmethod
     def __init__(self, **alg_kwargs) -> None:
         self.name: str = self.__class__.__name__.lower()

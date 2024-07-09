@@ -15,6 +15,7 @@ from qiskit_algorithms.minimum_eigensolvers import SamplingVQEResult
 
 from base import Problem, Algorithm
 from .backend import QiskitBackend
+from typing import Callable
 
 
 class QiskitOptimizationAlgorithm(Algorithm):
@@ -65,6 +66,7 @@ class QAOA(QiskitOptimizationAlgorithm):
         mixer_h (QuantumCircuit | None): The initial state of the circuit.
 
     """
+    _algorithm_format = 'hamiltonian'
 
     def __init__(self, p: int = 1, alternating_ansatz: bool = False, aux=None, **alg_kwargs):
         super().__init__(**alg_kwargs)
@@ -119,9 +121,9 @@ class QAOA(QiskitOptimizationAlgorithm):
                     res_dict = {**res_dict, **{key: path}}
         return res_dict
 
-    def run(self, problem: Problem, backend: QiskitBackend) -> dict:
+    def run(self, problem: Problem, backend: QiskitBackend, formatter=Callable) -> dict:
         """ Runs the QAOA algorithm """
-        hamiltonian: SparsePauliOp = problem.get_qiskit_hamiltonian()
+        hamiltonian: SparsePauliOp = formatter(problem)
         energies = []
 
         def qaoa_callback(evaluation_count, params, mean, std):
@@ -134,9 +136,10 @@ class QAOA(QiskitOptimizationAlgorithm):
 
         if self.alternating_ansatz:
             if self.mixer_h is None:
-                self.mixer_h = problem.get_mixer_hamiltonian()
+                self.mixer_h = formatter.get_mixer_hamiltonian(problem)
             if self.initial_state is None:
-                self.initial_state = problem.get_QAOAAnsatz_initial_state()
+                self.initial_state = formatter.get_QAOAAnsatz_initial_state(
+                    problem)
 
         qaoa = QiskitQAOA(sampler, optimizer, reps=self.p, callback=qaoa_callback,
                           mixer=self.mixer_h, initial_state=self.initial_state, **self.alg_kwargs)

@@ -21,6 +21,8 @@ __QL_ADAPTERS: Dict[type, Dict[type, Callable]] = defaultdict(lambda: {})
 
 def formatter(problem: Problem, format: str):
     def wrapper(func):
+        if type(func) == type:
+            func = func()
         __QL_ADAPTERS[problem][format] = func
         return func
     return wrapper
