@@ -1,10 +1,9 @@
 """ Backend class for Orca """
 from base import Backend
-from .orca_templates import OrcaRoutine
 from typing import Literal
 
 
-class OrcaBackend(Backend, OrcaRoutine):
+class OrcaBackend(Backend):
     """ local backend """
 
     def __init__(self, name: str) -> None:
@@ -14,7 +13,7 @@ class OrcaBackend(Backend, OrcaRoutine):
         return {}
 
 
-class PCSSOrcaBackend(Backend, OrcaRoutine):
+class PCSSOrcaBackend(Backend):
     """ Orca QPU backend """
 
     def __init__(self, name: Literal['system-A', 'system-B']) -> None:

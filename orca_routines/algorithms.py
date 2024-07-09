@@ -5,10 +5,11 @@ from ptseries.common.logger import Logger
 
 from base import Problem, Algorithm
 from .backend import OrcaBackend
-from .orca_templates import OrcaRoutine
+from typing import Callable
+import numpy as np
 
 
-class BBS(Algorithm, OrcaRoutine):
+class BBS(Algorithm):
     """
     Binary Bosonic Solver algorithm class.
 
@@ -64,7 +65,7 @@ class BBS(Algorithm, OrcaRoutine):
         """
         return 'BinaryBosonic'
 
-    def run(self, problem: Problem, backend: OrcaBackend):
+    def run(self, problem: Problem, backend: OrcaBackend, formatter: Callable[[Problem], np.ndarray]):
         """
         Run the BBS algorithm.
 
@@ -78,7 +79,7 @@ class BBS(Algorithm, OrcaRoutine):
         params = {"tbi_type": self.tbi_loops}
         if backend is not None:
             params.update(backend.get_args())
-        qubo_fn_fact, Q = problem.get_orca_qubo()
+        Q = formatter(problem)
         if self.input_state is None:
             self.input_state = [not i % 2 for i in range(len(Q))]
         self.bbs = BinaryBosonicSolver(
@@ -100,3 +101,41 @@ class BBS(Algorithm, OrcaRoutine):
 
     def get_bitstring(self, result: List[float]) -> str:
         return ''.join(map(str, map(int, result)))
+
+
+class BBSFN(BBS):
+    def run(self, problem: Problem, backend: OrcaBackend, formatter: Callable[[Problem], Callable]):
+        """
+        Run the BBS algorithm.
+
+        Parameters:
+        - problem (Problem): The problem to solve.
+        - backend (OrcaBackend): The backend to use for computation.
+
+        Returns:
+        - Solution: The solution obtained from running the BBS algorithm.
+        """
+        params = {"tbi_type": self.tbi_loops}
+        if backend is not None:
+            params.update(backend.get_args())
+        qubo_fn_fact = formatter(problem)
+        Q = None
+        # TODO make this thing working
+        if self.input_state is None:
+            self.input_state = [not i % 2 for i in range(len(Q))]
+        self.bbs = BinaryBosonicSolver(
+            pb_dim=len(Q),
+            objective=Q,
+            gradient_mode=self.gradient_mode,
+            tbi_params=params,
+            n_samples=self.n_samples,
+            input_state=self.input_state
+        )
+        self.bbs.train(
+            learning_rate=self.learning_rate,
+            updates=self.updates,
+            log_frequency=self.print_frequency,
+            logger=self.logger
+        )
+
+        return self.bbs.config_min_encountered
