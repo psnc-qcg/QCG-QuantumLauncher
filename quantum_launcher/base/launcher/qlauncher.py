@@ -2,8 +2,8 @@
 import json
 import os
 import pickle
-from .adapter_structure import get_formatter
-from .base import Problem, Algorithm, Backend
+from ..adapter_structure import get_formatter
+from ..base import Problem, Algorithm, Backend
 
 
 class _FileSavingSupportClass:
