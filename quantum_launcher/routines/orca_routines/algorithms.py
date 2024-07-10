@@ -3,7 +3,7 @@ from typing import List
 from ptseries.algorithms.binary_solvers import BinaryBosonicSolver
 from ptseries.common.logger import Logger
 
-from quantum_launcher.base import Problem, Algorithm
+from quantum_launcher.base import Problem, Algorithm, Result
 from .backend import OrcaBackend
 from typing import Callable
 import numpy as np
@@ -30,6 +30,7 @@ class BBS(Algorithm):
     - run(self, problem: Problem, backend: OrcaBackend):
         Run the BBS algorithm.
     """
+    _algorithm_format = 'qubo'
 
     def __init__(self, learning_rate: float = 1e-1, updates: int = 80, tbi_loops: str = 'single-loop', print_frequency: int = 20,
                  gradient_mode: str = 'spsa', n_samples: int = 20, input_state: list[int] | None = None) -> None:
@@ -83,8 +84,7 @@ class BBS(Algorithm):
         if self.input_state is None:
             self.input_state = [not i % 2 for i in range(len(Q))]
         self.bbs = BinaryBosonicSolver(
-            pb_dim=len(Q),
-            objective=Q,
+            len(Q), Q,
             gradient_mode=self.gradient_mode,
             tbi_params=params,
             n_samples=self.n_samples,
@@ -97,10 +97,14 @@ class BBS(Algorithm):
             logger=self.logger
         )
 
-        return self.bbs.config_min_encountered
+        return self.construct_results(self.bbs.config_min_encountered)
 
     def get_bitstring(self, result: List[float]) -> str:
         return ''.join(map(str, map(int, result)))
+
+    def construct_results(self, results) -> Result:
+        # TODO: Implement construct_results
+        return results
 
 
 class BBSFN(BBS):

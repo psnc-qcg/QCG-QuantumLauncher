@@ -3,7 +3,7 @@ from qiskit_optimization.translators import from_ising
 from qiskit.quantum_info import SparsePauliOp
 import numpy as np
 
-from utils import qubo_to_hamiltonian, _qubo_dict_into_hamiltonian, _qubo_matrix_into_hamiltonian
+from quantum_launcher.utils import qubo_to_hamiltonian, _qubo_dict_into_hamiltonian, _qubo_matrix_into_hamiltonian
 
 
 def _hamiltonian_to_qubo(hamiltonian: SparsePauliOp) -> tuple[np.ndarray, float]:

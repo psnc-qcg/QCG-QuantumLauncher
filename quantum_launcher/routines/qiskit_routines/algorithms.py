@@ -13,7 +13,7 @@ from qiskit.quantum_info import SparsePauliOp
 from qiskit_algorithms.minimum_eigensolvers import QAOA as QiskitQAOA
 from qiskit_algorithms.minimum_eigensolvers import SamplingVQEResult
 
-from quantum_launcher.base import Problem, Algorithm
+from quantum_launcher.base import Problem, Algorithm, Result
 from .backend import QiskitBackend
 from typing import Callable
 
@@ -150,15 +150,30 @@ class QAOA(QiskitOptimizationAlgorithm):
         else:
             cx_count = 0
         timestamps, usages, qpu_time = self.get_processing_times(tag, sampler)
-        result = {'energy': qaoa_result.eigenvalue,
-                  'depth': depth,
-                  'cx_count': cx_count,
-                  'qpu_time': qpu_time,
-                  'energies': energies,
-                  'SamplingVQEResult': qaoa_result,
-                  'usages': usages,
-                  'timestamps': timestamps}
-        return result
+        return self.construct_result({'energy': qaoa_result.eigenvalue,
+                                      'depth': depth,
+                                      'cx_count': cx_count,
+                                      'qpu_time': qpu_time,
+                                      'energies': energies,
+                                      'SamplingVQEResult': qaoa_result,
+                                      'usages': usages,
+                                      'timestamps': timestamps})
+
+    def construct_result(self, result: dict) -> Result:
+
+        best_bitstring = self.get_bitstring(result)
+        best_energy = result['energy']
+
+        distribution = dict(result['SamplingVQEResult'].eigenstate.items())
+        most_common_value = max(
+            distribution, key=distribution.get)
+        most_common_bitstring = bin(most_common_value)[2:].zfill(
+            len(best_bitstring))
+        most_common_bitstring_energy = distribution[most_common_value]
+        num_of_samples = 0  # TODO: implement
+        average_energy = np.mean(result['energies'])
+        energy_std = np.std(result['energies'])
+        return Result(best_bitstring, best_energy, most_common_bitstring, most_common_bitstring_energy, distribution, result['energies'], num_of_samples, average_energy, energy_std, result)
 
     def get_bitstring(self, result) -> str:
         return result['SamplingVQEResult'].best_measurement['bitstring']
