@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 from functools import wraps
 import pickle
 from typing import Callable
+from .unified_result import Result
 
 
 class _SupportClass(ABC):
@@ -230,7 +231,7 @@ class Algorithm(_SupportClass, ABC):
         return dict(o)
 
     @abstractmethod
-    def run(self, problem: Problem, backend: Backend, formatter: Callable = None):
+    def run(self, problem: Problem, backend: Backend, formatter: Callable = None) -> Result:
         """Runs the algorithm on a specific problem using a backend.
 
         Args:
