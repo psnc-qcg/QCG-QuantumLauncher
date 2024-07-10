@@ -1,6 +1,6 @@
-from base import QuantumLauncher
-from orca_routines import BBS, OrcaBackend
-from problems import EC, JSSP, MaxCut, QATM, Raw
+from quantum_launcher import QuantumLauncher
+from quantum_launcher.routines.orca_routines import BBS, OrcaBackend
+from quantum_launcher.problems import EC, JSSP, MaxCut, QATM, Raw
 import numpy as np
 TESTING_DIR = 'testing'
 

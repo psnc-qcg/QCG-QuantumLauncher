@@ -1,8 +1,8 @@
-from aql import AQLManager
-from problems import MaxCut, EC
-from dwave_routines import DwaveSolver, SimulatedAnnealingBackend
-from qiskit_routines import QAOA, QiskitBackend
-from orca_routines import BBS, OrcaBackend
+from quantum_launcher.launcher.aql import AQLManager
+from quantum_launcher.problems import MaxCut, EC
+from quantum_launcher.routines.dwave_routines import DwaveSolver, SimulatedAnnealingBackend
+from quantum_launcher.routines.qiskit_routines import QAOA, QiskitBackend
+from quantum_launcher.routines.orca_routines import BBS, OrcaBackend
 
 
 def test_runtime():

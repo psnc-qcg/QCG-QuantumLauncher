@@ -1,6 +1,6 @@
-from base import QuantumLauncher
-from dwave_routines import DwaveSolver, SimulatedAnnealingBackend
-from problems import EC, JSSP, MaxCut, QATM, Raw
+from quantum_launcher import QuantumLauncher
+from quantum_launcher.routines.dwave_routines import DwaveSolver, SimulatedAnnealingBackend
+from quantum_launcher.problems import EC, JSSP, MaxCut, QATM, Raw
 import numpy as np
 TESTING_DIR = 'testing'
 

@@ -1,6 +1,6 @@
-from base import QuantumLauncher
-from qiskit_routines import QAOA, QiskitBackend, FALQON
-from problems import EC, JSSP, MaxCut, QATM, Raw
+from quantum_launcher import QuantumLauncher
+from quantum_launcher.routines.qiskit_routines import QAOA, QiskitBackend, FALQON
+from quantum_launcher.problems import EC, JSSP, MaxCut, QATM, Raw
 from qiskit.quantum_info import SparsePauliOp
 TESTING_DIR = 'testing'
 
