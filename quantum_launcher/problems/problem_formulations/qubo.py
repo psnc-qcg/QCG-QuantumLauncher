@@ -53,43 +53,44 @@ class ECOrca:
         s = i_sum - len(route1) * 2
         return s / 2
 
-    def calculate_jrr_hr(self):
+    def calculate_jrr_hr(self, problem: EC):
         Jrr_dict = dict()
-        indices = np.triu_indices(len(self.instance), 1)
+        indices = np.triu_indices(len(problem.instance), 1)
         for i1, i2 in zip(indices[0], indices[1]):
-            Jrr_dict[(i1, i2)] = self.Jrr(self.instance[i1], self.instance[i2])
+            Jrr_dict[(i1, i2)] = self.Jrr(
+                problem.instance[i1], problem.instance[i2])
 
         hr_dict = dict()
-        for i in range(len(self.instance)):
-            hr_dict[i] = self.hr(self.instance[i], self.instance)
+        for i in range(len(problem.instance)):
+            hr_dict[i] = self.hr(problem.instance[i], problem.instance)
 
         return Jrr_dict, hr_dict
 
-    def calculate_lengths_tab(self):
+    def calculate_lengths_tab(self, problem: EC):
         tab = []
-        for route in self.instance:
+        for route in problem.instance:
             tab.append(len(route))
         return tab
 
-    def calculate_num_elements(self):
+    def calculate_num_elements(self, problem: EC):
         d = dict()
-        for route in self.instance:
+        for route in problem.instance:
             for el in route:
                 d[el] = 1
         return len(d)
 
-    def calculate_instance_size(self):
+    def calculate_instance_size(self, problem: EC):
         # Calculate instance size for training
-        return len(self.instance)
+        return len(problem.instance)
 
 
 @formatter(EC, 'qubo')
 class EC_QUBO(ECOrca):
     def __call__(self, problem: EC):
-        self.num_elements = self.calculate_num_elements()
-        self.len_routes = self.calculate_lengths_tab()
+        self.num_elements = self.calculate_num_elements(problem)
+        self.len_routes = self.calculate_lengths_tab(problem)
         Q = np.zeros((len(problem.instance), len(problem.instance)))
-        self.Jrr_dict, self.hr_dict = self.calculate_jrr_hr()
+        self.Jrr_dict, self.hr_dict = self.calculate_jrr_hr(problem)
         for i in self.Jrr_dict:
             Q[i[0]][i[1]] = self.Jrr_dict[i]
             Q[i[1]][i[0]] = Q[i[0]][i[1]]
