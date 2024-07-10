@@ -4,3 +4,4 @@ from .jssp import JSSP
 from .maxcut import MaxCut
 from .qatm import QATM
 from .raw import Raw
+from .problem_formulations import *

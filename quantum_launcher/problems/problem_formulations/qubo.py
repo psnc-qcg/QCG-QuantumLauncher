@@ -3,7 +3,7 @@ import numpy as np
 from qiskit_optimization.converters import QuadraticProgramToQubo
 from qiskit_optimization.translators import from_ising
 from typing import Tuple
-from jssp.pyqubo_scheduler import get_jss_bqm
+from quantum_launcher.jssp.pyqubo_scheduler import get_jss_bqm
 from quantum_launcher.problems import MaxCut, EC, JSSP, Raw
 from quantum_launcher.base import formatter, adapter
 
@@ -35,7 +35,7 @@ def get_orca_qubo(problem: MaxCut):
         Q[i, j] += 1
         Q[j, i] += 1
 
-    return problem.get_qubo_fn, Q
+    return Q
 
 
 class ECOrca:
