@@ -1,7 +1,8 @@
 # TODO update to new QL version
 from typing import Tuple
 import asyncio
-from base import QuantumLauncher, Backend, Algorithm, Problem
+from ..base import Backend, Algorithm, Problem
+from .qlauncher import QuantumLauncher
 from typing import List
 import random
 
@@ -170,7 +171,7 @@ class AQLManager:
 
 if __name__ == '__main__':
     from problems import MaxCut, EC
-    from qiskit_routines import QAOA, QiskitBackend
+    from ..routines.qiskit_routines import QAOA, QiskitBackend
 
     with AQLManager('test') as launcher:
         launcher.add(backend=QiskitBackend('local_simulator'),
