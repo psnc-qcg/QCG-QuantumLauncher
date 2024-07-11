@@ -3,7 +3,7 @@ import json
 import os
 import pickle
 from quantum_launcher.base.adapter_structure import get_formatter
-from quantum_launcher.base import Problem, Algorithm, Backend
+from quantum_launcher.base import Problem, Algorithm, Backend, Result
 
 
 class _FileSavingSupportClass:
@@ -154,7 +154,7 @@ class QuantumLauncher(_FileSavingSupportClass):
             self._bind_parameters()
         self.problem.prepare_methods()
 
-    def _run(self) -> dict:
+    def _run(self) -> Result:
         """
         Prepares the problem, and runs the algorithm on the problem.
 

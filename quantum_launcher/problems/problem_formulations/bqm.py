@@ -2,11 +2,12 @@ import numpy as np
 from qiskit.quantum_info import SparsePauliOp
 from qiskit_optimization.converters import QuadraticProgramToQubo
 from qiskit_optimization.translators import from_ising
-from quantum_launcher.base import adapter
+from quantum_launcher.base import adapter, formatter
 from typing import Tuple
 import ast
 from pyqubo import Spin
 from .qubo import *
+from quantum_launcher.problems import Raw
 
 
 @adapter('qubo', 'bqm')
@@ -89,3 +90,8 @@ class QUBOMatrix:
         bqm = model.to_bqm()
         bqm.offset += self.offset
         return bqm, model
+
+
+@formatter(Raw, 'bqm')
+def Rawbqm(problem: Raw):
+    return problem.instance

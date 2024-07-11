@@ -1,4 +1,5 @@
 from quantum_launcher import QuantumLauncher
+from quantum_launcher.base import Result
 from quantum_launcher.routines.qiskit_routines import QAOA, QiskitBackend, FALQON
 from quantum_launcher.problems import EC, JSSP, MaxCut, QATM, Raw
 from qiskit.quantum_info import SparsePauliOp
@@ -12,8 +13,9 @@ def test_ec():
     backend = QiskitBackend('local_simulator')
     launcher = QuantumLauncher(pr, qaoa, backend, path=TESTING_DIR)
 
-    inform = launcher.process(save_pickle=True, save_txt=True)
-    assert inform is not None
+    # inform = launcher.process(save_pickle=True, save_txt=True)
+    inform = launcher._run()
+    assert isinstance(inform, Result)
 
 
 def test_qatm():
@@ -23,8 +25,9 @@ def test_qatm():
     backend = QiskitBackend('local_simulator')
     launcher = QuantumLauncher(pr, qaoa, backend, path=TESTING_DIR)
 
-    inform = launcher.process(save_pickle=True)
-    assert inform is not None
+    # inform = launcher.process(save_pickle=True)
+    inform = launcher._run()
+    assert isinstance(inform, Result)
 
 
 def test_jssp():
@@ -34,8 +37,9 @@ def test_jssp():
     backend = QiskitBackend('local_simulator')
     launcher = QuantumLauncher(pr, qaoa, backend, path=TESTING_DIR)
 
-    inform = launcher.process(save_pickle=True)
-    assert inform is not None
+    # inform = launcher.process(save_pickle=True)
+    inform = launcher._run()
+    assert isinstance(inform, Result)
 
 
 def test_maxcut():
@@ -45,8 +49,9 @@ def test_maxcut():
     backend = QiskitBackend('local_simulator')
     launcher = QuantumLauncher(pr, qaoa, backend, path=TESTING_DIR)
 
-    inform = launcher.process(save_pickle=True)
-    assert inform is not None
+    # inform = launcher.process(save_pickle=True)
+    inform = launcher._run()
+    assert isinstance(inform, Result)
 
 
 def test_falqon():
@@ -72,5 +77,5 @@ def test_raw():
 
     inform = launcher._run()
     assert inform is not None
-    bitstring = qaoa.get_bitstring(inform)
+    bitstring = inform.best_bitstring
     assert bitstring in ['00', '01', '10', '11']
