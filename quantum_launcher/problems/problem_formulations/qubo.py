@@ -128,22 +128,24 @@ class JSSPOrca:
                   pre_result.spin.offset)  # I need to change it into dict somehow
         return result, list(result[0].keys()), None
 
-    def calculate_instance_size(self):
+    def calculate_instance_size(self, problem: JSSP):
         # Calculate instance size for training
-        _, variables, _ = self._fix_get_jss_bqm(self.instance, self.max_time, self.config,
+        # TODO: Add suport for problem.config
+        _, variables, _ = self._fix_get_jss_bqm(problem.instance, problem.max_time, {},
                                                 lagrange_one_hot=self.lagrange_one_hot,
                                                 lagrange_precedence=self.lagrange_precedence,
                                                 lagrange_share=self.lagrange_share)
         return len(variables)
 
-    def get_len_all_jobs(self):
+    def get_len_all_jobs(self, problem: JSSP):
         result = 0
-        for job in self.instance.values():
+        for job in problem.instance.values():
             result += len(job)
         return result
 
-    def one_hot_to_jobs(self, binary_vector):
-        actually_its_qubo, variables, model = self._fix_get_jss_bqm(self.instance, self.max_time, self.config,
+    def one_hot_to_jobs(self, binary_vector, problem: JSSP):
+        # TODO: Add support for problem.config
+        actually_its_qubo, variables, model = self._fix_get_jss_bqm(problem.instance, problem.max_time, {},
                                                                     lagrange_one_hot=self.lagrange_one_hot,
                                                                     lagrange_precedence=self.lagrange_precedence,
                                                                     lagrange_share=self.lagrange_share)
@@ -157,7 +159,7 @@ class JSSP_QUBO(JSSPOrca):
     def __call__(self, problem: JSSP):
         # Define the matrix Q used for QUBO
         self.config = {}
-        self.instance_size = self.calculate_instance_size()
+        self.instance_size = self.calculate_instance_size(problem)
         self.config['parameters'] = {}
         self.config['parameters']['job_shop_scheduler'] = {}
         self.config['parameters']['job_shop_scheduler']['problem_version'] = "optimization"
