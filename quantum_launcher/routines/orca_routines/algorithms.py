@@ -98,14 +98,25 @@ class BBS(Algorithm):
             logger=self.logger
         )
 
-        return self.construct_results(self.bbs.config_min_encountered)
+        return self.construct_results(self.bbs)
 
     def get_bitstring(self, result: List[float]) -> str:
         return ''.join(map(str, map(int, result)))
 
-    def construct_results(self, results) -> Result:
-        # TODO: Implement construct_results
-        return results
+    def construct_results(self, results: BinaryBosonicSolver) -> Result:
+        # TODO: add suport for distribution (probably with different logger)
+        best_bitstring = self.get_bitstring(results.config_min_encountered)
+        best_energy = results.E_min_encountered
+        most_common_bitstring = None
+        most_common_bitstring_energy = None
+        distribution = None
+        energy = None
+        num_of_samples = results.n_samples
+        average_energy = None
+        energy_std = None
+        return Result(best_bitstring, best_energy, most_common_bitstring,
+                      most_common_bitstring_energy, distribution, energy,
+                      num_of_samples, average_energy, energy_std, results)
 
 
 class BBSFN(BBS):

@@ -1,6 +1,7 @@
 from quantum_launcher import QuantumLauncher
 from quantum_launcher.routines.orca_routines import BBS, OrcaBackend
 from quantum_launcher.problems import EC, JSSP, MaxCut, QATM, Raw
+from quantum_launcher.base import Result
 import numpy as np
 TESTING_DIR = 'testing'
 
@@ -13,7 +14,7 @@ def test_ec():
     launcher = QuantumLauncher(pr, bbs, backend, path=TESTING_DIR)
 
     inform = launcher._run()
-    assert inform is not None
+    assert isinstance(inform, Result)
 
 
 def test_jssp():
@@ -24,7 +25,7 @@ def test_jssp():
     launcher = QuantumLauncher(pr, bbs, backend, path=TESTING_DIR)
 
     inform = launcher._run()
-    assert inform is not None
+    assert isinstance(inform, Result)
 
 
 def test_maxcut():
@@ -35,7 +36,7 @@ def test_maxcut():
     launcher = QuantumLauncher(pr, bbs, backend, path=TESTING_DIR)
 
     inform = launcher._run()
-    assert inform is not None
+    assert isinstance(inform, Result)
 
 
 def test_raw():
@@ -47,4 +48,4 @@ def test_raw():
     launcher = QuantumLauncher(pr, bbs, backend, path=TESTING_DIR)
 
     inform = launcher._run()
-    assert inform is not None
+    assert isinstance(inform, Result)
