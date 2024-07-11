@@ -40,7 +40,7 @@ def test_maxcut():
 
 def test_raw():
     """ Testing function for Raw """
-    qubo = np.array([[10, 1], [0, -10]])
+    qubo = np.array([[10, 1], [0, -10]]), 2
     pr = Raw(qubo)
     bbs = BBS()
     backend = OrcaBackend('local_simulator')
