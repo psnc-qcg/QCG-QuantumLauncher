@@ -18,7 +18,7 @@ def test_runtime():
 def test_runtime_dwave():
     with AQLManager('test') as launcher:
         launcher.add(backend=SimulatedAnnealingBackend(),
-                     algorithm=DwaveSolver(1), problem=EC('exact', instance_name='micro'))
+                     algorithm=DwaveSolver(1), problem=EC('quadratic', instance_name='micro'))
         launcher.add_algorithm(DwaveSolver(2), times=2)
         launcher.add_problem(MaxCut(instance_name='default'), times=3)
         result = launcher.result
@@ -30,7 +30,7 @@ def test_runtime_dwave():
         assert x is not None
     for x in result_bitstring:
         assert isinstance(x, str)
-        assert len(x) == 2
+        assert len(x) == 6 or len(x) == 2
 
 
 def test_runtime_qiskit():

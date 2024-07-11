@@ -2,9 +2,9 @@
 from typing import Tuple
 import asyncio
 from ..base import Backend, Algorithm, Problem
+from ..base.adapter_structure import get_formatter
 from .qlauncher import QuantumLauncher
 from typing import List
-import random
 
 
 class asyncQuantumLauncher(QuantumLauncher):
@@ -56,36 +56,25 @@ class AQL:
         self._results = []
         self._results_bitstring = []
         self._async_running = 0
-        self.debugging: bool = False
-        self.ROUTINE_CLASS = None
+        self.debugging: bool = debugging
 
     def start(self) -> List[any]:
         self._async_running = 1
         self._results = []
         self._results_bitstring = []
-        self.ROUTINE_CLASS = self.backends[0][0].ROUTINE_CLASS
-        for problem, _ in self.problems:
-            self._find_default_problem_class(problem)
-            problem.__class__ = self._find_default_problem_class(problem)
-            # print('binding', problem.__class__)
-            problem.prepare_methods()
 
         asyncio.run(self.run_async())
         return self._results, self._results_bitstring
-
-    def _find_default_problem_class(self, problem: Problem):
-        for subclass in problem.__class__.__subclasses__():
-            if self.ROUTINE_CLASS in subclass.__bases__:
-                return subclass
 
     async def run_async_task(self, pool: asyncio.BaseEventLoop, backend: Backend, algorithm: Algorithm, problem: Problem):
         # print('Task Started')
         if self.debugging:
             print('cloud task started')
-
-        result = await pool.run_in_executor(None, algorithm.run, problem, backend)
+        formatter = get_formatter(
+            problem._problem_id, algorithm._algorithm_format)
+        result = await pool.run_in_executor(None, algorithm.run, problem, backend, formatter)
         self._results.append(result)
-        self._results_bitstring.append(algorithm.get_bitstring(result))
+        self._results_bitstring.append(result.best_bitstring)
         # print('Task Done')
 
         if self.debugging:
