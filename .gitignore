@@ -5,3 +5,5 @@ testing
 .vscode
 .venv
 .pytest_cache
+data
+ptseries
