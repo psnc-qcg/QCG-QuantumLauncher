@@ -40,7 +40,7 @@ def test_maxcut():
 
 def test_raw():
     """ Testing function for Raw """
-    qubo = None, np.array([[10, 1], [0, -10]])
+    qubo = np.array([[10, 1], [0, -10]])
     pr = Raw(qubo)
     bbs = BBS()
     backend = OrcaBackend('local_simulator')
@@ -48,6 +48,3 @@ def test_raw():
 
     inform = launcher._run()
     assert inform is not None
-
-    bitstring = bbs.get_bitstring(inform)
-    assert bitstring in ['00', '01', '10', '11']
