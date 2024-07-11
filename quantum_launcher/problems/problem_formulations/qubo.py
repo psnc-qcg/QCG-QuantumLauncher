@@ -130,8 +130,7 @@ class JSSPOrca:
 
     def calculate_instance_size(self, problem: JSSP):
         # Calculate instance size for training
-        # TODO: Add suport for problem.config
-        _, variables, _ = self._fix_get_jss_bqm(problem.instance, problem.max_time, {},
+        _, variables, _ = self._fix_get_jss_bqm(problem.instance, problem.max_time, self.config,
                                                 lagrange_one_hot=self.lagrange_one_hot,
                                                 lagrange_precedence=self.lagrange_precedence,
                                                 lagrange_share=self.lagrange_share)
@@ -144,14 +143,19 @@ class JSSPOrca:
         return result
 
     def one_hot_to_jobs(self, binary_vector, problem: JSSP):
-        # TODO: Add support for problem.config
-        actually_its_qubo, variables, model = self._fix_get_jss_bqm(problem.instance, problem.max_time, {},
+        actually_its_qubo, variables, model = self._fix_get_jss_bqm(problem.instance, problem.max_time, self.config,
                                                                     lagrange_one_hot=self.lagrange_one_hot,
                                                                     lagrange_precedence=self.lagrange_precedence,
                                                                     lagrange_share=self.lagrange_share)
         result = [variables[i]
                   for i in range(len(variables)) if binary_vector[i] == 1]
         return result
+
+    def _set_config(self):
+        self.config = {}
+        self.config['parameters'] = {}
+        self.config['parameters']['job_shop_scheduler'] = {}
+        self.config['parameters']['job_shop_scheduler']['problem_version'] = "optimization"
 
 
 @formatter(JSSP, 'qubo')
@@ -160,9 +164,7 @@ class JSSP_QUBO(JSSPOrca):
         # Define the matrix Q used for QUBO
         self.config = {}
         self.instance_size = self.calculate_instance_size(problem)
-        self.config['parameters'] = {}
-        self.config['parameters']['job_shop_scheduler'] = {}
-        self.config['parameters']['job_shop_scheduler']['problem_version'] = "optimization"
+        self._set_config()
         actually_its_qubo, variables, model = self._fix_get_jss_bqm(problem.instance, problem.max_time, self.config,
                                                                     lagrange_one_hot=self.lagrange_one_hot,
                                                                     lagrange_precedence=self.lagrange_precedence,
