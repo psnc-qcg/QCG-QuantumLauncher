@@ -5,6 +5,7 @@
 - Proper project structure with ability to easily install via pip
 - Launcher enabling monitoring of specific function performance
 - Unified result system
+- New Launcher for monitoring purposes
 
 ## Modification:
 - Inheritence format changed to formatter decorator structure
