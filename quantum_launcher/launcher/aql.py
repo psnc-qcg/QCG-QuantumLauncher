@@ -122,7 +122,7 @@ class AQLManager:
     ```
     """
 
-    def __init__(self, path: str):
+    def __init__(self, path: str = None):
         self.aql: asyncQuantumLauncher | None = None
         self.path = path
         self.result = []
