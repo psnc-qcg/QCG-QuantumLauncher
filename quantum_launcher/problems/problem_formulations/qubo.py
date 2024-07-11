@@ -35,7 +35,7 @@ def get_orca_qubo(problem: MaxCut):
         Q[i, j] += 1
         Q[j, i] += 1
 
-    return Q
+    return Q, 0
 
 
 class ECOrca:
@@ -98,7 +98,7 @@ class EC_QUBO(ECOrca):
         for i in self.hr_dict:
             Q[i][i] = -self.hr_dict[i]
 
-        return Q
+        return Q, 0
 
 
 @formatter(EC, 'qubo_fn')
@@ -182,7 +182,7 @@ class JSSP_QUBO(JSSPOrca):
         for label_i, value in actually_its_qubo[0].items():
             i = reverse_dict_map[label_i]
             Q[i, i] += value
-        return Q / max(np.max(Q), -np.min(Q))
+        return Q / max(np.max(Q), -np.min(Q)), 0
 
 
 @formatter(JSSP, 'qubo_fn')

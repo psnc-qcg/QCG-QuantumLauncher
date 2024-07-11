@@ -12,7 +12,7 @@ from quantum_launcher.problems import Raw
 
 @adapter('qubo', 'bqm')
 def qubo_to_bqm(qubo_with_offset) -> dict:
-    qubo = qubo_with_offset
+    qubo, offset = qubo_with_offset
     bqm, _ = QUBOMatrix(qubo, 0).qubo_matrix_into_bqm()
     return bqm
 

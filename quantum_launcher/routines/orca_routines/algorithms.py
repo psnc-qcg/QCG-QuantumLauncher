@@ -80,7 +80,8 @@ class BBS(Algorithm):
         params = {"tbi_type": self.tbi_loops}
         if backend is not None:
             params.update(backend.get_args())
-        Q = formatter(problem)
+        Q, offset = formatter(problem)
+        # TODO: use offset somehow
         if self.input_state is None:
             self.input_state = [not i % 2 for i in range(len(Q))]
         self.bbs = BinaryBosonicSolver(
