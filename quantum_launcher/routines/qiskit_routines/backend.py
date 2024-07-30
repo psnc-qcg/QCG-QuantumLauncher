@@ -1,4 +1,6 @@
 """ Backend Class for Qiskit Launcher """
+from qiskit_aqt_provider import AQTProvider
+from qiskit_aqt_provider.primitives import AQTSampler, AQTEstimator
 from qiskit.primitives import Estimator as LocalEstimator, BaseEstimator
 from qiskit.primitives import Sampler as LocalSampler, BaseSampler
 from qiskit.primitives import BackendSampler, BackendEstimator
@@ -90,3 +92,16 @@ class QiskitBackend(Backend):
     @optimizer.setter
     def optimizer(self, optimizer: SciPyOptimizer):
         self._optimizer = optimizer
+
+
+class AQTBackend(QiskitBackend):
+    token: str = "ACCESS_TOKEN"
+
+    def _set_primitives_on_backend_name(self) -> None:
+        provider = AQTProvider(self.token)
+        if self.name == 'local_simulator':
+            self.name = "offline_simulator_no_noise"
+        backend = provider.get_backend(self.name)
+        self.estimator = AQTEstimator(backend, options=self.options)
+        self.sampler = AQTSampler(backend, options=self.options)
+        self.optimizer = COBYLA()
