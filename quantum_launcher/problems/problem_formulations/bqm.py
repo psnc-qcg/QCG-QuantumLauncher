@@ -1,5 +1,4 @@
 import numpy as np
-from qiskit.quantum_info import SparsePauliOp
 from qiskit_optimization.converters import QuadraticProgramToQubo
 from qiskit_optimization.translators import from_ising
 from quantum_launcher.base import adapter, formatter

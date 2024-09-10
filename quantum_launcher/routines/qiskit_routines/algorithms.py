@@ -121,7 +121,7 @@ class QAOA(QiskitOptimizationAlgorithm):
                     res_dict = {**res_dict, **{key: path}}
         return res_dict
 
-    def run(self, problem: Problem, backend: QiskitBackend, formatter=Callable) -> dict:
+    def run(self, problem: Problem, backend: QiskitBackend, formatter=Callable) -> Result:
         """ Runs the QAOA algorithm """
         hamiltonian: SparsePauliOp = formatter(problem)
         energies = []

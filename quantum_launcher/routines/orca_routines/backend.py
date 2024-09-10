@@ -1,6 +1,5 @@
 """ Backend class for Orca """
 from quantum_launcher.base import Backend
-from typing import Literal
 
 
 class OrcaBackend(Backend):

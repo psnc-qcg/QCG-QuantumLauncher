@@ -3,7 +3,7 @@ import numpy as np
 from qiskit_optimization.converters import QuadraticProgramToQubo
 from qiskit_optimization.translators import from_ising
 from typing import Tuple
-from quantum_launcher.jssp.pyqubo_scheduler import get_jss_bqm
+from quantum_launcher.problems.problem_formulations.jssp.pyqubo_scheduler import get_jss_bqm
 from quantum_launcher.problems import MaxCut, EC, JSSP, Raw
 from quantum_launcher.base import formatter, adapter
 
