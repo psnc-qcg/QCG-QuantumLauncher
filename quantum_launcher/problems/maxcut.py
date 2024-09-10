@@ -1,4 +1,5 @@
 """  This module contains the MaxCut class."""
+from typing import Optional
 import networkx as nx
 
 from quantum_launcher.base import Problem
@@ -33,7 +34,7 @@ class MaxCut(Problem):
             'instance_name': self.instance_name
         }
 
-    def set_instance(self, instance: None = None, instance_name: str | None = None) -> None:
+    def set_instance(self, instance: Optional[nx.Graph] = None, instance_name: Optional[str] = None) -> None:
         super().set_instance(instance, instance_name)
         if instance is None:
             match instance_name:

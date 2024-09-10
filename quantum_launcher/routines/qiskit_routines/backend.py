@@ -8,6 +8,7 @@ from qiskit.providers import BackendV1, BackendV2
 from qiskit_algorithms.optimizers import COBYLA, SPSA, SciPyOptimizer, Optimizer
 from qiskit_ibm_runtime import Estimator, Sampler
 from qiskit_ibm_runtime import Session, Options
+from qiskit import QuantumCircuit
 
 from quantum_launcher.base import Backend
 
@@ -95,13 +96,13 @@ class QiskitBackend(Backend):
 
 
 class AQTBackend(QiskitBackend):
-    token: str = "ACCESS_TOKEN"
+    token: str = 'ACCESS_TOKEN'
 
     def _set_primitives_on_backend_name(self) -> None:
         provider = AQTProvider(self.token)
         if self.name == 'local_simulator':
             self.name = "offline_simulator_no_noise"
-        backend = provider.get_backend(self.name)
+        backend = provider.get_backend(name=self.name)
         self.estimator = AQTEstimator(backend, options=self.options)
         self.sampler = AQTSampler(backend, options=self.options)
         self.optimizer = COBYLA()
