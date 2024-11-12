@@ -6,4 +6,4 @@ Program made for easier usage of Quantum computer for testing purposes.
 Provided with pre-made problems and algorithms.
 """
 from . import problems
-from .launcher import QuantumLauncher
+from quantum_launcher.launcher import QuantumLauncher

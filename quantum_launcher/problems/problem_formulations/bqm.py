@@ -6,7 +6,7 @@ from typing import Tuple
 import ast
 from pyqubo import Spin
 from .qubo import *
-from quantum_launcher.problems import Raw
+from quantum_launcher.problems.problem_initialization import Raw
 
 
 @adapter('qubo', 'bqm')

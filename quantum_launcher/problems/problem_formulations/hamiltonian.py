@@ -4,7 +4,7 @@ import hampy
 import numpy as np
 from qiskit.quantum_info import SparsePauliOp
 from qiskit import QuantumCircuit
-import quantum_launcher.problems as problems
+import quantum_launcher.problems.problem_initialization as problems
 
 
 def ring_ham(ring: set, n):
