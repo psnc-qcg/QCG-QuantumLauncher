@@ -19,3 +19,4 @@
 - Add support for AQT
 - Support for Apache Workflow framework
 - Dropped path in problems and algorithms for more flexible problem managment
+- Limited import support

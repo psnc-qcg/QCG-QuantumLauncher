@@ -6,4 +6,4 @@ The Quantum Launcher version for Qiskit-based architecture.
 """
 from .algorithms import QAOA, FALQON
 from .backend import QiskitBackend, AQTBackend
-from ...problems.problem_formulations.hamiltonian import *
+from quantum_launcher.problems.problem_formulations.hamiltonian import *

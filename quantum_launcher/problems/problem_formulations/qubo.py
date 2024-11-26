@@ -4,11 +4,7 @@ from qiskit_optimization.converters import QuadraticProgramToQubo
 from qiskit_optimization.translators import from_ising
 from typing import Tuple
 from quantum_launcher.problems.problem_formulations.jssp.pyqubo_scheduler import get_jss_bqm
-from quantum_launcher.problems.problem_initialization.maxcut import MaxCut
-from quantum_launcher.problems.problem_initialization.ec import EC
-from quantum_launcher.problems.problem_initialization.jssp import JSSP
-from quantum_launcher.problems.problem_initialization.qatm import QATM
-from quantum_launcher.problems.problem_initialization.raw import Raw
+import quantum_launcher.problems.problem_initialization as problem
 
 from quantum_launcher.base import formatter, adapter
 
@@ -30,8 +26,8 @@ def get_orca_qubo(self):
     return None, qubo.quadratic.to_array()
 
 
-@formatter(MaxCut, 'qubo')
-def get_orca_qubo(problem: MaxCut):
+@formatter(problem.MaxCut, 'qubo')
+def get_orca_qubo(problem: problem.MaxCut):
     """ Returns Qubo function """
     Q = np.zeros((6, 6))
     for (i, j) in problem.instance.edges:
@@ -58,7 +54,7 @@ class ECOrca:
         s = i_sum - len(route1) * 2
         return s / 2
 
-    def calculate_jrr_hr(self, problem: EC):
+    def calculate_jrr_hr(self, problem: problem.EC):
         Jrr_dict = dict()
         indices = np.triu_indices(len(problem.instance), 1)
         for i1, i2 in zip(indices[0], indices[1]):
@@ -71,27 +67,27 @@ class ECOrca:
 
         return Jrr_dict, hr_dict
 
-    def calculate_lengths_tab(self, problem: EC):
+    def calculate_lengths_tab(self, problem: problem.EC):
         tab = []
         for route in problem.instance:
             tab.append(len(route))
         return tab
 
-    def calculate_num_elements(self, problem: EC):
+    def calculate_num_elements(self, problem: problem.EC):
         d = dict()
         for route in problem.instance:
             for el in route:
                 d[el] = 1
         return len(d)
 
-    def calculate_instance_size(self, problem: EC):
+    def calculate_instance_size(self, problem: problem.EC):
         # Calculate instance size for training
         return len(problem.instance)
 
 
-@formatter(EC, 'qubo')
+@formatter(problem.EC, 'qubo')
 class EC_QUBO(ECOrca):
-    def __call__(self, problem: EC):
+    def __call__(self, problem: problem.EC):
         self.num_elements = self.calculate_num_elements(problem)
         self.len_routes = self.calculate_lengths_tab(problem)
         Q = np.zeros((len(problem.instance), len(problem.instance)))
@@ -106,7 +102,7 @@ class EC_QUBO(ECOrca):
         return Q, 0
 
 
-@formatter(EC, 'qubo_fn')
+@formatter(problem.EC, 'qubo_fn')
 class EC_FN(ECOrca):
     # TODO fix and check
     def __call__(self, Q):
@@ -133,7 +129,7 @@ class JSSPOrca:
                   pre_result.spin.offset)  # I need to change it into dict somehow
         return result, list(result[0].keys()), None
 
-    def calculate_instance_size(self, problem: JSSP):
+    def calculate_instance_size(self, problem: problem.JSSP):
         # Calculate instance size for training
         _, variables, _ = self._fix_get_jss_bqm(problem.instance, problem.max_time, self.config,
                                                 lagrange_one_hot=self.lagrange_one_hot,
@@ -141,13 +137,13 @@ class JSSPOrca:
                                                 lagrange_share=self.lagrange_share)
         return len(variables)
 
-    def get_len_all_jobs(self, problem: JSSP):
+    def get_len_all_jobs(self, problem: problem.JSSP):
         result = 0
         for job in problem.instance.values():
             result += len(job)
         return result
 
-    def one_hot_to_jobs(self, binary_vector, problem: JSSP):
+    def one_hot_to_jobs(self, binary_vector, problem: problem.JSSP):
         actually_its_qubo, variables, model = self._fix_get_jss_bqm(problem.instance, problem.max_time, self.config,
                                                                     lagrange_one_hot=self.lagrange_one_hot,
                                                                     lagrange_precedence=self.lagrange_precedence,
@@ -163,9 +159,9 @@ class JSSPOrca:
         self.config['parameters']['job_shop_scheduler']['problem_version'] = "optimization"
 
 
-@formatter(JSSP, 'qubo')
+@formatter(problem.JSSP, 'qubo')
 class JSSP_QUBO(JSSPOrca):
-    def __call__(self, problem: JSSP):
+    def __call__(self, problem: problem.JSSP):
         # Define the matrix Q used for QUBO
         self.config = {}
         self.instance_size = self.calculate_instance_size(problem)
@@ -190,7 +186,7 @@ class JSSP_QUBO(JSSPOrca):
         return Q / max(np.max(Q), -np.min(Q)), 0
 
 
-@formatter(JSSP, 'qubo_fn')
+@formatter(problem.JSSP, 'qubo_fn')
 class JSSP_FN(JSSPOrca):
     def qubo_fn_fact(self, Q):
         # TODO fix and check
@@ -199,6 +195,6 @@ class JSSP_FN(JSSPOrca):
         return qubo_fn
 
 
-@formatter(Raw, 'qubo')
-def get_orca_qubo(problem: Raw):
+@formatter(problem.Raw, 'qubo')
+def get_orca_qubo(problem: problem.Raw):
     return problem.instance
