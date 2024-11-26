@@ -8,3 +8,9 @@ testing
 data
 ptseries
 ignore*
+docs/build
+build
+*.egg-info
+.data
+.ignore
+.ptseries
