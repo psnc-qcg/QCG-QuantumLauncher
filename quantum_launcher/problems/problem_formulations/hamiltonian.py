@@ -1,6 +1,6 @@
 # from .launcher import QiskitProblem
 from quantum_launcher.base import formatter
-import hampy
+import quantum_launcher.hampy as hampy
 import numpy as np
 from qiskit.quantum_info import SparsePauliOp
 from qiskit import QuantumCircuit
