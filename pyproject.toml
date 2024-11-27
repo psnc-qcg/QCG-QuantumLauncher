@@ -12,5 +12,5 @@ classifiers = [
     "Operating System :: OS Independent",
 ]
 
-[tool.setuptools]
-py-modules = ["quantum_launcher"]
+[tool.setuptools.packages.find]
+py-include = ["quantum_launcher"]
