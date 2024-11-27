@@ -33,7 +33,7 @@ class BBS(Algorithm):
     _algorithm_format = 'qubo'
 
     def __init__(self, learning_rate: float = 1e-1, updates: int = 80, tbi_loops: str = 'single-loop', print_frequency: int = 20,
-                 gradient_mode: str = 'spsa', n_samples: int = 20, input_state: list[int] | None = None) -> None:
+                 gradient_mode: str = 'spsa', n_samples: int = 20, input_state: list[int] | None = None, **kwargs) -> None:
         """
         Initialize the BBS algorithm.
 
@@ -56,6 +56,7 @@ class BBS(Algorithm):
         self.gradient_mode = gradient_mode
         self.n_samples = n_samples
         self.input_state = input_state
+        self.kwargs = kwargs
 
     def _get_path(self) -> str:
         """
@@ -85,16 +86,16 @@ class BBS(Algorithm):
         if self.input_state is None:
             self.input_state = [not i % 2 for i in range(len(Q))]
         self.bbs = BinaryBosonicSolver(
-            len(Q), Q,
+            len(self.input_state), Q,
             gradient_mode=self.gradient_mode,
             tbi_params=params,
             n_samples=self.n_samples,
-            input_state=self.input_state
+            input_state=self.input_state,
+            **self.kwargs
         )
         self.bbs.train(
             learning_rate=self.learning_rate,
             updates=self.updates,
-            log_frequency=self.print_frequency,
             logger=self.logger
         )
 
