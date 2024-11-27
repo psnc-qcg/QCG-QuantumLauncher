@@ -2,7 +2,7 @@ from __future__ import print_function
 
 from bisect import bisect_right
 
-import hampy
+import quantum_launcher.hampy as hampy
 
 from .scheduler import JobShopScheduler, KeyList, get_label
 
