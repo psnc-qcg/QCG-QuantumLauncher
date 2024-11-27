@@ -11,6 +11,6 @@ classifiers = [
     "Programming Language :: Python :: 3",
     "Operating System :: OS Independent",
 ]
-dependencies = [
-# TODO: add dependencies
-]
+
+[tool.setuptools]
+py-modules = ["quantum_launcher"]
