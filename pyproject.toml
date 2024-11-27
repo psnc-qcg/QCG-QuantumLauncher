@@ -1,9 +1,7 @@
-[project]
+[tool.poetry]
 name = "quantum_launcher"
 version = "1.1"
-authors = [
-  { name="Dawid Siera", email="dsiera@man.poznan.pl" },
-]
+authors = ["Dawid Siera <dsiera@man.poznan.pl>"]
 description = "Quantum Launcher is modular tool, for solving many problems on many algorithms using many quantum computingbackends"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -11,6 +9,8 @@ classifiers = [
     "Programming Language :: Python :: 3",
     "Operating System :: OS Independent",
 ]
+packages = [{ include = "quantum_launcher"}]
 
-[tool.setuptools]
-py-modules = ["quantum_launcher"]
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
