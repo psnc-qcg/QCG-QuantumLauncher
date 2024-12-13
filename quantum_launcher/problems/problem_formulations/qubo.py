@@ -29,7 +29,8 @@ def get_orca_qubo(self):
 @formatter(problem.MaxCut, 'qubo')
 def get_orca_qubo(problem: problem.MaxCut):
     """ Returns Qubo function """
-    Q = np.zeros((6, 6))
+    n = len(problem.instance)
+    Q = np.zeros((n, n))
     for (i, j) in problem.instance.edges:
         Q[i, i] += -1
         Q[j, j] += -1
