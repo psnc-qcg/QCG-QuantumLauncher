@@ -4,7 +4,7 @@ import cProfile
 import pstats
 
 
-class MonitoringLauncher(QuantumLauncher):
+class ProfilingLauncher(QuantumLauncher):
     """Launcher made for debugging purposes of algorithms and other launchers focusing on performence issues"""
 
     def __init__(self, problem: Problem, algorithm: Algorithm, backend: Backend = None, path: str = 'results/', binding_params: dict | None = None, encoding_type: type = None, save_monitor_to_file: str = None) -> None:
