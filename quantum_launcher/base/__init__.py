@@ -1,3 +1,4 @@
-from .base import Problem, Algorithm, Backend
+from .base import Problem, Algorithm, Backend, Result
 from .adapter_structure import adapter, formatter
-from .unified_result import Result
+
+__all__ = ['Problem', 'Algorithm', 'Backend', 'Result', 'adapter', 'formatter']
