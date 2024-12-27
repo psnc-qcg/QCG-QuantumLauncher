@@ -188,7 +188,7 @@ class QuantumLauncher(_FileSavingSupportClass):
             dict: The processed results.
         """
         results = self._run()
-        energy = results['energy']
+        energy = results.result['energy']
 
         self.res['problem_setup'] = self.problem.setup
         self.res['algorithm_setup'] = self.algorithm.setup
