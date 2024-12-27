@@ -56,6 +56,9 @@ class _FileSavingSupportClass:
             f'\033[93mSaving to csv has not been implemented yet {results=}{file_name=}\033[0m')
 
     def _save_results_json(self, results: dict, file_name: str) -> None:
+        for i in results:
+            if isinstance(results[i], Result):
+                results[i] = results[i].__dict__
         with open(file_name, mode='w', encoding='utf-8') as file:
             json.dump(results, file, default=self.fix_json, indent=4)
 
