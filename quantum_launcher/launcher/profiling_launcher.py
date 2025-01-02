@@ -1,28 +1,23 @@
-from quantum_launcher.base.base import Algorithm, Backend, Problem
-from .qlauncher import QuantumLauncher
+from typing import Tuple
 import cProfile
 import pstats
+from quantum_launcher.base import Algorithm, Backend, Problem, Result
+from .qlauncher import QuantumLauncher
 
 
 class ProfilingLauncher(QuantumLauncher):
-    """Launcher made for debugging purposes of algorithms and other launchers focusing on performence issues"""
+    """ Launcher made for debugging purposes of algorithms and other launchers focusing on performance issues """
 
-    def __init__(self, problem: Problem, algorithm: Algorithm, backend: Backend = None, path: str = 'results/', binding_params: dict | None = None, encoding_type: type = None, save_monitor_to_file: str = None) -> None:
-        super().__init__(problem, algorithm, backend, path, binding_params, encoding_type)
-        self.save_monitor_to_file = save_monitor_to_file
+    def __init__(self, problem: Problem, algorithm: Algorithm, backend: Backend, profiler_path: str = 'profiling-results.prof'):
+        super().__init__(problem, algorithm, backend)
+        self._profiler_path = profiler_path
 
-    def monitor(self, func, *args, **kwargs):
+    def run(self) -> Tuple[Result, pstats.Stats]:
         with cProfile.Profile() as pr:
-            result = func(*args, **kwargs)
+            result = super().run()
         stats = pstats.Stats(pr)
         stats.sort_stats(pstats.SortKey.TIME)
         stats.reverse_order()
         stats.print_stats()
-        if self.save_monitor_to_file is True:
-            stats.dump_stats(f"{func.__name__}.prof")
-        elif self.save_monitor_to_file is not None:
-            stats.dump_stats(f"{self.save_monitor_to_file}.prof")
+        stats.dump_stats(self._profiler_path)
         return result
-
-    def run(self, *args, **kwargs):
-        return self.monitor(super().run, *args, **kwargs)

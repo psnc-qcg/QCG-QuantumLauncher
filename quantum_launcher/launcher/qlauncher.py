@@ -90,6 +90,8 @@ class QuantumLauncher:
 
         Args:
             file_path Optional[str]: Flag indicating whether to save the results to a file. Defaults to None.
+            format Union[Literal['pickle', 'txt', 'json'], List[Literal['pickle', 'txt', 'json']]]:
+                format in which file should be saved. Defaults to 'pickle'
 
         Returns:
             dict: The processed results.
@@ -107,9 +109,11 @@ class QuantumLauncher:
             self.backend.path + '-' \
             + self.algorithm.path + '-' + str(energy)
 
-        if file_path is not None:
-            self.save(file_path, file_path.rsplit('.', 1)[1])
-
+        if file_path is not None and isinstance(format, str):
+            self.save(file_path, format)
+        if file_path is not None and isinstance(format, list):
+            for form in format:
+                self.save(file_path, form)
         return res
 
 
