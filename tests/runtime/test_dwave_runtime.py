@@ -12,7 +12,7 @@ def test_ec():
     pr = EC('quadratic', instance_name='toy')
     solver = DwaveSolver(1)
     backend = SimulatedAnnealingBackend()
-    launcher = QuantumLauncher(pr, solver, backend, path=TESTING_DIR)
+    launcher = QuantumLauncher(pr, solver, backend)
 
     inform = launcher.run()
     assert inform is not None
@@ -23,7 +23,7 @@ def test_jssp():
     pr = JSSP(3, 'quadratic', instance_name='toy', optimization_problem=True)
     solver = DwaveSolver(1)
     backend = SimulatedAnnealingBackend()
-    launcher = QuantumLauncher(pr, solver, backend, path=TESTING_DIR)
+    launcher = QuantumLauncher(pr, solver, backend)
 
     inform = launcher.run()
     assert inform is not None
@@ -34,7 +34,7 @@ def test_maxcut():
     pr = MaxCut(instance_name='default')
     solver = DwaveSolver(1)
     backend = SimulatedAnnealingBackend()
-    launcher = QuantumLauncher(pr, solver, backend, path=TESTING_DIR)
+    launcher = QuantumLauncher(pr, solver, backend)
 
     inform = launcher.run()
     assert inform is not None
@@ -45,7 +45,7 @@ def test_qatm():
     pr = QATM('exact', instance_name='RCP_3.txt', instance_path='data/qatm/')
     solver = DwaveSolver(1)
     backend = SimulatedAnnealingBackend()
-    launcher = QuantumLauncher(pr, solver, backend, path=TESTING_DIR)
+    launcher = QuantumLauncher(pr, solver, backend)
 
     inform = launcher.run()
     assert inform is not None
@@ -62,7 +62,7 @@ def test_raw():
     pr = Raw(bqm)
     solver = DwaveSolver(1)
     backend = SimulatedAnnealingBackend()
-    launcher = QuantumLauncher(pr, solver, backend, path=TESTING_DIR)
+    launcher = QuantumLauncher(pr, solver, backend)
 
     inform = launcher.run()
     assert isinstance(inform, Result)

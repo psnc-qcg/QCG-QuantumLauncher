@@ -1,5 +1,5 @@
 """ file with orca algorithms subclasses """
-from typing import List
+from typing import List, Literal
 from ptseries.algorithms.binary_solvers import BinaryBosonicSolver
 from ptseries.common.logger import Logger
 
@@ -32,72 +32,30 @@ class BBS(Algorithm):
     """
     _algorithm_format = 'qubo'
 
-    def __init__(self, learning_rate: float = 1e-1, updates: int = 80, tbi_loops: str = 'single-loop', print_frequency: int = 20,
-                 gradient_mode: str = 'spsa', n_samples: int = 20, input_state: list[int] | None = None, **kwargs) -> None:
-        """
-        Initialize the BBS algorithm.
-
-        Parameters:
-        - learning_rate (float): The learning rate for the algorithm. Default is 1e-1.
-        - updates (int): The number of updates to perform during training. Default is 80.
-        - tbi_loops (str): The type of TBI loops to use. Default is 'single-loop'.
-        - print_frequency (int): The frequency at which to print updates. Default is 20.
-        - gradient_mode (str, optional): 'spsa' or 'paramshift'. Type of method used to compute the gradient of the
-                                   quantum parameters.
-        - n_samples (int, optional): number of samples used to estimate expectation values
-        """
+    def __init__(self, format:Literal['qubo', 'qubo_fn'] = 'qubo', **kwargs) -> None:
         super().__init__()
-        self.bbs = None
-        self.learning_rate = learning_rate
-        self.updates = updates
-        self.tbi_loops = tbi_loops
-        self.print_frequency = print_frequency
-        self.logger = Logger(log_dir=None)
-        self.gradient_mode = gradient_mode
-        self.n_samples = n_samples
-        self.input_state = input_state
+        self._algorithm_format = format
         self.kwargs = kwargs
+        self.input_state = kwargs.get('input_state', None)
 
-    def _get_path(self) -> str:
-        """
-        Get the path for the BBS algorithm.
-
-        Returns:
-        - str: The path for the BBS algorithm.
-        """
-        return 'BinaryBosonic'
 
     def run(self, problem: Problem, backend: OrcaBackend, formatter: Callable[[Problem], np.ndarray]):
-        """
-        Run the BBS algorithm.
-
-        Parameters:
-        - problem (Problem): The problem to solve.
-        - backend (OrcaBackend): The backend to use for computation.
-
-        Returns:
-        - Solution: The solution obtained from running the BBS algorithm.
-        """
-        params = {"tbi_type": self.tbi_loops}
-        if backend is not None:
-            params.update(backend.get_args())
-        Q, offset = formatter(problem)
+        # params = {"tbi_type": self.kwarga['tbi_type']}
+        # if backend is not None:
+        #     params.update(backend.get_args())
+        objective = formatter(problem)
         # TODO: use offset somehow
-        if self.input_state is None:
-            self.input_state = [not i % 2 for i in range(len(Q))]
+        if not callable(objective):
+            objective, offset = objective
+            if self.input_state is None:
+                self.input_state = [not i % 2 for i in range(len(objective))]
         self.bbs = BinaryBosonicSolver(
-            len(self.input_state), Q,
-            gradient_mode=self.gradient_mode,
-            tbi_params=params,
-            n_samples=self.n_samples,
-            input_state=self.input_state,
+            len(self.input_state),
+            objective,
+            self.input_state,
             **self.kwargs
         )
-        self.bbs.train(
-            learning_rate=self.learning_rate,
-            updates=self.updates,
-            logger=self.logger
-        )
+        self.bbs.train(**self.kwargs)
 
         return self.construct_results(self.bbs)
 
@@ -105,8 +63,8 @@ class BBS(Algorithm):
         return ''.join(map(str, map(int, result)))
 
     def construct_results(self, results: BinaryBosonicSolver) -> Result:
-        # TODO: add suport for distribution (probably with different logger)
-        best_bitstring = self.get_bitstring(results.config_min_encountered)
+        # TODO: add support for distribution (probably with different logger)
+        best_bitstring = ''.join(map(str, map(int, results.config_min_encountered)))
         best_energy = results.E_min_encountered
         most_common_bitstring = None
         most_common_bitstring_energy = None
@@ -122,16 +80,6 @@ class BBS(Algorithm):
 
 class BBSFN(BBS):
     def run(self, problem: Problem, backend: OrcaBackend, formatter: Callable[[Problem], Callable]):
-        """
-        Run the BBS algorithm.
-
-        Parameters:
-        - problem (Problem): The problem to solve.
-        - backend (OrcaBackend): The backend to use for computation.
-
-        Returns:
-        - Solution: The solution obtained from running the BBS algorithm.
-        """
         params = {"tbi_type": self.tbi_loops}
         if backend is not None:
             params.update(backend.get_args())
