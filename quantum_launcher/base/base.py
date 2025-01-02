@@ -5,26 +5,6 @@ import pickle
 from typing import Any, Callable, Dict, Optional
 
 
-class _SupportClass(ABC):
-    """Abstract base class for methods necessary for other classes in this module."""
-
-    @property
-    def setup(self) -> dict:
-        """Returns a dictionary with class instance parameters."""
-        return f'setup for {self.__class__.__name__} has not been implemented yet'
-
-    @property
-    def path(self) -> str:
-        """Returns the path to the file."""
-        if self._path is not None:
-            return self._path
-        return self._get_path()
-
-    @path.setter
-    def path(self, new_path: str | None) -> None:
-        self._path = new_path
-
-
 @dataclass
 class Result:
     best_bitstring: str
@@ -70,7 +50,7 @@ class Result:
                       bitstring_distribution, energy_distribution, num_of_samples, mean_value, std, result)
 
 
-class Backend(_SupportClass, ABC):
+class Backend:
     """
     Abstract class representing a backend for quantum computing.
 
@@ -84,7 +64,6 @@ class Backend(_SupportClass, ABC):
 
     """
 
-    @abstractmethod
     def __init__(self, name: str, parameters: list = None) -> None:
         self.name: str = name
         self.path: str | None = None
@@ -94,7 +73,7 @@ class Backend(_SupportClass, ABC):
         return f'{self.name}'
 
 
-class Problem(_SupportClass, ABC):
+class Problem(ABC):
     """
     Abstract class for defining Problems.
 
@@ -178,7 +157,6 @@ class Problem(_SupportClass, ABC):
         with open(instance_path, 'rb') as file:
             self.instance = pickle.load(file)
 
-    @abstractmethod
     def _get_path(self) -> str:
         """
         Returns the common path.
@@ -231,7 +209,7 @@ class Problem(_SupportClass, ABC):
                 attr()
 
 
-class Algorithm(_SupportClass, ABC):
+class Algorithm(ABC):
     """
     Abstract class for Algorithms.
 
