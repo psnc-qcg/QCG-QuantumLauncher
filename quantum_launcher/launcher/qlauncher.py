@@ -30,7 +30,6 @@ class _FileSavingSupportClass:
         self.algorithm = None
         self._res_path = None
         self._full_path = None
-        self.res = None
 
     def fix_json(self, o: object):
         if o.__class__.__name__ == 'SamplingVQEResult':
@@ -83,7 +82,7 @@ class _FileSavingSupportClass:
             self._save_results_json(self.res, path_json)
 
 
-class QuantumLauncher(_FileSavingSupportClass):
+class QuantumLauncher:
     """
     Quantum Launcher class.
 
@@ -119,9 +118,8 @@ class QuantumLauncher(_FileSavingSupportClass):
             print(result)
 
     """
-
     def __init__(self, problem: Problem, algorithm: Algorithm, backend: Backend = None,
-                 path: str = 'results/', binding_params: dict | None = None, encoding_type: type = None) -> None:
+                 path: str = 'results/') -> None:
         super().__init__()
         self.problem: Problem = problem
         self.algorithm: Algorithm = algorithm
@@ -129,32 +127,14 @@ class QuantumLauncher(_FileSavingSupportClass):
 
         self.path: str = path
         self.res: dict = {}
-        self._res_path: str | None = None
-        self.binding_params: dict | None = binding_params
-        self.encoding_type: callable = encoding_type  # TODO variable to be renamed
-
-    def _bind_parameters(self):
-        """
-        Binds parameters to the problem and algorithm.
-        """
-        for param, value in self.binding_params.items():
-            if param in self.problem.__class__.__dict__:
-                self.problem.__dict__[param] = value
-            elif param in self.algorithm.__dict__:
-                self.algorithm.__dict__[param] = value
-            else:
-                print(f'\033[93mClass {self.problem.__class__.__name__} nor class \
-{self.algorithm.__class__.__name__} does not have parameter {param}, so it cannot be bound\033[0m')
 
     def _prepare_problem(self):
         """
         Chooses a problem for current hardware taken from the algorithm and binds parameters.
         """
-        if self.binding_params is not None:
-            self._bind_parameters()
         self.problem.prepare_methods()
 
-    def _run(self) -> Result:
+    def run(self) -> Result:
         """
         Prepares the problem, and runs the algorithm on the problem.
 
@@ -162,8 +142,7 @@ class QuantumLauncher(_FileSavingSupportClass):
             dict: The results of the algorithm execution.
         """
         self._prepare_problem()
-        formatter = get_formatter(
-            self.problem._problem_id, self.algorithm._algorithm_format)
+        formatter = get_formatter(self.problem._problem_id, self.algorithm._algorithm_format)
 
         return self.algorithm.run(self.problem, self.backend, formatter=formatter)
 
@@ -187,7 +166,7 @@ class QuantumLauncher(_FileSavingSupportClass):
         Returns:
             dict: The processed results.
         """
-        results = self._run()
+        results = self.run()
         energy = results.result['energy']
 
         self.res['problem_setup'] = self.problem.setup

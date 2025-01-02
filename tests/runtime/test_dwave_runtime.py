@@ -14,7 +14,7 @@ def test_ec():
     backend = SimulatedAnnealingBackend()
     launcher = QuantumLauncher(pr, solver, backend, path=TESTING_DIR)
 
-    inform = launcher._run()
+    inform = launcher.run()
     assert inform is not None
 
 
@@ -25,7 +25,7 @@ def test_jssp():
     backend = SimulatedAnnealingBackend()
     launcher = QuantumLauncher(pr, solver, backend, path=TESTING_DIR)
 
-    inform = launcher._run()
+    inform = launcher.run()
     assert inform is not None
 
 
@@ -36,7 +36,7 @@ def test_maxcut():
     backend = SimulatedAnnealingBackend()
     launcher = QuantumLauncher(pr, solver, backend, path=TESTING_DIR)
 
-    inform = launcher._run()
+    inform = launcher.run()
     assert inform is not None
 
 
@@ -47,7 +47,7 @@ def test_qatm():
     backend = SimulatedAnnealingBackend()
     launcher = QuantumLauncher(pr, solver, backend, path=TESTING_DIR)
 
-    inform = launcher._run()
+    inform = launcher.run()
     assert inform is not None
 
 
@@ -64,7 +64,7 @@ def test_raw():
     backend = SimulatedAnnealingBackend()
     launcher = QuantumLauncher(pr, solver, backend, path=TESTING_DIR)
 
-    inform = launcher._run()
+    inform = launcher.run()
     assert isinstance(inform, Result)
     bitstring = inform.best_bitstring
     assert bitstring in ['00', '01', '10', '11']

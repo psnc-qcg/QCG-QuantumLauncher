@@ -24,5 +24,5 @@ class ProfilingLauncher(QuantumLauncher):
             stats.dump_stats(f"{self.save_monitor_to_file}.prof")
         return result
 
-    def _run(self, *args, **kwargs):
-        return self.monitor(super()._run, *args, **kwargs)
+    def run(self, *args, **kwargs):
+        return self.monitor(super().run, *args, **kwargs)

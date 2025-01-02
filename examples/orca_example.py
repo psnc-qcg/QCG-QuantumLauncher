@@ -9,7 +9,7 @@ def main():
     alg = BBS()
     backend = OrcaBackend('local')
     launcher = QuantumLauncher(problem, alg, backend)
-    print((result := launcher._run()))
+    print((result := launcher.run()))
     print(alg.get_bitstring(result))
 
 

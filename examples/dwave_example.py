@@ -9,7 +9,7 @@ def main():
     alg = DwaveSolver(1)
     backend = SimulatedAnnealingBackend('local')
     launcher = QuantumLauncher(problem, alg, backend)
-    res = launcher._run()
+    res = launcher.run()
     print(alg.get_bitstring(res))
 
 
