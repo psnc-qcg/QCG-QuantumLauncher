@@ -9,7 +9,15 @@ classifiers = [
     "Programming Language :: Python :: 3",
     "Operating System :: OS Independent",
 ]
-packages = [{ include = "quantum_launcher"}]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+networkx = "^3.0"
+numpy = "^2.0"
+pandas = "^2.0"
+
+[tool.poetry.extras]
+qiskit = ["qiskit"]
 
 [build-system]
 requires = ["poetry-core"]

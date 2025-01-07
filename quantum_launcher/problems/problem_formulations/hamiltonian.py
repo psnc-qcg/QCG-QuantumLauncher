@@ -1,11 +1,21 @@
 # from .launcher import QiskitProblem
-from quantum_launcher.base import formatter
-import quantum_launcher.hampy as hampy
 import numpy as np
 from qiskit.quantum_info import SparsePauliOp
 from qiskit import QuantumCircuit
-import quantum_launcher.problems.problem_initialization as problems
+from qiskit_optimization.converters import QuadraticProgramToQubo
+from qiskit_optimization.translators import from_ising
 
+from quantum_launcher.base import formatter
+from quantum_launcher.base.adapter_structure import adapter
+import quantum_launcher.problems.problem_initialization as problems
+import quantum_launcher.hampy as hampy
+
+@adapter('hamiltonian', 'qubo')
+def hamiltonian_to_qubo(hamiltonian):
+    qp = from_ising(hamiltonian)
+    conv = QuadraticProgramToQubo()
+    qubo = conv.convert(qp).objective
+    return None, qubo.quadratic.to_array()
 
 def ring_ham(ring: set, n):
     total = None

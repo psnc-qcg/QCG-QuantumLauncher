@@ -5,14 +5,13 @@ from quantum_launcher.base import adapter, formatter
 from typing import Tuple
 import ast
 from pyqubo import Spin
-from .qubo import *
 from quantum_launcher.problems.problem_initialization import Raw
 
 
 @adapter('qubo', 'bqm')
 def qubo_to_bqm(qubo_with_offset) -> dict:
     qubo, offset = qubo_with_offset
-    bqm, _ = QUBOMatrix(qubo, 0).qubo_matrix_into_bqm()
+    bqm, _ = QUBOMatrix(qubo, offset).qubo_matrix_into_bqm()
     return bqm
 
 
