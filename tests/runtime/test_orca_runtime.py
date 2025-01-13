@@ -11,9 +11,9 @@ def test_ec():
     pr = EC('exact', instance_name='toy')
     bbs = BBS()
     backend = OrcaBackend('local_simulator')
-    launcher = QuantumLauncher(pr, bbs, backend, path=TESTING_DIR)
+    launcher = QuantumLauncher(pr, bbs, backend)
 
-    inform = launcher._run()
+    inform = launcher.run()
     assert isinstance(inform, Result)
 
 
@@ -22,9 +22,9 @@ def test_jssp():
     pr = JSSP(3, 'exact', instance_name='toy', optimization_problem=True)
     bbs = BBS()
     backend = OrcaBackend('local_simulator')
-    launcher = QuantumLauncher(pr, bbs, backend, path=TESTING_DIR)
+    launcher = QuantumLauncher(pr, bbs, backend)
 
-    inform = launcher._run()
+    inform = launcher.run()
     assert isinstance(inform, Result)
 
 
@@ -33,9 +33,9 @@ def test_maxcut():
     pr = MaxCut(instance_name='default')
     bbs = BBS()
     backend = OrcaBackend('local_simulator')
-    launcher = QuantumLauncher(pr, bbs, backend, path=TESTING_DIR)
+    launcher = QuantumLauncher(pr, bbs, backend)
 
-    inform = launcher._run()
+    inform = launcher.run()
     assert isinstance(inform, Result)
 
 
@@ -45,7 +45,7 @@ def test_raw():
     pr = Raw(qubo)
     bbs = BBS()
     backend = OrcaBackend('local_simulator')
-    launcher = QuantumLauncher(pr, bbs, backend, path=TESTING_DIR)
+    launcher = QuantumLauncher(pr, bbs, backend)
 
-    inform = launcher._run()
+    inform = launcher.run()
     assert isinstance(inform, Result)

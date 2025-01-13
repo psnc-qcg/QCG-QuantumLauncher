@@ -1,35 +1,56 @@
 from abc import ABC, abstractmethod
+from dataclasses import dataclass
 from functools import wraps
 import pickle
-from typing import Callable
-from .unified_result import Result
+from typing import Any, Callable, Dict, Optional
 
 
-class _SupportClass(ABC):
-    """Abstract base class for methods necessary for other classes in this module."""
+@dataclass
+class Result:
+    best_bitstring: str
+    best_energy: float
+    most_common_bitstring: str
+    most_common_bitstring_energy: float
+    distribution: dict
+    energies: dict
+    num_of_samples: int
+    average_energy: float
+    energy_std: float
+    result: any
 
-    @property
-    def setup(self) -> dict:
-        """Returns a dictionary with class instance parameters."""
-        return f'setup for {self.__class__.__name__} has not been implemented yet'
+    def __str__(self):
+        return f"Result(bitstring={self.best_bitstring}, energy={self.best_energy})"
 
-    @property
-    def path(self) -> str:
-        """Returns the path to the file."""
-        if self._path is not None:
-            return self._path
-        return self._get_path()
+    def __repr__(self):
+        return str(self)
 
-    @path.setter
-    def path(self, new_path: str | None) -> None:
-        self._path = new_path
+    def best(self):
+        return self.best_bitstring, self.best_energy
 
-    @abstractmethod
-    def _get_path(self):
-        """Returns common path to the file."""
+    def most_common(self):
+        return self.most_common_bitstring, self.most_common_bitstring_energy
+
+    @staticmethod
+    def from_distributions(bitstring_distribution: Dict[str, float], energy_distribution: Dict[str, float], result: Optional[Any] = None) -> "Result":
+        """ Constructs the Result object from Dictionary with bitstring to num of occurrences, dictionary mapping bitstring to energy and optional result (rest) """
+        best_bitstring = min(energy_distribution, key=energy_distribution.get)
+        best_energy = energy_distribution[best_bitstring]
+        most_common_bitstring = max(
+            bitstring_distribution, key=bitstring_distribution.get)
+        most_common_bitstring_energy = energy_distribution[most_common_bitstring]
+        num_of_samples = sum(bitstring_distribution.values())
+
+        mean_value = sum(energy_distribution[bitstring] * occ for bitstring,
+                         occ in bitstring_distribution.items()) / num_of_samples
+        std = 0
+        for bitstring, occ in bitstring_distribution.items():
+            std += occ * ((energy_distribution[bitstring] - mean_value)**2)
+        std = (std/(num_of_samples-1))**0.5
+        return Result(best_bitstring, best_energy, most_common_bitstring, most_common_bitstring_energy,
+                      bitstring_distribution, energy_distribution, num_of_samples, mean_value, std, result)
 
 
-class Backend(_SupportClass, ABC):
+class Backend:
     """
     Abstract class representing a backend for quantum computing.
 
@@ -43,7 +64,6 @@ class Backend(_SupportClass, ABC):
 
     """
 
-    @abstractmethod
     def __init__(self, name: str, parameters: list = None) -> None:
         self.name: str = name
         self.path: str | None = None
@@ -53,7 +73,7 @@ class Backend(_SupportClass, ABC):
         return f'{self.name}'
 
 
-class Problem(_SupportClass, ABC):
+class Problem(ABC):
     """
     Abstract class for defining Problems.
 
@@ -137,7 +157,6 @@ class Problem(_SupportClass, ABC):
         with open(instance_path, 'rb') as file:
             self.instance = pickle.load(file)
 
-    @abstractmethod
     def _get_path(self) -> str:
         """
         Returns the common path.
@@ -190,7 +209,7 @@ class Problem(_SupportClass, ABC):
                 attr()
 
 
-class Algorithm(_SupportClass, ABC):
+class Algorithm(ABC):
     """
     Abstract class for Algorithms.
 
@@ -214,10 +233,6 @@ class Algorithm(_SupportClass, ABC):
         self.parameters: list = []
         self.alg_kwargs = alg_kwargs
 
-    @abstractmethod
-    def _get_path(self) -> str:
-        """Returns the common path for the algorithm."""
-
     def parse_result_to_json(self, o: object) -> dict:
         """Parses results so that they can be saved as a JSON file.
 
@@ -238,12 +253,3 @@ class Algorithm(_SupportClass, ABC):
             problem (Problem): The problem to be solved.
             backend (Backend): The backend to be used for execution.
         """
-
-    @abstractmethod
-    def get_bitstring(self, result) -> str:
-        """Returns the bitstring representation of the result.
-
-        Args:
-            result: The result to be converted to a bitstring.
-        """
-        pass

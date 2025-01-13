@@ -1,6 +1,5 @@
 """ Algorithms for Qiskit routines """
 import json
-from abc import ABC
 from datetime import datetime
 
 import numpy as np
@@ -22,9 +21,9 @@ class QiskitOptimizationAlgorithm(Algorithm):
     """ Abstract class for Qiskit optimization algorithms """
 
     def make_tag(self, problem: Problem, backend: QiskitBackend) -> str:
-        tag = problem.path + '-' + \
-            backend.path + '-' + \
-            self.path + '-' + \
+        tag = problem.__class__.__name__ + '-' + \
+            backend.__class__.__name__ + '-' + \
+            self.__class__.__name__ + '-' + \
             datetime.today().strftime('%Y-%m-%d')
         return tag
 
@@ -86,9 +85,6 @@ class QAOA(QiskitOptimizationAlgorithm):
             'parameters': self.parameters,
             'arg_kwargs': self.alg_kwargs
         }
-
-    def _get_path(self) -> str:
-        return f'{self.name}@{self.p}'
 
     def parse_samplingVQEResult(self, res: SamplingVQEResult, res_path) -> dict:
         res_dict = {}

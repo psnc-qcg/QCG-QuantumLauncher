@@ -1,3 +1,15 @@
-from .bqm import *
-from .qubo import *
-from .hamiltonian import *
+# Import Manager
+try:
+    from .bqm import *
+except ModuleNotFoundError:
+    pass
+
+try:
+    from .qubo import *
+except ModuleNotFoundError:
+    pass
+
+try:
+    from .hamiltonian import *
+except ModuleNotFoundError:
+    pass

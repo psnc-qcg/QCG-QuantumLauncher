@@ -1,16 +1,26 @@
-[tool.poetry]
+[project]
 name = "quantum_launcher"
-version = "1.1"
-authors = ["Dawid Siera <dsiera@man.poznan.pl>"]
-description = "Quantum Launcher is modular tool, for solving many problems on many algorithms using many quantum computingbackends"
+version = "1.1.1"
+description = "Quantum Launcher is modular tool, for solving many problems on many algorithms using many quantum computing backends"
 readme = "README.md"
-requires-python = ">=3.10"
-classifiers = [
-    "Programming Language :: Python :: 3",
-    "Operating System :: OS Independent",
+requires-python = ">=3.11"
+dependencies = [
+    "dwave-tabu>=0.5.0",
+    "networkx",
+    "notebook>=7.3.2",
+    "numpy>=2.0.0",
+    "pandas",
+    "pyqubo>=1.5.0",
+    "pytest",
+    "pytest-httpx>=0.35.0",
 ]
-packages = [{ include = "quantum_launcher"}]
 
-[build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+[tool.setuptools]
+packages = ['quantum_launcher']
+
+[project.optional-dependencies]
+qiskit = ["qiskit", "qiskit_algorithms", "qiskit_aqt_provider", "qiskit_ibm_runtime", "qiskit_optimization"]
+orca = [
+  "numba==0.60.0", "torch", "matplotlib"
+]
+dwave = ["dwave-ocean-sdk"]

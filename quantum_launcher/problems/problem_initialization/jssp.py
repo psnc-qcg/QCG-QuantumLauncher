@@ -1,7 +1,9 @@
 """  Module for Job Shop Scheduling Problem (JSSP)."""
 from collections import defaultdict
-
-from quantum_launcher.problems.problem_formulations.jssp.qiskit_scheduler import get_jss_hamiltonian
+try:
+    from quantum_launcher.problems.problem_formulations.jssp.qiskit_scheduler import get_jss_hamiltonian
+except ModuleNotFoundError:
+    pass
 from quantum_launcher.base import Problem
 
 
