@@ -1,4 +1,3 @@
-orca_example.py
 */__pycache__
 __pycache__
 testing
@@ -14,3 +13,5 @@ build
 .data
 .ignore
 .ptseries
+.python-version
+uv.lock
