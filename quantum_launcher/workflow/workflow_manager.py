@@ -76,7 +76,9 @@ class WorkflowManager:
     def __exit__(self, exc_type, exc_val, exc_tb):
         pass
 
-    def task(self, func, *args, num_output=None, **kwargs) -> Task:
+    def task(self, func, args: Tuple=None, kwargs: Dict=None, num_output=None) -> Task:
+        args = args or tuple()
+        kwargs = kwargs or dict()
         new_task = Task(func, args, kwargs, num_output=num_output)
         self.tasks.append(new_task)
         return new_task
