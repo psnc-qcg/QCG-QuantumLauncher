@@ -1,8 +1,8 @@
 """ Backend Class for Qiskit Launcher """
 from qiskit_aqt_provider import AQTProvider
 from qiskit_aqt_provider.primitives import AQTSampler, AQTEstimator
-from qiskit.primitives import Estimator as LocalEstimator, BaseEstimator
-from qiskit.primitives import Sampler as LocalSampler, BaseSampler
+from qiskit.primitives import StatevectorEstimator as LocalEstimator, BaseEstimator
+from qiskit.primitives import StatevectorSampler as LocalSampler, BaseSampler
 from qiskit.primitives import BackendSampler, BackendEstimator
 from qiskit.providers import BackendV1, BackendV2
 from qiskit_algorithms.optimizers import COBYLA, SPSA, SciPyOptimizer, Optimizer
@@ -54,8 +54,8 @@ class QiskitBackend(Backend):
 
     def _set_primitives_on_backend_name(self) -> None:
         if self.name == 'local_simulator':
-            self.estimator = LocalEstimator(options=self.options)
-            self.sampler = LocalSampler(options=self.options)
+            self.estimator = LocalEstimator()
+            self.sampler = LocalSampler()
             self.optimizer = COBYLA()
         elif self.name == 'backendv1v2_simulator':
             self.estimator = BackendEstimator(backend=self.backendv1v2)
@@ -101,7 +101,7 @@ class AQTBackend(QiskitBackend):
     def _set_primitives_on_backend_name(self) -> None:
         provider = AQTProvider(self.token)
         if self.name == 'local_simulator':
-            self.name = "offline_simulator_no_noise"
+            self.name = 'offline_simulator_no_noise'
         backend = provider.get_backend(name=self.name)
         self.estimator = AQTEstimator(backend, options=self.options)
         self.sampler = AQTSampler(backend, options=self.options)
