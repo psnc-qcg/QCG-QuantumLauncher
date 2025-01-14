@@ -5,6 +5,7 @@ import pickle
 from typing import List, Literal, Optional, Union
 from quantum_launcher.base.adapter_structure import get_formatter
 from quantum_launcher.base import Problem, Algorithm, Backend, Result
+from quantum_launcher.problems import Raw
 
 
 class QuantumLauncher:
@@ -45,6 +46,8 @@ class QuantumLauncher:
     """
 
     def __init__(self, problem: Problem, algorithm: Algorithm, backend: Backend = None) -> None:
+        if not isinstance(problem, Problem):
+            problem = Raw(problem)
         self.problem: Problem = problem
         self.algorithm: Algorithm = algorithm
         self.backend: Backend = backend
@@ -84,7 +87,7 @@ class QuantumLauncher:
             raise ValueError(
                 f'format: {format} in not supported try: pickle, txt, csv or json')
 
-    def process(self, *, file_path: Optional[str] = None, format: Union[Literal['pickle', 'txt', 'json'], List[Literal['pickle', 'txt', 'json']]]='pickle') -> dict:
+    def process(self, *, file_path: Optional[str] = None, format: Union[Literal['pickle', 'txt', 'json'], List[Literal['pickle', 'txt', 'json']]] = 'pickle') -> dict:
         """
         Runs the algorithm, processes the data, and saves the results if specified.
 

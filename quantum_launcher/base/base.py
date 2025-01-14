@@ -2,8 +2,10 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from functools import wraps
 import pickle
-from typing import Any, Callable, Dict, Optional
+from typing import Any, Callable, Dict, Optional, Literal
 
+
+AVAILABLE_FORMATS = Literal['hamiltonian', 'qubo', 'none', 'fn']
 
 @dataclass
 class Result:
@@ -224,7 +226,7 @@ class Algorithm(ABC):
         _get_path(self) -> str: Returns the common path for the algorithm.
         run(self, problem: Problem, backend: Backend): Runs the algorithm on a specific problem using a backend.
     """
-    _algorithm_format: str | None = None
+    _algorithm_format: AVAILABLE_FORMATS = 'none'
 
     @abstractmethod
     def __init__(self, **alg_kwargs) -> None:
